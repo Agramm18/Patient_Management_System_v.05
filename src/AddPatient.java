@@ -8,6 +8,9 @@ public class AddPatient {
     private String lname;
 
     private String gender;
+
+    private String email;
+    private String phone;
     
     //Age Information
     private int age;
@@ -73,9 +76,26 @@ public class AddPatient {
                     throw new IllegalArgumentException("Only your Biological gender (male/female) is allowed for medical reasons");
                 }
 
+                System.out.println("Please type in your E-Mail: ");
+                String PersonalEmail = scanner.nextLine();
+
+                if (PersonalEmail.isBlank()) {
+                    throw new IllegalArgumentException("Your E-Mail can't be empty!");
+                }
+
+                System.out.println("Please type in your Phone Number");
+                String PhoneNumber = scanner.nextLine();
+
+                if (PhoneNumber.isBlank()) {
+                    throw new IllegalArgumentException("Your Phone can't be empty!");
+                }
+
                 this.fname = fname;
                 this.lname = lname;
                 this.gender = gender;
+
+                this.email = PersonalEmail;
+                this.phone = PhoneNumber;
                 break;
             }
     }
@@ -166,9 +186,76 @@ public class AddPatient {
             } else if (weight > 650) {
                 throw new IllegalArgumentException("You reached the limit the limit is 650 kg");
             }
-
+            scanner.nextLine();
             this.heihgt_m = height;
             this.weight_kg = weight;
+            break;
+        }
+    }
+
+    public void SetAddress(Scanner scanner) {
+        while (true) {
+            String country;
+            String county;
+            String city;
+            String PostalCode;
+            String streetName;
+            String streetNumber;
+            
+
+            System.out.println("Please type in the country where you live: ");
+            country = scanner.nextLine();
+
+            if (country.isBlank()) {
+                throw new IllegalArgumentException("The country can't be empty!");
+            }
+
+            System.out.println("Please type in the county where you live: ");
+            county = scanner.nextLine();
+
+            if (county.isBlank()) {
+                throw new IllegalArgumentException("The county can't be empty!");
+            }
+            
+            System.out.println("Please type in the city where you live: ");
+            city = scanner.nextLine();
+
+            if (city.isBlank()) {
+                throw new IllegalArgumentException("The City can't be empty!");
+            }
+
+            System.out.println("Please type in your postal code: ");
+            PostalCode = scanner.nextLine();
+
+            if (PostalCode.isBlank()) {
+                throw new IllegalArgumentException("The Postal Code can't be empty!");
+            } else {
+                int PostalCodeINT = Integer.parseInt(PostalCode);
+                
+                if (PostalCodeINT < 1) {
+                    throw new IllegalArgumentException("The Postal Code can't be less than 1!");
+                }
+            }
+
+            System.out.println("Please type in the name from your street: ");
+            streetName = scanner.nextLine();
+
+            if (streetName.isBlank()) {
+                throw new IllegalArgumentException("Your Streetname can't be empty!");
+            }
+
+            System.out.println("Please type in your street number: ");
+            streetNumber = scanner.nextLine();
+
+            if (streetNumber.isBlank()) {
+                throw new IllegalArgumentException("Your street number can't be empty!");
+            }
+            this.country = country;
+            this.county = county;
+            this.city = city;
+            this.PostalCode = PostalCode;
+            this.StreetName = streetName;
+            this.StreetNumber = streetNumber;
             break;
         }
     }
@@ -178,7 +265,9 @@ public class AddPatient {
         System.out.println("\n------------------The Patient------------\n");
         System.out.println("First Name: " + this.fname);
         System.out.println("Last Name: " + this.lname);
-        System.out.println("Gender: " + this.gender + "\n");
+        System.out.println("Gender: " + this.gender);
+        System.out.println("E-Mail: " + this.email);
+        System.out.println("Phone Number " + this.phone + "\n");
 
         System.out.println("Birthday day: " + this.birthday_day);
         System.out.println("Birthday month: " + this.birthday_month);
@@ -188,6 +277,13 @@ public class AddPatient {
 
         System.out.println("\nHeight: " + this.heihgt_m + " m");
         System.out.println("Weight: " + this.weight_kg + " kg\n");
+
+        System.out.println("\nCountry: " + this.country);
+        System.out.println("County: " + this.county);
+        System.out.println("City: " + this.city);
+        System.out.println("Postal Code:" + this.PostalCode);
+        System.out.println("Street Name: " + this.StreetName);
+        System.out.println("Street Number" + this.StreetNumber + "\n");
     }
 
     //Add to Data Base
