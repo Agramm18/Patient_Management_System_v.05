@@ -81,6 +81,17 @@ public class menu {
                                 }
                             }
 
+                            
+                            while (true) {
+                                try {
+                                    add.SetAddress(scanner);
+                                    break;
+                                } catch (IllegalArgumentException invalidInput) {
+                                    System.out.println("\nThere is an error of the patient generation");
+                                    System.out.println("The error is: " + invalidInput.getMessage() + "\n");
+                                }
+                            }
+
 
                             add.DisplayPatient();
                             break;
