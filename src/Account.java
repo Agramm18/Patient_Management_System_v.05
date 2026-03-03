@@ -4,15 +4,22 @@ import java.io.Console;
 
 public class Account {
 
-    private boolean baseValue;
+    private boolean HasAccount;
+
+    private boolean IsAccountValid;
 
     private String UserName;
     
     private String UserMail;
     private String UserPhone;
 
-    private String UserPWSD;
-    private String UserPWSDConfirm;
+    private String UserPwsdPlain;
+    private String UserPWSDConfirmPlain;
+
+    private String UserPwsdHashed;
+    private String UserPwsdConfirmHashed;
+
+
 
     public Account() {
 
@@ -37,54 +44,116 @@ public class Account {
             } else if (!StartValue.equals("y") && !StartValue.equals("n")) {
                 throw new IllegalArgumentException("Only y and n are allowed as values please try again!");
             } else if (StartValue.equals("y")) {
-                this.baseValue = true;
+                System.out.println("Please follow the login");
+                this.HasAccount = true;
                 break;
             } else if (StartValue.equals("n")) {
-                this.baseValue = false;
+                System.out.println("Please follow the registration");
+                this.HasAccount = false;
                 break;
+            } else {
+                throw new IllegalStateException("It seems that the base value is corrupted");
             }
             
         }
     }
 
+    public void Login(Scanner scanner) {
 
-    public void SetAccount(Scanner scanner) {
+            //Input handler to cover passwords
+            Console console = System.console();
 
-        //Input handler to cover passwords
-        Console console = System.console();
+            //Loop through value of AccountStatus
 
-        //Loop through value of baseValue
+            //Login Loop if AccountStatus == true
+            while (this.HasAccount) {
+                String UserName;
 
-        while (this.baseValue == true) {
-            String UserName;
+                System.out.println("Please type in your Username: ");
+                UserName = scanner.nextLine();
 
-            System.out.println("Please type in your Username: ");
-            UserName = scanner.nextLine();
+                if (UserName.isBlank()) {
+                    throw new IllegalArgumentException("Your Username can't be empty!");
+                }
 
-            if (UserName.isBlank()) {
-                throw new IllegalArgumentException("Your Username can't be empty!");
+                if (console == null) {
+                    throw new IllegalStateException("Please run the programm via a terminal");
+                }
+
+                char[] PWSD = console.readPassword("Please type in your Password: ");
+
+                if (PWSD.length == 0) {
+                    throw new IllegalArgumentException("Your Password can't be empty!");
+                }
+
+                char[] VerPWSD = console.readPassword("Please retype your Password for verification: ");
+
+                if (VerPWSD.length == 0 || !Arrays.equals(PWSD, VerPWSD)) {
+                    throw new IllegalArgumentException("Your Verification Password is empty or does not equal your Password");
+                } else {
+                    System.out.println("\nThe Login where Sucsessfull");
+                    this.IsAccountValid = true;
+                    break;
+                }
             }
 
-            if (console == null) {
-                throw new IllegalStateException("Please run the programm via a terminal");
-            }
+        while (!this.HasAccount) {
+                String TempUserName;
+                String TempEmail;
+                String TempPhoneNumber;
 
-            char[] PWSD = console.readPassword("Please type in your Password: ");
+                System.out.println("Please set a user name for your account: ");
+                TempUserName = scanner.nextLine();
 
-            if (PWSD.length == 0) {
-                throw new IllegalArgumentException("Your Password can't be empty!");
-            }
+                if (TempUserName.isBlank()) {
+                    throw new IllegalArgumentException("Your Username can't be empty!");
 
-            char[] VerPWSD = console.readPassword("Please retype your Password for verification: ");
+                }
 
-            if (VerPWSD.length == 0 || !Arrays.equals(PWSD, VerPWSD)) {
-                throw new IllegalArgumentException("Your Verification Password is empty or does not equal your Password");
-            } else {
-                System.out.println("\nThe Login where Sucsessfull");
-                break;
-            }
-        }
+                System.out.println("Please set your email adress for your account: ");
+                TempEmail = scanner.nextLine();
+
+                if (TempEmail.isBlank()) {
+                    throw new IllegalArgumentException("Your email adress can't be empty!");
+                }
+
+                System.out.println("Please set a phone number for your account: ");
+                TempPhoneNumber = scanner.nextLine();
+
+                if (TempPhoneNumber.isBlank()) {
+                    throw new IllegalArgumentException("Your Phone Number can't be empty!");
+                }
+
+
+                char[] PWSD_REG = console.readPassword("Please set a password for your account: ");
+
+                if (PWSD_REG.length == 0) {
+                    throw new IllegalArgumentException("Your Password can't be empty!");
+                }
+
+                char[] VerPWSD_REG = console.readPassword("Please retype your password from before: ");
+
+                if (VerPWSD_REG.length == 0 || !Arrays.equals(PWSD_REG, VerPWSD_REG)) {
+                    throw new IllegalArgumentException("The verification password can't be empty and must be equal to the password from before");
+                } else {
+                    System.out.println("The base values for the Database are setted");
+                    this.IsAccountValid = true;
+
+                    this.UserName = TempUserName;
+                    this.UserMail = TempEmail;
+                    this.UserPhone = TempPhoneNumber;
+
+                    System.out.println("Convert Password Values to String");
+                    this.UserPwsdPlain = String.valueOf(PWSD_REG);
+                    this.UserPWSDConfirmPlain = String.valueOf(VerPWSD_REG);
+                    System.out.println("Passwords are converted");
+
+                    System.out.println("Your registration where sucsessfull");
+                    break;
+                }
+
+
+        }   
     }
-
 
 }
