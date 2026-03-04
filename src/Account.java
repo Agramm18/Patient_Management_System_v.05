@@ -19,12 +19,6 @@ public class Account {
     private String UserPwsdHashed;
     private String UserPwsdConfirmHashed;
 
-
-
-    public Account() {
-
-    }
-
     public static void HeaderMSGAccount() {
         System.out.println("\n==================================================");
         System.out.println("=== Please Login or Register to your Account ===");
@@ -58,7 +52,7 @@ public class Account {
         }
     }
 
-    public void Login(Scanner scanner) {
+    public void AccountValidation(Scanner scanner) {
 
             //Input handler to cover passwords
             Console console = System.console();
@@ -67,12 +61,12 @@ public class Account {
 
             //Login Loop if AccountStatus == true
             while (this.HasAccount) {
-                String UserName;
+                String TempUserName;
 
                 System.out.println("Please type in your Username: ");
-                UserName = scanner.nextLine();
+                TempUserName = scanner.nextLine();
 
-                if (UserName.isBlank()) {
+                if (TempUserName.isBlank()) {
                     throw new IllegalArgumentException("Your Username can't be empty!");
                 }
 
