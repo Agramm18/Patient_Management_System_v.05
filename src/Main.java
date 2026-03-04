@@ -29,13 +29,14 @@ public class Main {
 
         while (true) {
             try {
-                account.SetAccount(scanner);
+                account.AccountValidation(scanner);
                 break;
 
             } catch (IllegalArgumentException invalidInput) {
                 System.out.println("\nThere is an error of the Login/Registration logic");
                 System.out.println("The error is: " + invalidInput.getMessage() + "\n");
             }
+
         }
 
         /*
