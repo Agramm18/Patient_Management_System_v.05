@@ -1,6 +1,20 @@
 import java.io.Console;
 import java.util.Scanner;
 
+import javax.management.RuntimeErrorException;
+
+//Load SQL Connection libaries
+import java.sql.Connection;
+import java.sql.DriverManager;
+
+
+//load dotenv libaries
+import io.github.cdimascio.dotenv.Dotenv;
+
+//load filehandler
+
+import java.io.File;
+
 public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
@@ -10,10 +24,23 @@ public class Main {
         System.out.println("\n-------Welcome to my Patient Management System .v 5.0 this time in Java-------");
         System.out.println("-------------Made from Agramm18 2026 All Rights reserved---------------\n");
 
+        //Load SQL Connection and handeling .env file/parameter
+        RunSqlHandeling connection = new RunSqlHandeling();
+        connection.sqlHeader();
+        connection.ValidateENV();
+
         //Load Login Logic
 
         Account account = new Account();
         account.HeaderMSGAccount();
+
+        /*
+                Connection conn = DriverManager.getConnection() {
+            "jdbc:mysql://localhost:3306/patient_management_v5",
+            Dbuser,
+            "password"
+        }        
+        */
 
         //Error Handeling with try and catch
         while (true) {
