@@ -1,3 +1,4 @@
+package app;
 import java.io.Console;
 import java.util.Scanner;
 
@@ -12,6 +13,11 @@ import io.github.cdimascio.dotenv.Dotenv;
 
 //load filehandler
 import java.io.File;
+
+//load bcrypt for Password Hashing
+import org.mindrot.jbcrypt.BCrypt;
+
+import app.controller.SystemLoader;
 
 public class Main {
     public static void main(String[] args) {

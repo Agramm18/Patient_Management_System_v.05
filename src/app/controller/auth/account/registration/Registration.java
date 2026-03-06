@@ -1,9 +1,11 @@
-import java.util.Arrays;
+package app.controller.auth.account.registration;
 import java.util.Scanner;
+
+import java.util.Arrays;
 import java.io.Console;
 import org.mindrot.jbcrypt.BCrypt;
 
-public class Account {
+public class Registration {
 
     private boolean HasAccount;
 
@@ -27,82 +29,12 @@ public class Account {
     private boolean ContainsNumbers;
 
 
-    public static void HeaderMSGAccount() {
-        System.out.println("\n==================================================");
-        System.out.println("                 Account System");
-        System.out.println("--------------------------------------------------");
-        System.out.println("   Login or create a new account to continue");
-        System.out.println("==================================================\n");
-    }
+    public void RegisterUser(Scanner scanner) {
 
+        Console console = System.console();
 
-    public void SetBaseValues(Scanner scanner) {
-        while (true) {
-            String StartValue;
-            System.out.println("Do you have an Account or are you allready registerd/logged in (Y/N)?: ");
-            StartValue = scanner.nextLine().trim().toLowerCase();
-
-            //Check if the user have an account
-            if (StartValue.isBlank()) {
-                throw new IllegalArgumentException("This field can't be empty!");
-            } else if (!StartValue.equals("y") && !StartValue.equals("n")) {
-                throw new IllegalArgumentException("Only y and n are allowed as values please try again!");
-            } else if (StartValue.equals("y")) {
-                System.out.println("Please follow the login");
-                this.HasAccount = true;
-                break;
-            } else if (StartValue.equals("n")) {
-                System.out.println("Please follow the registration");
-                this.HasAccount = false;
-                break;
-            } else {
-                throw new IllegalStateException("It seems that the base value is corrupted");
-            }
-            
-        }
-    }
-
-    public void AccountValidation(Scanner scanner) {
-
-            //Input handler to cover passwords
-            Console console = System.console();
-
-            //Loop through value of AccountStatus
-
-            //Login Loop if AccountStatus == true
-            while (this.HasAccount) {
-                String TempUserName;
-
-                System.out.println("Please type in your Username: ");
-                TempUserName = scanner.nextLine();
-
-                if (TempUserName.isBlank()) {
-                    throw new IllegalArgumentException("Your Username can't be empty!");
-                }
-
-                if (console == null) {
-                    throw new IllegalStateException("Please run the programm via a terminal");
-                }
-
-                char[] PWSD = console.readPassword("Please type in your Password: ");
-
-                if (PWSD.length == 0) {
-                    throw new IllegalArgumentException("Your Password can't be empty!");
-                }
-
-                char[] VerPWSD = console.readPassword("Please retype your Password for verification: ");
-
-                if (VerPWSD.length == 0 || !Arrays.equals(PWSD, VerPWSD)) {
-                    throw new IllegalArgumentException("Your Verification Password is empty or does not equal your Password");
-                } else {
-                    System.out.println("\nThe Login where Sucsessfull");
-                    this.IsAccountValid = true;
-                    break;
-                }
-            }
-        
         //Registration Loop if the User didn't have an Account
-        while (!this.HasAccount) {
+        while (true) {
                 String TempUserName;
                 String TempEmail;
                 String TempPhoneNumber;
@@ -205,8 +137,6 @@ public class Account {
                     System.out.println("Your registration where sucsessfull");
                     break;
                 }
-
-
-        }   
+        }
     }
 }

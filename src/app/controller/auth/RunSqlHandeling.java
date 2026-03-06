@@ -1,8 +1,10 @@
+package app.controller.auth;
 //Load SQL Connection libaries
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.Scanner;
 
+import app.controller.auth.account.AccountStatus;
 //load dotenv libaries
 import io.github.cdimascio.dotenv.Dotenv;
 
@@ -118,7 +120,7 @@ public class RunSqlHandeling {
                 System.out.println("SQL Connected sucsessfully");
                 System.out.println("\nEverything worked you will now be redirected to the Account validation\n");
 
-                Account account = new Account();
+                AccountStatus account = new AccountStatus();
                 account.HeaderMSGAccount();
                 
                 //Throw collected errors and the user must start again
@@ -132,19 +134,6 @@ public class RunSqlHandeling {
                         System.out.println("The error is: " + invalidInput.getMessage() + "\n");
                     }
                 }
-
-                while (true) {
-                    try {
-                        account.AccountValidation(scanner);
-                        break;
-
-                    } catch (IllegalArgumentException invalidInput) {
-                        System.out.println("\nThere is an error of the Login/Registration logic");
-                        System.out.println("The error is: " + invalidInput.getMessage() + "\n");
-                    }
-                }
-
-
             }
 
         } catch (Exception error) {

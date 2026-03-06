@@ -1,4 +1,7 @@
+package app.menu;
 import java.util.Scanner;
+
+import app.service.AddPatient;
 
 public class menu {
     String UserChoice;
