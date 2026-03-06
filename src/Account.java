@@ -1,6 +1,7 @@
 import java.util.Arrays;
 import java.util.Scanner;
 import java.io.Console;
+import org.mindrot.jbcrypt.BCrypt;
 
 public class Account {
 
@@ -17,11 +18,20 @@ public class Account {
     private String UserPWSDConfirmPlain;
 
     private String UserPwsdHashed;
-    private String UserPwsdConfirmHashed;
+
+    //Password Credentials
+    private boolean FitPWSDLength;
+    private boolean ContainsUpperLetters;
+    private boolean ContainsLowerLetters;
+    private boolean ContainsSpecialLetters;
+    private boolean ContainsNumbers;
+
 
     public static void HeaderMSGAccount() {
         System.out.println("\n==================================================");
-        System.out.println("=== Please Login or Register to your Account ===");
+        System.out.println("                 Account System");
+        System.out.println("--------------------------------------------------");
+        System.out.println("   Login or create a new account to continue");
         System.out.println("==================================================\n");
     }
 
@@ -90,11 +100,19 @@ public class Account {
                     break;
                 }
             }
-
+        
+        //Registration Loop if the User didn't have an Account
         while (!this.HasAccount) {
                 String TempUserName;
                 String TempEmail;
                 String TempPhoneNumber;
+
+                //Password credentials
+                boolean HasUpper = false;
+                boolean HasLower = false;
+                boolean HasSpecial = false;
+                boolean HasNumbers = false;
+                boolean FitLength = false;
 
                 System.out.println("Please set a user name for your account: ");
                 TempUserName = scanner.nextLine();
@@ -117,14 +135,50 @@ public class Account {
                 if (TempPhoneNumber.isBlank()) {
                     throw new IllegalArgumentException("Your Phone Number can't be empty!");
                 }
-
-
+                
+                //Create pwsd with inivisible user input
                 char[] PWSD_REG = console.readPassword("Please set a password for your account: ");
 
+                //Check if the password fit to the credentaisl
                 if (PWSD_REG.length == 0) {
                     throw new IllegalArgumentException("Your Password can't be empty!");
+                } else if (PWSD_REG.length < 10) {
+                    throw new IllegalArgumentException("Your password must bee at least 10 letters long");
+                } else {
+                    FitLength = true;
                 }
 
+                //Check if the PWSD fit to the credentials if thats the case the default vars will be sett to true
+                for (char c : PWSD_REG) {
+                    if (Character.isUpperCase(c)) {
+                        HasUpper = true;
+
+                    }
+
+                    if (Character.isLowerCase(c)) {
+                        HasLower = true;
+                    }
+
+                    if (Character.isDigit(c)) {
+                        HasNumbers = true;
+                    }
+
+                    if (!Character.isLetterOrDigit(c)) {
+                        HasSpecial = true;
+                    }
+                }
+
+                //Throw errors based on the value
+                if (!HasUpper) {
+                    throw new IllegalArgumentException("Please note that your Password need to contain Uppercase Letters to be valid");
+                } else if (!HasLower) {
+                    throw new IllegalArgumentException("Please note that your Password need to contain Lowercase Letters to be valid");
+                } else if (!HasNumbers) {
+                    throw new IllegalArgumentException("Please note that your Password need to contain Numbers to be valid");
+                } else if (!HasSpecial) {
+                    throw new IllegalArgumentException("Please note that your Password need to contain a Special Letter (e.g. !%$§§%&/) to be valid");
+                }
+ 
                 char[] VerPWSD_REG = console.readPassword("Please retype your password from before: ");
 
                 if (VerPWSD_REG.length == 0 || !Arrays.equals(PWSD_REG, VerPWSD_REG)) {
@@ -142,6 +196,13 @@ public class Account {
                     this.UserPWSDConfirmPlain = String.valueOf(VerPWSD_REG);
                     System.out.println("Passwords are converted");
 
+                    System.out.println("Your Password is collected and will be Hashed now");
+                    
+                    this.UserPwsdHashed = BCrypt.hashpw(UserPwsdPlain, BCrypt.gensalt(15));
+
+                    System.out.println("The Password where Hashed sucsessfully");
+                    System.out.println("\nHashed Password " + this.UserPwsdHashed + "\n");
+
                     System.out.println("Your registration where sucsessfull");
                     break;
                 }
@@ -149,5 +210,4 @@ public class Account {
 
         }   
     }
-
 }
