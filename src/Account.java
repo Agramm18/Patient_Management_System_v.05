@@ -201,7 +201,6 @@ public class Account {
                     this.UserPwsdHashed = BCrypt.hashpw(UserPwsdPlain, BCrypt.gensalt(15));
 
                     System.out.println("The Password where Hashed sucsessfully");
-                    System.out.println("\nHashed Password " + this.UserPwsdHashed + "\n");
 
                     System.out.println("Your registration where sucsessfull");
                     break;
