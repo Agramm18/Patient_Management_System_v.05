@@ -5,30 +5,19 @@ import java.util.Arrays;
 import java.io.Console;
 import org.mindrot.jbcrypt.BCrypt;
 
+import app.controller.auth.account.Password.SetPassword;
+
 public class Registration {
 
     private boolean HasAccount;
 
-    private boolean IsAccountValid;
+    private boolean BasicCredntials;
 
     private String UserName;
     
     private String UserMail;
     private String UserPhone;
-
-    private String UserPwsdPlain;
-    private String UserPWSDConfirmPlain;
-
-    private String UserPwsdHashed;
-
-    //Password Credentials
-    private boolean FitPWSDLength;
-    private boolean ContainsUpperLetters;
-    private boolean ContainsLowerLetters;
-    private boolean ContainsSpecialLetters;
-    private boolean ContainsNumbers;
-
-
+    
     public void RegisterUser(Scanner scanner) {
 
         Console console = System.console();
@@ -68,71 +57,48 @@ public class Registration {
                     throw new IllegalArgumentException("Your Phone Number can't be empty!");
                 }
                 
-                //Create pwsd with inivisible user input
-                char[] PWSD_REG = console.readPassword("Please set a password for your account: ");
-
-                //Check if the password fit to the credentaisl
-                if (PWSD_REG.length == 0) {
-                    throw new IllegalArgumentException("Your Password can't be empty!");
-                } else if (PWSD_REG.length < 10) {
-                    throw new IllegalArgumentException("Your password must bee at least 10 letters long");
-                } else {
-                    FitLength = true;
-                }
-
-                //Check if the PWSD fit to the credentials if thats the case the default vars will be sett to true
-                for (char c : PWSD_REG) {
-                    if (Character.isUpperCase(c)) {
-                        HasUpper = true;
-
-                    }
-
-                    if (Character.isLowerCase(c)) {
-                        HasLower = true;
-                    }
-
-                    if (Character.isDigit(c)) {
-                        HasNumbers = true;
-                    }
-
-                    if (!Character.isLetterOrDigit(c)) {
-                        HasSpecial = true;
-                    }
-                }
-
-                //Throw errors based on the value
-                if (!HasUpper) {
-                    throw new IllegalArgumentException("Please note that your Password need to contain Uppercase Letters to be valid");
-                } else if (!HasLower) {
-                    throw new IllegalArgumentException("Please note that your Password need to contain Lowercase Letters to be valid");
-                } else if (!HasNumbers) {
-                    throw new IllegalArgumentException("Please note that your Password need to contain Numbers to be valid");
-                } else if (!HasSpecial) {
-                    throw new IllegalArgumentException("Please note that your Password need to contain a Special Letter (e.g. !%$§§%&/) to be valid");
-                }
- 
-                char[] VerPWSD_REG = console.readPassword("Please retype your password from before: ");
-
-                if (VerPWSD_REG.length == 0 || !Arrays.equals(PWSD_REG, VerPWSD_REG)) {
-                    throw new IllegalArgumentException("The verification password can't be empty and must be equal to the password from before");
-                } else {
                     System.out.println("The base values for the Database are setted");
-                    this.IsAccountValid = true;
+                    this.BasicCredntials = true;
 
                     this.UserName = TempUserName;
                     this.UserMail = TempEmail;
                     this.UserPhone = TempPhoneNumber;
 
-                    System.out.println("Convert Password Values to String");
-                    this.UserPwsdPlain = String.valueOf(PWSD_REG);
-                    this.UserPWSDConfirmPlain = String.valueOf(VerPWSD_REG);
-                    System.out.println("Passwords are converted");
-
-                    System.out.println("Your Password is collected and will be Hashed now");
+                    if (this.BasicCredntials) {
+                        SetPassword collect = new SetPassword();
                     
-                    this.UserPwsdHashed = BCrypt.hashpw(UserPwsdPlain, BCrypt.gensalt(15));
+                while (true) {
+                    try {
+                        collect.PlainPWSD(scanner);
+                        break;
 
-                    System.out.println("The Password where Hashed sucsessfully");
+                    } catch (IllegalArgumentException invalidInput) {
+                        System.out.println("\nThere is an error of the Login/Registration logic");
+                        System.out.println("The error is: " + invalidInput.getMessage() + "\n");
+                    }
+                }
+
+                while (true) {
+                    try {
+                        collect.ValidatePWSD();
+                        break;
+
+                    } catch (IllegalArgumentException invalidInput) {
+                        System.out.println("\nThere is an error of the Login/Registration logic");
+                        System.out.println("The error is: " + invalidInput.getMessage() + "\n");
+                    }
+                }
+
+                while (true) {
+                    try {
+                        collect.VerifyPWSD();
+                        break;
+
+                    } catch (IllegalArgumentException invalidInput) {
+                        System.out.println("\nThere is an error of the Login/Registration logic");
+                        System.out.println("The error is: " + invalidInput.getMessage() + "\n");
+                    }
+                }
 
                     System.out.println("Your registration where sucsessfull");
                     break;
