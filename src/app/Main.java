@@ -1,21 +1,5 @@
 package app;
-import java.io.Console;
 import java.util.Scanner;
-
-import javax.management.RuntimeErrorException;
-
-//Load SQL Connection libaries
-import java.sql.Connection;
-import java.sql.DriverManager;
-
-//load dotenv libaries
-import io.github.cdimascio.dotenv.Dotenv;
-
-//load filehandler
-import java.io.File;
-
-//load bcrypt for Password Hashing
-import org.mindrot.jbcrypt.BCrypt;
 
 import app.controller.SystemLoader;
 

@@ -1,7 +1,7 @@
 package app.controller;
 import java.util.Scanner;
 
-import app.controller.auth.RunSqlHandeling;
+import app.db.auth.config.CheckENV;
 public class SystemLoader {
         
         public void HeaderLoad() {
@@ -12,11 +12,10 @@ public class SystemLoader {
             System.out.println("==================================================\n");
         }
 
+        //Load .env check
         public void start(Scanner scanner) {
-            //Load SQL Connection and handeling .env file/parameter
-            RunSqlHandeling connection = new RunSqlHandeling();
-            connection.sqlHeader();
-            connection.ValidateENV();
-            connection.SQLConnection(scanner);
+            CheckENV  run = new CheckENV();
+            run.sqlHeader();
+            run.ValidateENV(scanner);
         }
 }

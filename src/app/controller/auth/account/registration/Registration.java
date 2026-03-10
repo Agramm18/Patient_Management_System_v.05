@@ -1,11 +1,10 @@
 package app.controller.auth.account.registration;
-import java.util.Scanner;
 
-import java.util.Arrays;
+import java.util.Scanner;
 import java.io.Console;
-import org.mindrot.jbcrypt.BCrypt;
 
 import app.controller.auth.account.Password.SetPassword;
+import app.db.insert.CreateUser;
 
 public class Registration {
 
@@ -67,40 +66,35 @@ public class Registration {
                     if (this.BasicCredntials) {
                         SetPassword collect = new SetPassword();
                     
-                while (true) {
-                    try {
-                        collect.PlainPWSD(scanner);
-                        break;
+                    while (true) {
+                        try {
+                            collect.PlainPWSD(scanner);
+                            collect.ValidatePWSD();
+                            collect.VerifyPWSD();
+                            break;
 
-                    } catch (IllegalArgumentException invalidInput) {
-                        System.out.println("\nThere is an error of the Login/Registration logic");
-                        System.out.println("The error is: " + invalidInput.getMessage() + "\n");
+                        } catch (IllegalArgumentException invalidInput) {
+                            System.out.println("\nThere is an error in the password validation");
+                            System.out.println("The error is: " + invalidInput.getMessage());
+                            System.out.println("Please try again....\n");
+                            continue;
+                        }
                     }
-                }
 
-                while (true) {
-                    try {
-                        collect.ValidatePWSD();
-                        break;
-
-                    } catch (IllegalArgumentException invalidInput) {
-                        System.out.println("\nThere is an error of the Login/Registration logic");
-                        System.out.println("The error is: " + invalidInput.getMessage() + "\n");
-                    }
-                }
-
-                while (true) {
-                    try {
-                        collect.VerifyPWSD();
-                        break;
-
-                    } catch (IllegalArgumentException invalidInput) {
-                        System.out.println("\nThere is an error of the Login/Registration logic");
-                        System.out.println("The error is: " + invalidInput.getMessage() + "\n");
-                    }
-                }
+                String hashedPWSD = collect.getHashedPWSD();
 
                     System.out.println("Your registration where sucsessfull");
+                    System.out.println("The data will now be setted in the DB");
+                    
+                    CreateUser create = new CreateUser(
+                        this.UserName,
+                        this.UserMail,
+                        this.UserPhone,
+                        hashedPWSD
+                    );
+
+                    create.InsertData();
+
                     break;
                 }
         }

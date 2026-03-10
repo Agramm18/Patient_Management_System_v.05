@@ -1,17 +1,11 @@
-package app.controller.auth;
-//Load SQL Connection libaries
-import java.sql.Connection;
-import java.sql.DriverManager;
+package app.db.auth.config;
 import java.util.Scanner;
-
-import app.controller.auth.account.AccountStatus;
-//load dotenv libaries
-import io.github.cdimascio.dotenv.Dotenv;
-
-//load filehandler
 import java.io.File;
 
-public class RunSqlHandeling {
+import io.github.cdimascio.dotenv.Dotenv;
+
+public class CheckENV {
+
     String DbHost;
     String DBPort;
     int DBPortINT;
@@ -19,8 +13,7 @@ public class RunSqlHandeling {
     String DBUser;
     String DbPWSD;
     boolean EnvValid;
-    boolean ConnectionValid;
-
+    
     public void sqlHeader() {
         System.out.println("\n==================================================");
         System.out.println("              Configuration & Database");
@@ -30,7 +23,7 @@ public class RunSqlHandeling {
         System.out.println("==================================================\n");
     }
 
-    public void ValidateENV() {
+    public void ValidateENV(Scanner scanner) {
         try {
             boolean env = false;
             int port;
@@ -89,8 +82,18 @@ public class RunSqlHandeling {
                 env = true;
                 this.EnvValid = env;
                 System.out.println("Values setted\n");
-
                 System.out.println(".env parameters loaded and setted sucsessfully\n");
+
+                CheckDBConnection run = new CheckDBConnection(
+                    this.DbHost,
+                    this.DBPortINT,
+                    this.DBName,
+                    this.DBUser,
+                    this.DbPWSD,
+                    this.EnvValid
+                );
+
+                run.SQLConnection(scanner);
             }
 
         } catch (IllegalArgumentException error) {
@@ -98,47 +101,5 @@ public class RunSqlHandeling {
             System.out.println("Error: " + error + "\n");
         }
     }
-
-    public void SQLConnection(Scanner scanner) {
-        try {
-            boolean SQLValid = false;
-
-            System.out.println("SQL Starting.....");
-            //Set connection link with parameters
-            String url = "jdbc:mysql://" + this.DbHost + ":" + this.DBPortINT + "/" + this.DBName;
-
-            //load connection
-            Connection connection = DriverManager.getConnection(url, this.DBUser, this.DbPWSD);
-            SQLValid = true;
-
-            //validate if everything worked with base values
-            if (!SQLValid || !EnvValid) {
-                throw new IllegalStateException("It seems that something unexpected happend");
-            } else 
-                {
-                //if everything worked the account class will be called
-                System.out.println("SQL Connected sucsessfully");
-                System.out.println("\nEverything worked you will now be redirected to the Account validation\n");
-
-                AccountStatus account = new AccountStatus();
-                account.HeaderMSGAccount();
-                
-                //Throw collected errors and the user must start again
-                while (true) {
-                    try {
-                        account.SetBaseValues(scanner);
-                        break;
-
-                    } catch (IllegalArgumentException invalidInput) {
-                        System.out.println("\nThere is an error of the Login/Registration logic");
-                        System.out.println("The error is: " + invalidInput.getMessage() + "\n");
-                    }
-                }
-            }
-
-        } catch (Exception error) {
-            System.out.println("\nIt seems the SQL Connection this didn't work...");
-            System.out.println("Error: " + error + "\n");
-        }
-    }
+    
 }

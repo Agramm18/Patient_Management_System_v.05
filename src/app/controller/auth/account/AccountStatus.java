@@ -41,7 +41,8 @@ public class AccountStatus {
 
                     } catch (IllegalArgumentException invalidInput) {
                         System.out.println("\nThere is an error of the Login/Registration logic");
-                        System.out.println("The error is: " + invalidInput.getMessage() + "\n");
+                        System.out.println("The error is: " + invalidInput.getMessage());
+                        System.out.println("Please try again....\n");
                     }
                 }
 
@@ -60,7 +61,8 @@ public class AccountStatus {
 
                     } catch (IllegalArgumentException invalidInput) {
                         System.out.println("\nThere is an error of the Login/Registration logic");
-                        System.out.println("The error is: " + invalidInput.getMessage() + "\n");
+                        System.out.println("The error is: " + invalidInput.getMessage());
+                        System.out.println("Please try again....\n");
                     }
                 }
 

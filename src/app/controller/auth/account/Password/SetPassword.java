@@ -74,6 +74,17 @@ public class SetPassword {
             throw new IllegalArgumentException("Please note that your Password need to contain a Special Letter (e.g. !%$§§%&/) to be valid");
         }
 
+        //Throw error if atleast one case is missing but the others are valid
+        if (HasUpper && HasLower && HasNumbers && !HasSpecial) {
+            throw new IllegalArgumentException("The Special letter is missing please add at least one speical letter");
+        } else if (HasUpper && HasLower && HasSpecial && !HasNumbers) {
+            throw new IllegalArgumentException("The Number is Missing please add at least one number");
+        } else if (HasUpper && HasNumbers && HasSpecial && !HasLower) {
+            throw new IllegalArgumentException("The Lowercase letter is missing Please add atleast one lower case letter");
+        } else if (HasLower && HasNumbers && HasSpecial && !HasUpper) {
+            throw new IllegalArgumentException("The Upper case letter is missing please add at least one uppercase letter");
+        }
+
     }
 
     public void VerifyPWSD() {
@@ -84,6 +95,7 @@ public class SetPassword {
         if (this.VerifyPWSD.length == 0 || !Arrays.equals(this.PWSDChar, this.VerifyPWSD)) {
             throw new IllegalArgumentException("The verification password can't be empty and must be equal to the password from before");
         } else {
+            System.out.println("Your password is correct an fit to all the credentials");
             ConvertCharToString();
             PlainToHash();
         }
@@ -101,5 +113,9 @@ public class SetPassword {
         this.HashedPWSD = BCrypt.hashpw(PlainPWSD, BCrypt.gensalt(15));
 
         System.out.println("The Password where Hashed sucsessfully");
+    }
+
+    public String getHashedPWSD() {
+        return this.HashedPWSD;
     }
 }
