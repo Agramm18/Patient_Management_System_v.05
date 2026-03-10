@@ -1,4 +1,4 @@
-package app.db.insert;
+package app.db.Repository;
 
 public class CreateUser {
     private String DBUser;
@@ -11,7 +11,6 @@ public class CreateUser {
         this.DBEmail = DBEmail;
         this.DBPhone = DBPhone;
         this.PWSDHashed = PWSDHashed;
-    
     }
 
     public void InsertData() {
@@ -21,5 +20,9 @@ public class CreateUser {
         System.out.println("Email: " + this.DBEmail);
         System.out.println("Phone: " + this.DBPhone);
         System.out.println("PWSD: "  + this.PWSDHashed + "\n");
+    }
+
+    public void InsertUser() {
+        
     }
 }

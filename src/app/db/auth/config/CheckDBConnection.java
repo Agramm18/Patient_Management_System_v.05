@@ -4,7 +4,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.Scanner;
 
-import app.controller.auth.account.AccountStatus;
+import app.controller.auth.account.Validate.AccountStatus;
+import app.controller.auth.account.LoadAccount;
 
 public class CheckDBConnection {
     String Host;
@@ -43,21 +44,9 @@ public class CheckDBConnection {
                 //if everything worked the account class will be called
                 System.out.println("SQL Connected sucsessfully");
                 System.out.println("\nEverything worked you will now be redirected to the Account validation\n");
-
-                AccountStatus account = new AccountStatus();
-                account.HeaderMSGAccount();
                 
-                //Throw collected errors and the user must start again
-                while (true) {
-                    try {
-                        account.SetBaseValues(scanner);
-                        break;
-
-                    } catch (IllegalArgumentException invalidInput) {
-                        System.out.println("\nThere is an error of the Login/Registration logic");
-                        System.out.println("The error is: " + invalidInput.getMessage() + "\n");
-                    }
-                }
+                LoadAccount run = new LoadAccount();
+                run.SetAccountParam(scanner);
             }
 
         } catch (Exception error) {

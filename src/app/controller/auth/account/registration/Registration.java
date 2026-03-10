@@ -4,7 +4,7 @@ import java.util.Scanner;
 import java.io.Console;
 
 import app.controller.auth.account.Password.SetPassword;
-import app.db.insert.CreateUser;
+import app.db.Repository.CreateUser;
 
 public class Registration {
 

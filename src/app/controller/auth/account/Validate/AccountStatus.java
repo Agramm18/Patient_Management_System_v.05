@@ -1,4 +1,4 @@
-package app.controller.auth.account;
+package app.controller.auth.account.Validate;
 
 //Load other files
 import app.controller.auth.account.login.Login;
