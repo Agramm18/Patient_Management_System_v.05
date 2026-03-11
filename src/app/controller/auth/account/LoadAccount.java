@@ -1,12 +1,20 @@
 package app.controller.auth.account;
 import app.controller.auth.account.Validate.AccountStatus;
 
+import java.sql.Connection;
 import java.util.Scanner;
 
 public class LoadAccount {
+
+    private Connection connection;
+
+    public LoadAccount(Connection connection) {
+        this.connection = connection;
+    }
+
     public void SetAccountParam(Scanner scanner) {
     
-        AccountStatus account = new AccountStatus();
+        AccountStatus account = new AccountStatus(connection);
             account.HeaderMSGAccount();
                     
             //Throw collected errors and the user must start again

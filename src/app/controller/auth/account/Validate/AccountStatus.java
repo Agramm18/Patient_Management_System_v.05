@@ -4,9 +4,16 @@ package app.controller.auth.account.Validate;
 import app.controller.auth.account.login.Login;
 import app.controller.auth.account.registration.Registration;
 
+import java.sql.Connection;
 import java.util.Scanner;
 
 public class AccountStatus {
+
+    private Connection connection;
+
+    public AccountStatus(Connection connection) {
+        this.connection = connection;
+    }
 
     public static void HeaderMSGAccount() {
         System.out.println("\n==================================================");
@@ -31,7 +38,7 @@ public class AccountStatus {
                 //Redirect User to Login
                 System.out.println("Please follow the login");
 
-                Login login = new Login();
+                Login login = new Login(connection);
 
                 //Throw collected errors and the user must start again
                 while (true) {
@@ -51,7 +58,7 @@ public class AccountStatus {
                 //Redirect User to Registration
                 System.out.println("Please follow the registration");
 
-                Registration registration = new Registration();
+                Registration registration = new Registration(connection);
 
                 //Throw collected errors and the user must start again
                 while (true) {

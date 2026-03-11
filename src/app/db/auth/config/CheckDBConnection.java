@@ -15,6 +15,8 @@ public class CheckDBConnection {
     String PWSD;
     boolean ENVConnection;
 
+    private Connection connection;
+
     public CheckDBConnection(String Host, int Port, String Name, String User, String PWSD, boolean ENVConnection) {
         this.Host = Host;
         this.Port = Port;
@@ -33,7 +35,7 @@ public class CheckDBConnection {
             String url = "jdbc:mysql://" + this.Host + ":" + this.Port + "/" + this.Name;
 
             //load connection
-            Connection connection = DriverManager.getConnection(url, this.User, this.PWSD);
+            this.connection = DriverManager.getConnection(url, this.User, this.PWSD);
             SQLValid = true;
 
             //validate if everything worked with base values
@@ -45,7 +47,7 @@ public class CheckDBConnection {
                 System.out.println("SQL Connected sucsessfully");
                 System.out.println("\nEverything worked you will now be redirected to the Account validation\n");
                 
-                LoadAccount run = new LoadAccount();
+                LoadAccount run = new LoadAccount(this.connection);
                 run.SetAccountParam(scanner);
             }
 

@@ -1,5 +1,6 @@
 package app.controller.auth.account.registration;
 
+import java.sql.Connection;
 import java.util.Scanner;
 import java.io.Console;
 
@@ -16,6 +17,12 @@ public class Registration {
     
     private String UserMail;
     private String UserPhone;
+
+    private Connection connection;
+
+    public Registration(Connection connection) {
+        this.connection = connection;
+    }
     
     public void RegisterUser(Scanner scanner) {
 
@@ -90,10 +97,12 @@ public class Registration {
                         this.UserName,
                         this.UserMail,
                         this.UserPhone,
-                        hashedPWSD
+                        hashedPWSD,
+                        connection
                     );
 
                     create.InsertData();
+                    create.InsertUser();
 
                     break;
                 }

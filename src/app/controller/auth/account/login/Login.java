@@ -1,6 +1,9 @@
 package app.controller.auth.account.login;
-import java.util.Scanner;
 
+import app.db.auth.check.CheckUser;
+
+import java.util.Scanner;
+import java.sql.Connection;
 import java.io.Console;
 import java.util.Arrays;
 
@@ -19,6 +22,12 @@ public class Login {
     private String UserPWSDConfirmPlain;
 
     private String UserPwsdHashed;
+
+    private Connection connection;
+
+    public Login(Connection connection) {
+        this.connection = connection;
+    }
 
     //Password Credentials
     private boolean FitPWSDLength;
@@ -59,7 +68,19 @@ public class Login {
                 if (VerPWSD.length == 0 || !Arrays.equals(PWSD, VerPWSD)) {
                     throw new IllegalArgumentException("Your Verification Password is empty or does not equal your Password");
                 } else {
-                    System.out.println("\nThe Login where Sucsessfull");
+                    //Set base values and convert char to str
+                    this.UserName = TempUserName;
+                    this.UserPwsdPlain = String.valueOf(PWSD);
+
+                    //Build constructor and load it to db logic
+                    CheckUser load = new CheckUser(
+                        this.UserName,
+                        this.UserPwsdPlain,
+                        connection
+                    );
+
+                    load.CollectDBValues();
+
                     break;
                 }
             }
