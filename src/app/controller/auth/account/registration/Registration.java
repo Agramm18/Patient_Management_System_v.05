@@ -102,7 +102,7 @@ public class Registration {
                     );
 
                     create.InsertData();
-                    create.InsertUser();
+                    create.InsertUser(scanner);
 
                     break;
                 }

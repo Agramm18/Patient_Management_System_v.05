@@ -1,7 +1,7 @@
 package app.db.auth.check;
 
 import app.menu.MenuScreen;
-import app.menu.menu;
+import app.menu.MenuValidation;
 
 //Libary imports
 import java.sql.Connection;
@@ -22,7 +22,7 @@ public class CheckUser {
         this.connection = connection;
     }
 
-    public void CollectDBValues() {
+    public void CollectDBValues(Scanner scanner) {
         System.out.println("\nThe values from the database are loaded and compared with the entered values\n");
         try {
 
@@ -48,6 +48,9 @@ public class CheckUser {
                 
                 MenuScreen collect = new MenuScreen();
                 collect.show();
+
+                MenuValidation start = new MenuValidation();
+                start.CollectMenuChoice(scanner);
 
             } else {
                 throw new IllegalArgumentException("The entered Password is not correct please try again...");

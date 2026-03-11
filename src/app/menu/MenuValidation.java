@@ -3,12 +3,8 @@ import java.util.Scanner;
 
 import app.service.AddPatient;
 
-public class menu {
+public class MenuValidation {
     String UserChoice;
-
-    public menu(String UserChoice) {
-        this.UserChoice = UserChoice;
-    }
 
     //Collect Menu Choice via Switch
     public void CollectMenuChoice(Scanner scanner) {

@@ -79,7 +79,7 @@ public class Login {
                         connection
                     );
 
-                    load.CollectDBValues();
+                    load.CollectDBValues(scanner);
 
                     break;
                 }

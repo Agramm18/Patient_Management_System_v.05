@@ -4,6 +4,7 @@ import app.controller.auth.account.login.Login;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.util.Scanner;
 
 public class CreateUser {
     private String DBUser;
@@ -29,7 +30,7 @@ public class CreateUser {
         System.out.println("PWSD: "  + this.PWSDHashed + "\n");
     }
 
-    public void InsertUser() {
+    public void InsertUser(Scanner scanner) {
         try {
             System.out.println("\nThe User will now be laid in into the Database\n");
 
@@ -50,6 +51,7 @@ public class CreateUser {
             System.out.println("Welcome to the programm");
             System.out.println("You will now be redirected to the Login\n");
             Login load = new Login(connection);
+            load.LoginUser(scanner);
 
         } catch (Exception error) {
             System.out.println("Something didnt't work...");
