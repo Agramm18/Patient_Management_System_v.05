@@ -12,6 +12,7 @@ public class CheckENV {
     String DBName;
     String DBUser;
     String DbPWSD;
+    String Admin_Auth_KEY;
     boolean EnvValid;
     
     public void sqlHeader() {
@@ -47,6 +48,7 @@ public class CheckENV {
             String Name = dotenv.get("DB_NAME");
             String User = dotenv.get("DB_USER");
             String PWSD = dotenv.get("DB_PWSD");
+            String ADMIN_KEY = dotenv.get("Admin_Center_AUTH_KEY");
 
             //Check if env exsist if not throw error msg
             if (Host == null) {
@@ -71,6 +73,10 @@ public class CheckENV {
                 throw new IllegalArgumentException("It seems that the DB_PWSD in your .env seems to be empty");
             }
 
+            else if (ADMIN_KEY == null) {
+                throw new IllegalArgumentException("The Admin key can't be empty");
+            }
+
             else {
                 //If everything is valid set the .env values to the parameters
                 System.out.println("\nSet the values");
@@ -79,6 +85,7 @@ public class CheckENV {
                 this.DBName = Name;
                 this.DBUser = User;
                 this.DbPWSD = PWSD;
+                this.Admin_Auth_KEY = ADMIN_KEY;
                 env = true;
                 this.EnvValid = env;
                 System.out.println("Values setted\n");
@@ -90,7 +97,8 @@ public class CheckENV {
                     this.DBName,
                     this.DBUser,
                     this.DbPWSD,
-                    this.EnvValid
+                    this.EnvValid,
+                    this.Admin_Auth_KEY
                 );
 
                 run.SQLConnection(scanner);

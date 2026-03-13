@@ -14,16 +14,18 @@ public class CheckDBConnection {
     String User;
     String PWSD;
     boolean ENVConnection;
+    String Admin_Auth_KEY;
 
     private Connection connection;
 
-    public CheckDBConnection(String Host, int Port, String Name, String User, String PWSD, boolean ENVConnection) {
+    public CheckDBConnection(String Host, int Port, String Name, String User, String PWSD, boolean ENVConnection, String Admin_Auth_KEY) {
         this.Host = Host;
         this.Port = Port;
         this.Name = Name;
         this.User = User;
         this.PWSD = PWSD;
         this.ENVConnection = ENVConnection;
+        this.Admin_Auth_KEY = Admin_Auth_KEY;
     }
     
     public void SQLConnection(Scanner scanner) {
@@ -47,7 +49,10 @@ public class CheckDBConnection {
                 System.out.println("SQL Connected sucsessfully");
                 System.out.println("\nEverything worked you will now be redirected to the Account validation\n");
                 
-                LoadAccount run = new LoadAccount(this.connection);
+                LoadAccount run = new LoadAccount(
+                    this.connection,
+                    this.Admin_Auth_KEY
+                );
                 run.SetAccountParam(scanner);
             }
 
