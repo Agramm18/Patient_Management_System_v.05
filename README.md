@@ -125,6 +125,8 @@ Create the `.env` file in the project root:
 /lib
 /src
 /docs
+.env.example
+.gitignore
 .env
 README.md
 ```
@@ -138,6 +140,12 @@ DB_USER=YOUR_MYSQL_USER
 DB_NAME=patient_management_v5
 DB_PWSD=YOUR_MYSQL_PASSWORD
 ```
+
+The easiest setup is:
+
+1. Copy `.env.example` to `.env`
+2. Replace the placeholder values with your real MySQL login data
+3. Keep the key names exactly as written, because the current loader checks for those exact names
 
 What each value means:
 
@@ -163,6 +171,22 @@ Why this file is required:
 - If the values exist but are wrong, the JDBC connection to MySQL fails and the application cannot continue into login or registration.
 
 In short: without a valid `.env` file, the current application cannot connect to MySQL and the account system will not work.
+
+### `.gitignore` and Safe Local Configuration
+
+The repository now also includes a `.gitignore` file.
+
+Its purpose is to keep local or sensitive files out of Git, especially:
+
+- `.env`, so real database credentials are not committed by accident
+- `/.VSCodeCounter`, because it is local tooling output
+- `/docs`, if you want to keep local documentation artifacts out of commits in the current setup
+
+This means the intended workflow is:
+
+- keep example values in `.env.example`
+- keep real local values only in `.env`
+- do not commit passwords or machine-specific configuration
 
 ---
 
@@ -209,6 +233,8 @@ java -cp "out;lib/mysql-connector-j-9.6.0.jar;lib/jbcrypt-0.4.jar;lib/dotenv-jav
 - `src/app/db/auth/` - environment checks, JDBC connection, account status and role checks
 - `src/app/menu/` - role-based menu controller and admin menu UI
 - `src/app/service/AddPatient.java` - legacy patient intake prototype
+- `.env.example` - template for local database configuration
+- `.gitignore` - prevents local config and ignored folders from being committed
 - `docs/uml/current_program_flow.puml` - current flow documentation
 - `lib/` - project dependencies kept locally in the repository
 
