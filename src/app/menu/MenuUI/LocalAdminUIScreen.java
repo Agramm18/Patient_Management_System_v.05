@@ -1,4 +1,4 @@
-package app.menu;
+package app.menu.MenuUI;
 
 public class LocalAdminUIScreen {
 

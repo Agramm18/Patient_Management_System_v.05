@@ -1,4 +1,4 @@
-package app.menu;
+package app.menu.MenuValidation;
 import java.util.Scanner;
 
 import app.service.AddPatient;

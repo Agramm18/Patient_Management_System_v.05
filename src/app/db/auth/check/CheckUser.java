@@ -1,8 +1,8 @@
 package app.db.auth.check;
 
-import app.menu.MenuScreen;
-import app.menu.MenuValidation;
-
+import app.menu.MenuValidation.MenuValidation;
+import app.menu.MenuUI.MenuScreen;
+import app.db.auth.check.CheckAccountStatus;
 //Libary imports
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -45,16 +45,19 @@ public class CheckUser {
             
             if(BCrypt.checkpw(this.UserPwsdPlain, StoredHash)) {
                 System.out.println("\nThe Login where a sucsess the username and the pwsd fits to the db\n");
-                
-                MenuScreen collect = new MenuScreen();
-                collect.show();
 
-                MenuValidation start = new MenuValidation();
-                start.CollectMenuChoice(scanner);
+                CheckAccountStatus load = new CheckAccountStatus(
+                    this.UserName,
+                    this.connection
+                );
+                
+                load.AccountStatus(scanner);
 
             } else {
                 throw new IllegalArgumentException("The entered Password is not correct please try again...");
             }
+        } catch (IllegalArgumentException error) {
+            System.out.println(error.getMessage());
         } catch(Exception error) {
             System.out.println("\nThere seems to be something wrong with the user input and the DB synchronisation");
             System.out.println("Error: " + error + "\n");

@@ -1,4 +1,4 @@
-package app.menu;
+package app.menu.MenuValidation;
 
 import app.controller.auth.account.admin.create.CreateAdmin;
 

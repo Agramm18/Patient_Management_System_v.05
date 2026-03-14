@@ -7,17 +7,14 @@ import java.util.Scanner;
 public class LoadAccount {
 
     private Connection connection;
-    private String Admin_Auth_KEY; 
 
-    public LoadAccount(Connection connection, String Admin_Auth_KEY) {
+    public LoadAccount(Connection connection) {
         this.connection = connection;
-        this.Admin_Auth_KEY = Admin_Auth_KEY;
-
     }
 
     public void SetAccountParam(Scanner scanner) {
     
-        AccountStatus account = new AccountStatus(connection, this.Admin_Auth_KEY);
+        AccountStatus account = new AccountStatus(connection);
             account.HeaderMSGAccount();
                     
             //Throw collected errors and the user must start again
