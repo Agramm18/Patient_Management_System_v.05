@@ -7,7 +7,7 @@ public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
-        //CLI Hello MSGY
+        //CLI Hello MSG
         System.out.println("\n==================================================");
         System.out.println("         Welcome to the Patient Management System");
         System.out.println("                     Version 5.0");

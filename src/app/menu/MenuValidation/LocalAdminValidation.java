@@ -1,7 +1,8 @@
 package app.menu.MenuValidation;
 
-import app.controller.auth.account.admin.create.CreateAdmin;
+import app.db.Admin.LocalAdmin.ShowUsers;
 
+import java.sql.Connection;
 import java.sql.Connection;
 import java.util.Scanner;
 
@@ -9,10 +10,12 @@ import java.util.Scanner;
 public class LocalAdminValidation {
 
     private Connection connection;
+    private String UserName;
     private int AdminChoice;
 
-    public LocalAdminValidation(Connection connection) {
+    public LocalAdminValidation(Connection connection, String UserName) {
         this.connection = connection;
+        this.UserName = UserName;
     }
 
     public void AdminChoice(Scanner scanner) {
@@ -20,13 +23,15 @@ public class LocalAdminValidation {
 
         this.AdminChoice = scanner.nextInt();
 
-        if (this.AdminChoice < 1 || this.AdminChoice > 12) {
+        if (this.AdminChoice < 1 || this.AdminChoice > 5) {
             throw new IllegalArgumentException("You are out of range only 1-13 are allowed");
         } else {
             switch (this.AdminChoice) {
                 case 1:
-                    CreateAdmin create = new CreateAdmin();
-                    create.LoacalAdmin();
+                    ShowUsers action = new ShowUsers(
+                        connection
+                    );
+                    action.showAvailableUsers(scanner);
             }
         }
     }
