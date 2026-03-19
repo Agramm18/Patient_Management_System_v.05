@@ -29,7 +29,7 @@ public class MenuController {
                 LocalAdminUIScreen display = new LocalAdminUIScreen();
                 display.LocalAdminPanel();
 
-                LocalAdminValidation collect = new LocalAdminValidation(connection);
+                LocalAdminValidation collect = new LocalAdminValidation(connection, this.UserName);
                 collect.AdminChoice(scanner);
             }
         } catch (Exception error) {
