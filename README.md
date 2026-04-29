@@ -2,6 +2,28 @@
 
 Java console project for a patient management system rewrite. The current focus is the technical foundation: bootstrap flow, controller structure, `.env` validation, and MySQL connection setup.
 
+## Project Direction
+
+This version reflects a restructuring of the project architecture and tooling.
+
+The earlier project state relied heavily on constructor-driven flow. Objects created other objects directly, logic was chained through constructors, and more and more startup behavior was spread across different classes. That made the code harder to follow over time because it became unclear:
+
+- which class created which dependency
+- where a method call originally came from
+- which part of the system was responsible for the next step in the flow
+
+Because of that, the project was remodeled toward a more central control structure with `BootConfigService`, `FrontController`, and dedicated sub-controllers such as `ConfigController` and `AuthController`.
+
+The reason for this change is simple: the application flow should be visible and understandable from one central place. A dispatcher/controller approach makes the control flow easier to trace, easier to extend, and easier to debug than pushing system behavior through nested constructors.
+
+The tooling was also changed during this phase:
+
+- The project was moved from VS Code to IntelliJ IDEA because the Java workflow there is more stable and transparent for this project setup
+- Maven replaced the old ad-hoc build handling because dependency management and project builds repeatedly caused problems before
+- This was especially relevant together with VS Code, where build/setup issues became a recurring blocker during development
+
+So the current project state is not only a feature update, but also a cleanup of architecture, project structure, and build workflow.
+
 ## Current Status
 
 The project currently starts through a simple bootstrap flow and routes requests into dedicated controllers.
