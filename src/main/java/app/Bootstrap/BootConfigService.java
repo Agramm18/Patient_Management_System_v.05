@@ -1,6 +1,7 @@
 package app.Bootstrap;
 
 import app.Controller.*;
+import java.util.Scanner;
 
 public class BootConfigService {
     public void DisplayHelloMSG() {
@@ -11,7 +12,7 @@ public class BootConfigService {
         System.out.println("==================================================\n");
     }
 
-    public void SystemConfig() {
+    public void SystemConfig(Scanner scanner) {
         AuthController auth = new AuthController();
         ConfigController config = new ConfigController();
         MenuController menu = new MenuController();
@@ -24,8 +25,8 @@ public class BootConfigService {
         System.out.println("[INFO] Running Controller classes.......");
 
         try {
-            dispatcher.NavigateSubController(FrontController.RequestType.CONFIG);
-            dispatcher.NavigateSubController(FrontController.RequestType.AUTH);
+            dispatcher.NavigateSubController(FrontController.RequestType.CONFIG, scanner);
+            dispatcher.NavigateSubController(FrontController.RequestType.AUTH, scanner);
         } catch (Exception error) {
             System.out.println("[FATAL] Boot failed " + error.getMessage());
             System.out.println("[INFO] System won't load and will be shutted down right now");
