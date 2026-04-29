@@ -12,7 +12,7 @@ public class RegistrationService {
         SetUserName(scanner);
         SetEmailAddress(scanner);
         SetPhoneNumber(scanner);
-        ShowUser(scanner);
+        ShowCurrentInfo(scanner);
 
     }
 
@@ -101,7 +101,7 @@ public class RegistrationService {
     }
 
     //Printing the Results and allowing changes
-    private void ShowUser(Scanner scanner) {
+    private void ShowCurrentInfo(Scanner scanner) {
         System.out.println("\n[INFO] Showing your Info");
         System.out.println("[DEBUG] User Name: " + UserName);
         System.out.println("[DEBUG] Email Adress: " + EmailAdress);
