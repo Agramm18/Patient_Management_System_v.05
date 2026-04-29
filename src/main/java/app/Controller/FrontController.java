@@ -1,5 +1,5 @@
 package app.Controller;
-
+import java.util.Scanner;
 //Main Controller classes that navigate the System
 public class FrontController {
     private AuthController authController;
@@ -27,15 +27,15 @@ public class FrontController {
     }
 
     //Handle UseCase via RequestType
-    public void NavigateSubController(RequestType request) {
+    public void NavigateSubController(RequestType request, Scanner scanner) {
 
         switch (request) {
             case CONFIG:
-                configController.execute();
+                configController.execute(scanner);
                 break;
 
             case AUTH:
-                authController.VerifyUser();
+                authController.VerifyUser(scanner);
         }
     }
 }
