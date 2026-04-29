@@ -91,13 +91,56 @@ Important:
 
 ## Database Setup
 
+The current configuration flow depends on a valid MySQL setup before the application starts. The program reads the database values from `.env` and then tries to build a JDBC connection with them.
+
 Create the database:
 
 ```sql
 CREATE DATABASE patient_management_v5;
 ```
 
-The current code only verifies whether a connection to the configured MySQL database can be established. It does not yet create tables automatically.
+Verify that the database exists:
+
+```sql
+SHOW DATABASES;
+```
+
+Switch into the database:
+
+```sql
+USE patient_management_v5;
+```
+
+Create the `accounts` table used by the current authentication foundation:
+
+```sql
+CREATE TABLE accounts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    account_name VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    phone_number VARCHAR(20),
+    user_job VARCHAR(50) DEFAULT 'intern',
+    user_role VARCHAR(50) DEFAULT 'user',
+    account_status VARCHAR(50) DEFAULT 'disabled',
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+```
+
+Optional checks:
+
+```sql
+SHOW TABLES;
+SHOW COLUMNS FROM accounts;
+```
+
+Important for the current config flow:
+
+- `DB_NAME` in `.env` must match the created database exactly
+- The MySQL user from `DB_USER` must have access to that database
+- `DB_PWSD` must match the password of that MySQL user
+- The application currently checks the connection only; it does not create tables automatically
 
 ## Run The Project
 
