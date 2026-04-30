@@ -2,6 +2,8 @@ package app.Auth;
 import java.awt.image.renderable.RenderableImage;
 import java.util.Scanner;
 
+import app.Auth.PasswordService;
+
 public class RegistrationService {
     protected String UserName;
     protected String EmailAdress;
@@ -13,7 +15,6 @@ public class RegistrationService {
         SetEmailAddress(scanner);
         SetPhoneNumber(scanner);
         ShowCurrentInfo(scanner);
-
     }
 
     private void SetUserName(Scanner scanner) {
@@ -120,11 +121,12 @@ public class RegistrationService {
                 } else if (!RegistrationState.equals("y") && !RegistrationState.equals("n")) {
                     throw new IllegalArgumentException("[ERROR] Only y for yes or n for n are valid please try again");
                 } else if (RegistrationState.equals("y")) {
-                    System.out.println("Password Logic");
+                    PasswordService create = new PasswordService();
+                    create.UserPWSD(scanner);
                 } else {
                     System.out.println("[INFO] Please Enter what you want to chang");
                     System.out.println("[INFO] 1 User Name");
-                    System.out.println("[INFO] 2 Email Adress");
+                    System.out.println("[INFO] 2 Email Address");
                     System.out.println("[INFO] 3 Phone Number");
 
                     ChangeValue = scanner.nextInt();
