@@ -23,11 +23,19 @@ public class PasswordService {
     public void UserPWSD(Scanner scanner) {
         System.out.println("[INFO] Running through password creation");
         System.out.println("[INFO] Creating plain text PWSD");
-        PlainPWSD(scanner);
-        System.out.println("[INFO] Running through validation process and validate if the password is valid");
-        ValidatePWSD();
-        System.out.println("[INFO] Please Retype your Password from before");
-        RetypePWSD();
+
+        while (true) {
+            PlainPWSD(scanner);
+            try {
+                System.out.println("[INFO] Running through validation process and validate if the password is valid");
+                ValidatePWSD();
+                break;
+            } catch (IllegalStateException error) {
+                System.out.println(error.getMessage());
+            }
+        }
+
+        RetypePWSD(scanner);
         System.out.println("[INFO] Converting Char back to string");
         ConvertCharToString();
         System.out.println("[INFO] Hashing String values to an unreadable format");
@@ -58,6 +66,7 @@ public class PasswordService {
     }
 
     public void ValidatePWSD() {
+
         //Password credentials
         boolean HasUpper = false;
         boolean HasLower = false;
@@ -67,9 +76,9 @@ public class PasswordService {
 
         //Check if the password fit to the credentaisl
         if (this.PWSDChar.length == 0) {
-            throw new IllegalArgumentException("[ERROR] Your Password can't be empty!");
+            throw new IllegalStateException("[ERROR] Your Password can't be empty!");
         } else if (this.PWSDChar.length < 10) {
-            throw new IllegalArgumentException("[ERROR] Your password must bee at least 10 letters long");
+            throw new IllegalStateException("[ERROR] Your password must bee at least 10 letters long");
         } else {
             FitLength = true;
         }
@@ -95,18 +104,17 @@ public class PasswordService {
 
         //Throw errors based on the value
         if (!HasUpper) {
-            throw new IllegalArgumentException("[ERROR] Please note that your Password need to contain Uppercase Letters to be valid");
+            throw new IllegalStateException("[ERROR] Please note that your Password need to contain Uppercase Letters to be valid");
         } else if (!HasLower) {
-            throw new IllegalArgumentException("[ERROR] Please note that your Password need to contain Lowercase Letters to be valid");
+            throw new IllegalStateException("[ERROR] Please note that your Password need to contain Lowercase Letters to be valid");
         } else if (!HasNumbers) {
-            throw new IllegalArgumentException("[ERROR] Please note that your Password need to contain Numbers to be valid");
+            throw new IllegalStateException("[ERROR] Please note that your Password need to contain Numbers to be valid");
         } else if (!HasSpecial) {
-            throw new IllegalArgumentException("[ERROR] Please note that your Password need to contain a Special Letter (e.g. !%$§§%&/) to be valid");
+            throw new IllegalStateException("[ERROR] Please note that your Password need to contain a Special Letter (e.g. !%$§§%&/) to be valid");
         }
-
     }
 
-    public void RetypePWSD() {
+    public void RetypePWSD(Scanner scanner) {
         Console console = System.console();
 
         this.VerifyPWSD = console.readPassword("[INFO] Please retype your password from before: ");
@@ -115,23 +123,17 @@ public class PasswordService {
             throw new IllegalArgumentException("[ERROR] The verification password can't be empty and must be equal to the password from before");
         } else {
             System.out.println("[OK] Your password is correct an fit to all the credentials");
-            ConvertCharToString();
-            PlainToHash();
         }
     }
 
     public void ConvertCharToString() {
-        System.out.println("[INFO] Convert Password Values to String...");
         this.PlainPWSD = String.valueOf(PWSDChar);
         System.out.println("[OK] Passwords are converted");
     }
 
     public void PlainToHash() {
-        System.out.println("[INFO] Your Password is collected and will be Hashed now");
 
         this.HashedPWSD = BCrypt.hashpw(PlainPWSD, BCrypt.gensalt(15));
-
-        System.out.println("[OK] The Password where Hashed sucsessfully");
     }
 
     public String getHashedPWSD() {
