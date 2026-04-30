@@ -35,7 +35,7 @@ public class FrontController {
                 break;
 
             case AUTH:
-                authController.VerifyUser(scanner);
+                authController.VerifyAccountStatus(scanner);
         }
     }
 }
