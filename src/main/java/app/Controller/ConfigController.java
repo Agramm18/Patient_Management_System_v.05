@@ -16,5 +16,11 @@ public class ConfigController {
 
         SQLValidationService configurate = new SQLValidationService(check);
         configurate.DBConnection();
+
+        DBManager.initialize(
+                configurate.getSQLUser(),
+                configurate.getSqlPWSD(),
+                configurate.getSqlURL()
+        );
     }
 }
