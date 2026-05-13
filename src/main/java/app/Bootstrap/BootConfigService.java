@@ -25,8 +25,14 @@ public class BootConfigService {
         System.out.println("[INFO] Running Controller classes.......");
 
         try {
-            dispatcher.NavigateSubController(FrontController.RequestType.CONFIG, scanner);
-            dispatcher.NavigateSubController(FrontController.RequestType.AUTH, scanner);
+            boolean configOK = dispatcher.NavigateSubController(FrontController.RequestType.CONFIG, scanner);
+
+            if (configOK) {
+                System.out.println("[OK] System Config where a sucsess");
+                System.out.println("[INFO] Starting Authentication phase");
+
+                dispatcher.NavigateSubController(FrontController.RequestType.AUTH, scanner);
+            }
         } catch (Exception error) {
             System.out.println("[FATAL] Boot failed " + error.getMessage());
             System.out.println("[INFO] System won't load and will be shutted down right now");
