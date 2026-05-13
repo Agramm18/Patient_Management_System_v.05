@@ -18,9 +18,9 @@ public final class DBManager {
             String password,
             String URL
     ) {
-        System.out.println("[INFO] Building global DB Connection");
+        System.out.println("\n[INFO] Building global DB Connection");
         System.out.println("[INFO] Save global DB runtime config");
-        System.out.println("[INFO] Set DB Config");
+        System.out.println("[INFO] Set DB Config\n");
 
         sqlUser = user;
         sqlPWSD = password;
