@@ -2,11 +2,11 @@ package app.Controller;
 import java.util.Scanner;
 //Main Controller classes that navigate the System
 public class FrontController {
-    private AuthController authController;
+    private final AuthController authController;
     private final ConfigController configController;
-    private MenuController menuController;
-    private ServiceController serviceController;
-    private uiController UIController;
+    private final MenuController menuController;
+    private final ServiceController serviceController;
+    private final uiController UIController;
 
     //Enum to store request types
     public enum RequestType {
@@ -27,15 +27,17 @@ public class FrontController {
     }
 
     //Handle UseCase via RequestType
-    public void NavigateSubController(RequestType request, Scanner scanner) {
+    public boolean NavigateSubController(RequestType request, Scanner scanner) {
 
         switch (request) {
             case CONFIG:
-                configController.execute(scanner);
-                break;
+                return configController.execute(scanner);
 
             case AUTH:
                 authController.VerifyAccountStatus(scanner);
+                return true;
         }
+
+        return false;
     }
 }
