@@ -58,6 +58,16 @@ public class EnvValidationService {
             String User = dotenv.get("DB_USER");
             String PWSD = dotenv.get("DB_PWSD");
 
+            String LocalAdminName = dotenv.get("LOCAL_ADMIN_NAME");
+            String Local_AdminPWSD = dotenv.get("LOCAL_ADMIN_PWSD");
+            String Local_Admin_Email = dotenv.get("LOCAL_ADMIN_EMAIL");
+
+            String admin_name = dotenv.get("ADMIN_NAME");
+            String admin_pwsd = dotenv.get("ADMIN_PWSD_DEFAULT");
+            String admin_email = dotenv.get("ADMIN_EMAIL_DEFAULT");
+            String bootstrap_key = dotenv.get("BOOTSTRAP_KEY");
+
+
             //Check if env exsist if not throw error msg
             if (Host == null || Host.isBlank()) {
                 throw new IllegalArgumentException("[ERROR] It seems that your DB_HOST for the db host seems to be empty");
@@ -83,6 +93,34 @@ public class EnvValidationService {
 
             if (PWSD == null || PWSD.isBlank()) {
                 throw new IllegalArgumentException("[ERROR] It seems that the DB_PWSD in your .env seems to be empty");
+            }
+
+            if (LocalAdminName == null || LocalAdminName.isBlank()) {
+                throw new IllegalArgumentException ("[ERROR] It seems that your LOCAL_ADMIN_NAME for the default local admin account is empty" );
+            }
+
+            if (Local_AdminPWSD == null || Local_AdminPWSD.isBlank()) {
+                throw new IllegalArgumentException("[ERROR] It seems that your LOCAL_ADMIN_PWSD for the default local admin password is empty" );
+            }
+
+            if (Local_Admin_Email == null || Local_Admin_Email.isBlank()) {
+                throw new IllegalArgumentException("[ERROR] It seems that your LOCAL_ADMIN_EMAIL for the default local admin email is empty");
+            }
+
+            if (admin_name == null || admin_name.isBlank()) {
+                throw new IllegalArgumentException("[ERROR] It seems that your ADMIN_NAME for the default admin account is empty");
+            }
+
+            if (admin_pwsd == null || admin_pwsd.isBlank()) {
+                throw new IllegalArgumentException("[ERROR] It seems that your ADMIN_PWSD_DEFAULT for the default admin password is empty");
+            }
+
+            if (admin_email == null || admin_email.isBlank()) {
+                throw new IllegalArgumentException("[ERROR] It seems that your ADMIN_EMAIL_DEFAULT for the default admin email is empty");
+            }
+
+            if (bootstrap_key == null || bootstrap_key.isBlank()) {
+                throw new IllegalArgumentException("[ERROR] It seems that your BOOTSTRAP_KEY for the bootstrap authentication is empty");
             }
 
             System.out.println("\n[OK] The .env values are all valid");
