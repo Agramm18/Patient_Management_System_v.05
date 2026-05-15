@@ -15,22 +15,39 @@ public class AuthController {
 
         while (true) {
             try {
-                System.out.println("[INFO] Do you have already an account? Y/N?: ");
+                System.out.println("\n[INFO] Please select one of the following Options");
+                System.out.println("[1] Login");
+                System.out.println("[2] Registration");
+                System.out.println("[3] Exit the Program\n");
+
                 AccountStatusSTR = scanner.nextLine().trim().toLowerCase();
 
                 if (AccountStatusSTR.isBlank()) {
-                    throw new IllegalArgumentException("[ERROR] The Field can't be empty please try again");
-                } else if (!AccountStatusSTR.equals("y") && !AccountStatusSTR.equals("n")) {
-                    throw new IllegalArgumentException("[ERROR] Only Y or N are permitted values please try again");
-                } else if (AccountStatusSTR.equals("y")) {
-                    LoginService login = new LoginService();
-                    System.out.println("[INFO] Not Implemented yet");
-                    break;
+                    throw new IllegalArgumentException("[ERROR] Please type in something to continue");
                 } else {
-                    RegistrationService create = new RegistrationService();
-                    create.UserAccount(scanner);
-                    break;
+                    int UserValue = Integer.parseInt(AccountStatusSTR);
+
+                    if (UserValue < 1 || UserValue > 3) {
+                        throw new IllegalArgumentException("[ERROR] The value can't be less than 1 or higher than 3");
+                    } else if (UserValue == 1) {
+                        System.out.println("\n[INFO] You can now login to your Account");
+                        LoginService login = new LoginService();
+                        return;
+                    } else if (UserValue == 2) {
+                        System.out.println("\n[INFO] Welcome You can now Create a new Account");
+                        RegistrationService register = new RegistrationService();
+                        register.UserAccount(scanner);
+                        return;
+                    } else {
+                        System.out.println("\n[INFO] You have chosen to end this program");
+                        System.out.println("[INFO] Have a nice day and Good Bye!!\n");
+                        System.exit(0);
+                        break;
+                    }
                 }
+
+            } catch (NumberFormatException numberError) {
+                System.out.println("[ERROR] Please type in a valid number");
             } catch (IllegalArgumentException error) {
                 System.out.println(error.getMessage());
             }
