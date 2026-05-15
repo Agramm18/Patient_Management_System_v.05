@@ -62,10 +62,10 @@ public class SystemAccountValidationService {
             ResultSet result = statement.executeQuery();
 
             if (result.next()) {
-                System.out.println("[OK] Admin where found in the DB");
+                System.out.println("[OK] Admin exists in the DB\n");
                 this.adminExists = true;
             } else {
-                System.out.println("[WARNING] No Admin Account exsists in the DB");
+                System.out.println("[WARNING] No Admin Account exists in the DB\n");
                 this.adminExists = false;
             }
 
