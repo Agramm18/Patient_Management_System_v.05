@@ -21,13 +21,14 @@ public class SetDefaultAccounts {
         String role = "local_admin";
         String account_status = "enabled";
         String job = "system_administrator";
+        String permission = "root_access";
 
 
         System.out.println("[INFO] Hashing Password");
         HashedLocalPWSD = BCrypt.hashpw(LocalAdminPWSD, BCrypt.gensalt(12));
         System.out.println("[OK] Local Admin Password is sucsessfully Hashed");
 
-        String sql = "INSERT INTO accounts (account_name, email, user_role, password_hash, bootstrap_key, account_status, user_job) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO accounts (account_name, email, user_role, password_hash, bootstrap_key, account_status, user_job, permission) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (
             Connection connection = DBManager.getConnection();
@@ -40,6 +41,7 @@ public class SetDefaultAccounts {
             statement.setString(5, BootstrapKey);
             statement.setString(6, account_status);
             statement.setString(7, job);
+            statement.setString(8, permission);
 
             int rows = statement.executeUpdate();
 
@@ -69,12 +71,13 @@ public class SetDefaultAccounts {
         String role = "admin";
         String account_status_admin = "enabled";
         String admin_job = "application_administrator";
+        String permission = "admin_rights";
 
         System.out.println("[INFO] Hashing Password");
         HashedPWSD = BCrypt.hashpw(AdminPWSD, BCrypt.gensalt(12));
         System.out.println("[OK] Admin Password is sucsessfully hashed");
 
-        String sql = "INSERT INTO accounts (account_name, email, user_role, password_hash, bootstrap_key, account_status, user_job) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO accounts (account_name, email, user_role, password_hash, bootstrap_key, account_status, user_job, permission) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (
             Connection connection = DBManager.getConnection();
@@ -87,6 +90,7 @@ public class SetDefaultAccounts {
             statement.setString(5, Bootstrap_Key);
             statement.setString(6, account_status_admin);
             statement.setString(7, admin_job);
+            statement.setString(8, permission);
 
             int rows = statement.executeUpdate();
 
