@@ -1,6 +1,6 @@
 # Patient Management System V5.01
 
-Java console project for a patient management system rewrite. The current focus is the technical foundation: bootstrap flow, controller structure, `.env` validation, and MySQL connection setup.
+Java console project for a patient management system rewrite. The current focus is the technical foundation: bootstrap flow, controller structure, `.env` validation, MySQL connection setup, starter account checks, and the authentication foundation.
 
 ## Project Direction
 
@@ -35,22 +35,33 @@ Active flow right now:
 3. Run `BootConfigService`
 4. Route to `ConfigController`
 5. Validate the `.env` file
-6. Read database values from `.env`
+6. Read database and starter account values from `.env`
 7. Try to establish the MySQL connection
-8. Route to `AuthController`
-9. Start the authentication area placeholder
+8. Store the runtime DB config in `DBManager`
+9. Check whether `local_admin` and `admin` accounts exist
+10. Create missing default admin accounts with BCrypt password hashes and default permissions
+11. Route to `AuthController`
+12. Show the authentication menu: login, registration, or exit
+13. Start the selected authentication path
 
 ## What Is Implemented
 
 - Maven project setup via `pom.xml`
-- Java 21 compiler target
+- Maven compiler plugin currently targets Java 25
 - Console entry point in `app.Main`
 - Bootstrap service in `app.Bootstrap.BootConfigService`
 - Central routing through `FrontController`
 - Configuration flow via `ConfigController`
 - `.env` file validation with `dotenv-java`
 - JDBC connection test for MySQL
-- Installed dependencies for BCrypt password handling
+- Runtime DB connection settings through `DBManager`
+- Starter account checks for `local_admin` and `admin`
+- Automatic creation of missing default admin accounts
+- Default permissions for starter accounts: `root_access` for `local_admin`, `admin_rights` for `admin`
+- BCrypt password hashing for default accounts and registration password input
+- Authentication menu with login, registration, and exit options
+- Registration input flow for username, email, phone number, and password creation
+- Activity documentation under `docs/`
 - Base controller and service structure for future expansion
 
 ## What Changed Compared To The Old README
@@ -59,6 +70,7 @@ Active flow right now:
 - Removed old manual run instructions with `javac`, `lib/*`, and `run.sh`
 - Removed references to files that are not present right now, such as `.env.example`
 - Adjusted the documentation to the actual package structure under `src/main/java`
+- Added the current default account bootstrap flow
 - Reduced the README to the current real project scope
 
 ## Current Project Structure
@@ -73,8 +85,11 @@ src/main/java/app
 |-- Bootstrap
 |   `-- BootConfigService.java
 |-- Config
+|   |-- DBManager.java
 |   |-- EnvValidationService.java
-|   `-- SQLValidationService.java
+|   |-- SQLValidationService.java
+|   |-- SetDefaultAccounts.java
+|   `-- SystemAccountValidationService.java
 |-- ConsoleView
 |   `-- CLIText.java
 `-- Controller
@@ -86,9 +101,17 @@ src/main/java/app
     `-- uiController.java
 ```
 
+Additional documentation:
+
+```text
+docs
+|-- patient-management-activity.drawio
+`-- patient-management-activity.mmd
+```
+
 ## Requirements
 
-- Java 21 or newer
+- JDK 25, matching the current Maven compiler plugin configuration
 - Maven 3.9+ recommended
 - MySQL server
 - `.env` file in the project root
@@ -103,6 +126,16 @@ DB_PORT=3306
 DB_NAME=patient_management_v5
 DB_USER=your_mysql_user
 DB_PWSD=your_mysql_password
+
+LOCAL_ADMIN_NAME=local_admin
+LOCAL_ADMIN_PWSD=change_this_password
+LOCAL_ADMIN_EMAIL=local_admin@example.com
+
+ADMIN_NAME=admin
+ADMIN_PWSD_DEFAULT=change_this_password
+ADMIN_EMAIL_DEFAULT=admin@example.com
+
+BOOTSTRAP_KEY=change_this_bootstrap_key
 ```
 
 Important:
@@ -110,10 +143,12 @@ Important:
 - The `.env` file must be located in the project root
 - All values are required
 - `DB_PORT` must be numeric
+- The default account values are used when the application needs to create missing `local_admin` or `admin` rows
+- Default account permissions are currently hard-coded in `SetDefaultAccounts`
 
 ## Database Setup
 
-The current configuration flow depends on a valid MySQL setup before the application starts. The program reads the database values from `.env` and then tries to build a JDBC connection with them.
+The current configuration flow depends on a valid MySQL setup before the application starts. The program reads the database values from `.env`, tries to build a JDBC connection with them, and then checks the `accounts` table for required starter accounts.
 
 Create the database:
 
@@ -142,9 +177,11 @@ CREATE TABLE accounts (
     email VARCHAR(100) NOT NULL UNIQUE,
     phone_number VARCHAR(20),
     user_job VARCHAR(50) DEFAULT 'intern',
-    user_role VARCHAR(50) DEFAULT 'user',
+    user_role VARCHAR(50) DEFAULT 'unassigned',
     account_status VARCHAR(50) DEFAULT 'disabled',
+    permission VARCHAR(50) NOT NULL DEFAULT 'read_only',
     password_hash VARCHAR(255) NOT NULL,
+    bootstrap_key VARCHAR(255) DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -162,7 +199,9 @@ Important for the current config flow:
 - `DB_NAME` in `.env` must match the created database exactly
 - The MySQL user from `DB_USER` must have access to that database
 - `DB_PWSD` must match the password of that MySQL user
-- The application currently checks the connection only; it does not create tables automatically
+- The application does not create tables automatically
+- The application can create missing `local_admin` and `admin` rows if the `accounts` table already exists
+- The `permission` column is used by the current default account setup
 
 ## Run The Project
 
@@ -186,7 +225,8 @@ mvn exec:java
 
 ## In Progress
 
-- `Auth` services exist, but the login and registration logic is not implemented yet
+- `LoginService` is still empty, so the login option is only a placeholder
+- Registration currently collects user data and creates a password hash, but it does not persist a new user account yet
 - `MenuController`, `ServiceController`, and `uiController` are currently placeholders
 - No patient management workflow is connected yet
 - No persistent patient data logic exists yet
