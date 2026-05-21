@@ -8,7 +8,22 @@ import org.mindrot.jbcrypt.BCrypt;
 public class SetDefaultAccounts {
     private final Dotenv dotenv = Dotenv.load();
 
-    public boolean DefaultLocalAdmin() {
+    public boolean DefaultAccounts(boolean CreateDefaultLocalAdmin, boolean CreateDefaultAdmin) {
+        boolean localAdminCreated = true;
+        boolean adminCreated = true;
+
+        if (CreateDefaultLocalAdmin) {
+            localAdminCreated = CreateDefaultLocalAdmin();
+        }
+
+        if (CreateDefaultAdmin) {
+            adminCreated = CreateDefaultAdmin();
+        }
+
+        return adminCreated && localAdminCreated;
+    }
+
+    private boolean CreateDefaultLocalAdmin() {
 
         System.out.println("\n[INFO] Creating Local Admin");
 
@@ -61,7 +76,7 @@ public class SetDefaultAccounts {
         }
     }
 
-    public boolean DefaultAdmin() {
+    private boolean CreateDefaultAdmin() {
         System.out.println("\n[INFO] Creating Admin");
         String AdminName = dotenv.get("ADMIN_NAME");
         String AdminPWSD = dotenv.get("ADMIN_PWSD_DEFAULT");
