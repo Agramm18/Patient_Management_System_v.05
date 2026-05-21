@@ -2,6 +2,7 @@ package app.Controller;
 
 import app.Auth.LoginService;
 import app.Auth.RegistrationService;
+import app.Repository.AuthenticationService;
 import app.Repository.UserAccountRepository;
 
 import java.util.Scanner;
@@ -19,8 +20,7 @@ public class AuthController {
                 System.out.println("\n[INFO] Please select one of the following Options\n");
                 System.out.println("[1] Registration");
                 System.out.println("[2] Login");
-                System.out.println("[3] Activate/Reactivate User");
-                System.out.println("[4] Exit the Program\n");
+                System.out.println("[3] Exit the Program\n");
 
                 AccountStatusSTR = scanner.nextLine().trim().toLowerCase();
 
@@ -29,7 +29,7 @@ public class AuthController {
                 } else {
                     int UserValue = Integer.parseInt(AccountStatusSTR);
 
-                    if (UserValue < 1 || UserValue > 4) {
+                    if (UserValue < 1 || UserValue > 3) {
                         throw new IllegalArgumentException("[ERROR] The value can't be less than 1 or higher than 4");
                     } else if (UserValue == 1) {
                         System.out.println("\n[INFO] You can now Register your User");
@@ -48,16 +48,25 @@ public class AuthController {
                         return;
 
                     } else if (UserValue == 2) {
-                        System.out.println("\n[INFO] Welcome You can now Login your User");
+                        System.out.println("\n[INFO] Welcome You can now Login your User\n");
                         LoginService login = new LoginService();
+                        login.User(scanner);
 
-                        System.out.println("[INFO] Not implemented yet");
+                        String Username = login.getEnteredUserName();
+                        String PWSD = login.getEnteredPWSD();
+
+                        AuthenticationService check = new AuthenticationService();
+                        boolean LoginSucsess = check.LoggedUser(Username, PWSD);
+
+                        if (LoginSucsess) {
+                            System.out.println("[OK] The Login where a success");
+                        } else {
+                            System.out.println("[ERROR] Something went wrong please try again");
+                        }
+
                         return;
-                    } else if (UserValue == 3){
-                        System.out.println("[INFO] You can now Activate/ Reactivate your User");
-                        System.out.println("[INFO] Not Implemented yet");
-                        return;
-                    }else {
+
+                    } else {
                         System.out.println("\n[INFO] You have chosen to end this program");
                         System.out.println("[INFO] Have a nice day and Good Bye!!\n");
                         System.exit(0);
