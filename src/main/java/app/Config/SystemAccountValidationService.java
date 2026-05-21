@@ -86,18 +86,14 @@ public class SystemAccountValidationService {
 
         else if (this.adminExists) {
             System.out.println("\n[INFO] The Default Local Admin will be created");
-            return create.DefaultLocalAdmin();
+            return create.DefaultAccounts(true, false);
 
         } else if (this.LocalAdminExsist) {
             System.out.println("\n[INFO] The Default Admin will be created");
-            return create.DefaultAdmin();
+            return create.DefaultAccounts(false, true);
         } else {
             System.out.println("\n[INFO] Both the Local Admin and Admin will be created");
-
-            boolean localCreated = create.DefaultLocalAdmin();
-            boolean adminCreated = create.DefaultAdmin();
-
-            return localCreated && adminCreated;
+            return create.DefaultAccounts(true, true);
         }
     }
 }
