@@ -21,7 +21,7 @@ public class PasswordService {
     private int retryCount = 0;
     private static final int MAX_RETRY_COUNT = 3;
 
-    protected void UserPWSD(Scanner scanner) {
+    public void UserPWSD(Scanner scanner) {
         System.out.println("[INFO] Running through password creation");
         System.out.println("[INFO] Creating plain text PWSD");
 
@@ -73,7 +73,7 @@ public class PasswordService {
         }
     }
 
-    public void ValidatePWSD() {
+    private void ValidatePWSD() {
 
         //Password credentials
         boolean HasUpper = false;
@@ -123,7 +123,7 @@ public class PasswordService {
         }
     }
 
-    public void RetypePWSD(Scanner scanner) {
+    private void RetypePWSD(Scanner scanner) {
         Console console = System.console();
 
         this.VerifyPWSD = console.readPassword("[INFO] Please retype your password from before: ");
@@ -135,12 +135,12 @@ public class PasswordService {
         }
     }
 
-    public void ConvertCharToString() {
+    private void ConvertCharToString() {
         this.PlainPWSD = String.valueOf(PWSDChar);
         System.out.println("[OK] Passwords are converted");
     }
 
-    public void PlainToHash() {
+    private void PlainToHash() {
 
         this.HashedPWSD = BCrypt.hashpw(PlainPWSD, BCrypt.gensalt(15));
     }
