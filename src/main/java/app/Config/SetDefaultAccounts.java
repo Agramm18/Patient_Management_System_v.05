@@ -37,13 +37,15 @@ public class SetDefaultAccounts {
         String account_status = "enabled";
         String job = "system_administrator";
         String permission = "root_access";
+        boolean needs_change = true;
+        String department = "IT";
 
 
         System.out.println("[INFO] Hashing Password");
         HashedLocalPWSD = BCrypt.hashpw(LocalAdminPWSD, BCrypt.gensalt(12));
         System.out.println("[OK] Local Admin Password is sucsessfully Hashed");
 
-        String sql = "INSERT INTO accounts (account_name, email, user_role, password_hash, bootstrap_key, account_status, user_job, permission) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO accounts (account_name, email, user_role, password_hash, bootstrap_key, account_status, user_job, permission, requires_password_change, department) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (
             Connection connection = DBManager.getConnection();
@@ -57,11 +59,14 @@ public class SetDefaultAccounts {
             statement.setString(6, account_status);
             statement.setString(7, job);
             statement.setString(8, permission);
+            statement.setBoolean(9, needs_change);
+            statement.setString(10, department);
 
             int rows = statement.executeUpdate();
 
             if (rows > 0) {
                 System.out.println("[OK] Local Admin is created");
+                System.out.println("[WARNING] A default Local Admin exists in the DB");
                 System.out.println("\n[INFO] Rows effected " + rows);
 
                 return true;
@@ -87,12 +92,15 @@ public class SetDefaultAccounts {
         String account_status_admin = "enabled";
         String admin_job = "application_administrator";
         String permission = "admin_rights";
+        boolean needs_change = true;
+        String department = "IT";
 
         System.out.println("[INFO] Hashing Password");
         HashedPWSD = BCrypt.hashpw(AdminPWSD, BCrypt.gensalt(12));
         System.out.println("[OK] Admin Password is sucsessfully hashed");
 
-        String sql = "INSERT INTO accounts (account_name, email, user_role, password_hash, bootstrap_key, account_status, user_job, permission) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
+        String sql = "INSERT INTO accounts (account_name, email, user_role, password_hash, bootstrap_key, account_status, user_job, permission, requires_password_change, department) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (
             Connection connection = DBManager.getConnection();
@@ -106,11 +114,14 @@ public class SetDefaultAccounts {
             statement.setString(6, account_status_admin);
             statement.setString(7, admin_job);
             statement.setString(8, permission);
+            statement.setBoolean(9, needs_change);
+            statement.setString(10, department);
 
             int rows = statement.executeUpdate();
 
             if (rows > 0) {
                 System.out.println("[OK] Admin is created");
+                System.out.println("[WARNING] A default Admin account exists in the DB");
                 System.out.println("\n[INFO] Rows effected " + rows);
                 return true;
             }
