@@ -18,9 +18,10 @@ public class PasswordService {
     private boolean ContainsLowerLetters;
     private boolean ContainsSpecialLetters;
     private boolean ContainsNumbers;
+    private int retryCount = 0;
+    private static final int MAX_RETRY_COUNT = 3;
 
-
-    public void UserPWSD(Scanner scanner) {
+    protected void UserPWSD(Scanner scanner) {
         System.out.println("[INFO] Running through password creation");
         System.out.println("[INFO] Creating plain text PWSD");
 
@@ -32,6 +33,13 @@ public class PasswordService {
                 break;
             } catch (IllegalStateException error) {
                 System.out.println(error.getMessage());
+                this.retryCount++;
+                System.out.println("[INFO] Retry Count: " + this.retryCount);
+
+                if (this.retryCount >= MAX_RETRY_COUNT) {
+                    System.out.println("[ERROR] Max retry attempts reached your account will be disabled");
+                    throw new IllegalStateException("[INFO] Please reactivate your account via the basic AUTH Menu");
+                }
             }
         }
 
@@ -73,6 +81,7 @@ public class PasswordService {
         boolean HasSpecial = false;
         boolean HasNumbers = false;
         boolean FitLength = false;
+        int FailedAttemtps = 0;
 
         //Check if the password fit to the credentaisl
         if (this.PWSDChar.length == 0) {
