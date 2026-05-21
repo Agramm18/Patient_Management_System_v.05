@@ -2,6 +2,7 @@ package app.Controller;
 
 import app.Auth.LoginService;
 import app.Auth.RegistrationService;
+import app.Repository.UserAccountRepository;
 
 import java.util.Scanner;
 
@@ -15,7 +16,7 @@ public class AuthController {
 
         while (true) {
             try {
-                System.out.println("\n[INFO] Please select one of the following Options");
+                System.out.println("\n[INFO] Please select one of the following Options\n");
                 System.out.println("[1] Registration");
                 System.out.println("[2] Login");
                 System.out.println("[3] Activate/Reactivate User");
@@ -34,6 +35,16 @@ public class AuthController {
                         System.out.println("\n[INFO] You can now Register your User");
                         RegistrationService register = new RegistrationService();
                         register.UserAccount(scanner);
+
+                        //Collect Data from getter
+                        String Username = register.getUserName();
+                        String Email = register.getEmailAddress();
+                        String PhoneNumber = register.getPhoneNumber();
+                        String HashedPWSD = register.getHashedPWSD();
+
+                        UserAccountRepository userAccountRepository = new UserAccountRepository();
+                        userAccountRepository.newAccount(Username, Email, PhoneNumber, HashedPWSD);
+
                         return;
 
                     } else if (UserValue == 2) {
