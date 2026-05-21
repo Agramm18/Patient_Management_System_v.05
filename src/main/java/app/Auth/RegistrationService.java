@@ -5,9 +5,10 @@ import java.util.Scanner;
 import app.Auth.PasswordService;
 
 public class RegistrationService {
-    protected String UserName;
-    protected String EmailAdress;
-    protected String PhoneNumber;
+    private String UserName;
+    private String EmailAddress;
+    private String PhoneNumber;
+    private String HashedPWSD;
 
     public void UserAccount(Scanner scanner) {
         System.out.println("[INFO] Creating User Account");
@@ -32,7 +33,7 @@ public class RegistrationService {
                     throw new IllegalArgumentException("[ERROR] The Username can't be shorter than 5 or longer than 20 letters please try again");
                 } else {
                     System.out.println("[OK] The UserName is now setted");
-                    UserName = DefaulUserName;
+                    this.UserName = DefaulUserName;
                     break;
                 }
             } catch (IllegalArgumentException error) {
@@ -42,10 +43,9 @@ public class RegistrationService {
         }
     }
 
-    //Set The Email Adress and validate if the Email Adress is valid
+    //Set The Email Address and validate if the Email Address is valid
     private void SetEmailAddress(Scanner scanner) {
         System.out.println("\n[INFO] Setting E-Mail Adress");
-
         String UserEmail;
 
         while (true) {
@@ -61,7 +61,7 @@ public class RegistrationService {
                     throw new IllegalArgumentException("[ERROR] It seems the @ sign is missing please try again");
                 } else {
                     System.out.println("[OK] Your Email Adress is set");
-                    EmailAdress = UserEmail;
+                    this.EmailAddress = UserEmail;
                     break;
                 }
             } catch (IllegalArgumentException error) {
@@ -92,7 +92,7 @@ public class RegistrationService {
                     throw new IllegalArgumentException("[ERROR] The Format is invalid please try again");
                 } else {
                     System.out.println("[OK] The Number is Valid an will be setted");
-                    PhoneNumber = UserPhone;
+                    this.PhoneNumber = UserPhone;
                     break;
                 }
             } catch (IllegalArgumentException error) {
@@ -104,9 +104,9 @@ public class RegistrationService {
     //Printing the Results and allowing changes
     private void ShowCurrentInfo(Scanner scanner) {
         System.out.println("\n[INFO] Showing your Info");
-        System.out.println("[DEBUG] User Name: " + UserName);
-        System.out.println("[DEBUG] Email Adress: " + EmailAdress);
-        System.out.println("[DEBUG] Phone Number: " + PhoneNumber + "\n");
+        System.out.println("[DEBUG] User Name: " + this.UserName);
+        System.out.println("[DEBUG] Email Adress: " + this.EmailAddress);
+        System.out.println("[DEBUG] Phone Number: " + this.PhoneNumber + "\n");
 
         String RegistrationState;
         int ChangeValue;
@@ -123,6 +123,7 @@ public class RegistrationService {
                 } else if (RegistrationState.equals("y")) {
                     PasswordService create = new PasswordService();
                     create.UserPWSD(scanner);
+                    this.HashedPWSD = create.getHashedPWSD();
                 } else {
                     System.out.println("[INFO] Please Enter what you want to chang");
                     System.out.println("[INFO] 1 User Name");
@@ -144,11 +145,26 @@ public class RegistrationService {
                         throw new IllegalArgumentException("[ERROR] The Value is out of range please try again");
                     }
                 }
-
                 break;
             } catch (IllegalArgumentException error) {
                 System.out.println(error.getMessage());
             }
         }
+    }
+
+    public String getUserName() {
+        return this.UserName;
+    }
+
+    public String getEmailAddress() {
+        return this.EmailAddress;
+    }
+
+    public String getPhoneNumber() {
+        return this.PhoneNumber;
+    }
+
+    public String getHashedPWSD() {
+        return this.HashedPWSD;
     }
 }
