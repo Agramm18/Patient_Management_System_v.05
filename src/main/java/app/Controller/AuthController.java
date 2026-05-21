@@ -16,9 +16,10 @@ public class AuthController {
         while (true) {
             try {
                 System.out.println("\n[INFO] Please select one of the following Options");
-                System.out.println("[1] Login");
-                System.out.println("[2] Registration");
-                System.out.println("[3] Exit the Program\n");
+                System.out.println("[1] Registration");
+                System.out.println("[2] Login");
+                System.out.println("[3] Activate/Reactivate User");
+                System.out.println("[4] Exit the Program\n");
 
                 AccountStatusSTR = scanner.nextLine().trim().toLowerCase();
 
@@ -27,18 +28,25 @@ public class AuthController {
                 } else {
                     int UserValue = Integer.parseInt(AccountStatusSTR);
 
-                    if (UserValue < 1 || UserValue > 3) {
-                        throw new IllegalArgumentException("[ERROR] The value can't be less than 1 or higher than 3");
+                    if (UserValue < 1 || UserValue > 4) {
+                        throw new IllegalArgumentException("[ERROR] The value can't be less than 1 or higher than 4");
                     } else if (UserValue == 1) {
-                        System.out.println("\n[INFO] You can now login to your Account");
-                        LoginService login = new LoginService();
-                        return;
-                    } else if (UserValue == 2) {
-                        System.out.println("\n[INFO] Welcome You can now Create a new Account");
+                        System.out.println("\n[INFO] You can now Register your User");
                         RegistrationService register = new RegistrationService();
                         register.UserAccount(scanner);
                         return;
-                    } else {
+
+                    } else if (UserValue == 2) {
+                        System.out.println("\n[INFO] Welcome You can now Login your User");
+                        LoginService login = new LoginService();
+
+                        System.out.println("[INFO] Not implemented yet");
+                        return;
+                    } else if (UserValue == 3){
+                        System.out.println("[INFO] You can now Activate/ Reactivate your User");
+                        System.out.println("[INFO] Not Implemented yet");
+                        return;
+                    }else {
                         System.out.println("\n[INFO] You have chosen to end this program");
                         System.out.println("[INFO] Have a nice day and Good Bye!!\n");
                         System.exit(0);
