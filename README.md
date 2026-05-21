@@ -39,10 +39,10 @@ Active flow right now:
 7. Try to establish the MySQL connection
 8. Store the runtime DB config in `DBManager`
 9. Check whether `local_admin` and `admin` accounts exist
-10. Create missing default admin accounts with BCrypt password hashes and default permissions
+10. Create missing default admin accounts with BCrypt password hashes, default permissions, department, and password-change flag
 11. Route to `AuthController`
 12. Show the authentication menu: login, registration, or exit
-13. Start the selected authentication path
+13. Start the selected authentication path and access the DB through repository classes
 
 ## What Is Implemented
 
@@ -57,12 +57,23 @@ Active flow right now:
 - Runtime DB connection settings through `DBManager`
 - Starter account checks for `local_admin` and `admin`
 - Automatic creation of missing default admin accounts
-- Default permissions for starter accounts: `root_access` for `local_admin`, `admin_rights` for `admin`
-- BCrypt password hashing for default accounts and registration password input
+- Default starter account values: `root_access` for `local_admin`, `admin_rights` for `admin`, `IT` department, and required password change
+- BCrypt password hashing for default accounts, registration, and login verification
 - Authentication menu with login, registration, and exit options
-- Registration input flow for username, email, phone number, and password creation
+- Registration input flow for username, email, phone number, password creation, and DB insert
+- Login input flow with username lookup and BCrypt password check
+- Repository classes for account creation and authentication checks
 - Activity documentation under `docs/`
 - Base controller and service structure for future expansion
+
+### Features
+
+- Boot flow with system loader, config check, and routing into authentication
+- Config validation for `.env`, MySQL connection, and runtime DB setup
+- Automatic default admin setup for missing `local_admin` and `admin` accounts
+- Registration with user input validation, BCrypt password hashing, and DB insert
+- Login with username lookup and BCrypt password verification
+- Basic activity documentation for the current application flow
 
 ## What Changed Compared To The Old README
 
@@ -71,6 +82,7 @@ Active flow right now:
 - Removed references to files that are not present right now, such as `.env.example`
 - Adjusted the documentation to the actual package structure under `src/main/java`
 - Added the current default account bootstrap flow
+- Added the current DB-backed registration and login foundation
 - Reduced the README to the current real project scope
 
 ## Current Project Structure
@@ -92,13 +104,16 @@ src/main/java/app
 |   `-- SystemAccountValidationService.java
 |-- ConsoleView
 |   `-- CLIText.java
-`-- Controller
-    |-- AuthController.java
-    |-- ConfigController.java
-    |-- FrontController.java
-    |-- MenuController.java
-    |-- ServiceController.java
-    `-- uiController.java
+|-- Controller
+|   |-- AuthController.java
+|   |-- ConfigController.java
+|   |-- FrontController.java
+|   |-- MenuController.java
+|   |-- ServiceController.java
+|   `-- uiController.java
+`-- Repository
+    |-- AuthenticationService.java
+    `-- UserAccountRepository.java
 ```
 
 Additional documentation:
@@ -176,15 +191,47 @@ CREATE TABLE accounts (
     account_name VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(100) NOT NULL UNIQUE,
     phone_number VARCHAR(20),
-    user_job VARCHAR(50) DEFAULT 'intern',
-    user_role VARCHAR(50) DEFAULT 'unassigned',
-    account_status VARCHAR(50) DEFAULT 'disabled',
+    department VARCHAR(50) NOT NULL DEFAULT 'unassigned',
+    user_job VARCHAR(50) NOT NULL DEFAULT 'intern',
+    user_role VARCHAR(50) NOT NULL DEFAULT 'unassigned',
+    account_status VARCHAR(50) NOT NULL DEFAULT 'disabled',
     permission VARCHAR(50) NOT NULL DEFAULT 'read_only',
     password_hash VARCHAR(255) NOT NULL,
+    requires_password_change BOOLEAN NOT NULL DEFAULT FALSE,
+    failed_password_attempts INT NOT NULL DEFAULT 0,
     bootstrap_key VARCHAR(255) DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+```
+
+Create the separate `roles` table used for account roles:
+
+```sql
+CREATE TABLE roles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    role_name VARCHAR(50) NOT NULL UNIQUE,
+    role_description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+```
+
+Insert the default account roles:
+
+```sql
+INSERT INTO roles (role_name, role_description)
+VALUES
+    ('local_admin', 'Full infrastructure and system access'),
+    ('admin', 'Administrative access for user and system management'),
+    ('auditor', 'Read-only access to logs and audit data'),
+    ('doctor', 'Medical access to patient treatment data'),
+    ('nurse', 'Limited medical access under doctor permissions'),
+    ('finance', 'Access to financial and billing information'),
+    ('office', 'Administrative access to patient organization data'),
+    ('support', 'Technical support access for troubleshooting and assistance'),
+    ('intern', 'Restricted training role with minimal permissions'),
+    ('apprentice', 'Training role with limited operational permissions');
 ```
 
 Optional checks:
@@ -192,6 +239,7 @@ Optional checks:
 ```sql
 SHOW TABLES;
 SHOW COLUMNS FROM accounts;
+SHOW COLUMNS FROM roles;
 ```
 
 Important for the current config flow:
@@ -201,6 +249,7 @@ Important for the current config flow:
 - `DB_PWSD` must match the password of that MySQL user
 - The application does not create tables automatically
 - The application can create missing `local_admin` and `admin` rows if the `accounts` table already exists
+- Default admin rows are created as enabled accounts in the `IT` department and must change their password later
 - The `permission` column is used by the current default account setup
 
 ## Run The Project
@@ -225,8 +274,9 @@ mvn exec:java
 
 ## In Progress
 
-- `LoginService` is still empty, so the login option is only a placeholder
-- Registration currently collects user data and creates a password hash, but it does not persist a new user account yet
+- Login validates username and password, but no post-login session, menu, or role-based routing is connected yet
+- Registration creates a basic account row, but activation, role assignment, and account management are still open
+- Failed login counters and account locking are not connected yet
 - `MenuController`, `ServiceController`, and `uiController` are currently placeholders
 - No patient management workflow is connected yet
 - No persistent patient data logic exists yet
