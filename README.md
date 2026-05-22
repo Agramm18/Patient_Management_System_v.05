@@ -324,4 +324,31 @@ mvn exec:java
 - The runtime welcome message in `Main` still shows `Version 5.0`, while the project is documented as `V5.01`.
 - Some class and method names still contain typos or inconsistent naming and should be cleaned up later.
 
+## Future Plans
+
+These features are planned for a later stage, after the core console application is as stable as possible:
+
+## Future Plans
+
+### Testing & Development
+- Testing and debugging environment
+- Unit and integration testing
+- Automated testing pipelines
+
+### Backend & Infrastructure
+- REST API support
+- Redis integration for caching and session management
+- Docker and Kubernetes compatibility
+- Cloud compatibility with AWS, Azure, and similar platforms
+
+### Monitoring & Security
+- Monitoring with Grafana and Prometheus
+- Audit logging and security monitoring
+
+### User Interface
+- Graphical user interface with JavaFX
+
+### AI & Data Processing
+- Machine learning integration into the application workflow using Python and JSON
+
 Developed by Agramm18 (c) 2026
