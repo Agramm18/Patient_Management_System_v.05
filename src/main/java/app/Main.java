@@ -19,7 +19,7 @@ public class Main {
         show.DisplayHelloMSG();
 
         BootConfigService run = new BootConfigService();
-        run.SystemConfig();
+        run.SystemConfig(scanner);
 
     }
 }
