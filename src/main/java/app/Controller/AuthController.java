@@ -1,9 +1,12 @@
 package app.Controller;
 
+import app.Auth.AccountPolicyService;
 import app.Auth.LoginService;
 import app.Auth.RegistrationService;
+import app.Repository.AccountRepository;
 import app.Repository.AuthenticationService;
 import app.Repository.UserAccountRepository;
+import app.Auth.LoginResult;
 
 import java.util.Scanner;
 
@@ -49,22 +52,33 @@ public class AuthController {
 
                     } else if (UserValue == 2) {
                         System.out.println("\n[INFO] Welcome You can now Login your User\n");
-                        LoginService login = new LoginService();
-                        login.User(scanner);
-
-                        String Username = login.getEnteredUserName();
-                        String PWSD = login.getEnteredPWSD();
 
                         AuthenticationService check = new AuthenticationService();
-                        boolean LoginSucsess = check.LoggedUser(Username, PWSD);
+                        AccountRepository store = new AccountRepository();
 
-                        if (LoginSucsess) {
-                            System.out.println("[OK] The Login where a success");
-                        } else {
-                            System.out.println("[ERROR] Something went wrong please try again");
+                        while (true) {
+                            LoginService login = new LoginService();
+                            login.User(scanner);
+
+                            String Username = login.getEnteredUserName();
+                            String PWSD = login.getEnteredPWSD();
+
+                            LoginResult result = check.LoggedUser(Username, PWSD);
+
+                            store.LogginAttempt(
+                                    Username,
+                                    result.isSuccess(),
+                                    result.getFailureReason()
+                            );
+
+                            if (result.isSuccess()) {
+                                System.out.println("[OK] The Login where a success");
+
+                                return;
+                            } else {
+                                System.out.println("\n[ERROR] Something went wrong please try again");
+                            }
                         }
-
-                        return;
 
                     } else {
                         System.out.println("\n[INFO] You have chosen to end this program");
