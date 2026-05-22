@@ -1,85 +1,81 @@
 # Patient Management System V5.01
 
-Java console project for a patient management system rewrite. The current focus is the technical foundation: bootstrap flow, controller routing, `.env` validation, MySQL connection setup, default admin account bootstrap, DB-backed registration, DB-backed login, and login attempt logging.
+Java console project for a patient management system. The current focus is the technical foundation: bootstrap flow, central controller routing, `.env` validation, MySQL connection setup, default admin account bootstrap, DB-backed registration, DB-backed login, login attempt logging, and first role validation.
 
-## Project Direction
+## Current Project Status
 
-This version reflects a restructuring of the project architecture and tooling.
+The project has been restructured from a constructor-heavy flow into a clearer controller, flow, service, and repository structure.
 
-The earlier project state relied heavily on constructor-driven flow. Objects created other objects directly, logic was chained through constructors, and startup behavior became spread across multiple classes. That made the control flow harder to trace and harder to extend.
+The current entry path is:
 
-The project is now moving toward a more central controller structure:
+- `app.Main`
+- `BootConfigService`
+- `FrontController`
+- `ConfigController`
+- `AuthController`
+- Authentication flows under `app.Auth.Flow`
+- Database access through repository classes
 
-- `BootConfigService` starts the boot process
-- `FrontController` dispatches requests into sub-controllers
-- `ConfigController` validates configuration and database access
-- `AuthController` handles the current registration/login entry point
-- Repository classes isolate database access from console input logic
+Main changes so far:
 
-The goal is to keep application flow visible from one central place instead of hiding system behavior inside nested constructors.
+- Maven project setup with Java 21 compiler configuration.
+- `FrontController` is the central dispatch point for sub-controllers.
+- `ConfigController` is the entry point for `.env` and SQL configuration.
+- `DBManager` stores runtime JDBC connection settings.
+- Default account bootstrap exists for `local_admin` and `admin`.
+- Registration was split into `RegistrationFlow`, `RegistrationService`, `PasswordFlow`, `PasswordService`, and `UserAccountRepository`.
+- Login was split into `LoginFlow`, `LoginService`, `AuthenticationRepository`, `LoginResult`, and `LoginLogsRepository`.
+- Login attempts are persisted in `login_attempts`.
+- After successful login, `accounts.user_role` is checked through `RoleRepository`.
+- Users without a role are routed into a first role selection flow through `RoleValidationService` and `roleMenu`.
+- Menu classes were moved into `app.Menus`.
+- Architecture, activity, and UML documentation is stored under `docs/`.
 
-The tooling was also changed during this phase:
+## Current Runtime Flow
 
-- IntelliJ IDEA is now the main development environment
-- Maven handles dependency management and project execution
-- The Maven compiler configuration currently targets Java 21
+1. `app.Main` starts the console application.
+2. The welcome message and system loader are printed.
+3. `BootConfigService.SystemConfig(scanner)` creates the controllers.
+4. `FrontController` routes first to `CONFIG`.
+5. `ConfigController` validates the `.env` file.
+6. `SQLValidationService` builds the MySQL JDBC URL and tests the connection.
+7. `DBManager` stores the runtime user, password, and JDBC URL.
+8. `SystemAccountValidationService` checks whether roles `local_admin` and `admin` exist in `accounts.user_role`.
+9. `SetDefaultAccounts` creates missing default accounts with BCrypt password hashes.
+10. If configuration succeeds, `FrontController` routes to `AUTH`.
+11. `AuthController` shows the authentication menu: registration, login, or exit.
+12. Registration collects username, email, phone number, and password.
+13. `PasswordService` validates and hashes the password.
+14. `UserAccountRepository` inserts the new account into `accounts` with status `waiting_for_authorization`.
+15. Login validates username and password against the database.
+16. Every login attempt is saved through `LoginLogsRepository` into `login_attempts`.
+17. After successful login, `RoleRepository` checks whether the account has a role.
+18. If `user_role = unassigned`, the application currently displays and validates a role selection only.
 
-## Current Status
+## Implemented
 
-The application currently starts through a console bootstrap flow and routes into configuration and authentication.
-
-Active flow right now:
-
-1. Start `app.Main`
-2. Print the welcome message and system loader
-3. Run `BootConfigService.SystemConfig(scanner)`
-4. Create `FrontController` with the available sub-controllers
-5. Route to `ConfigController`
-6. Validate the `.env` file and required values
-7. Build and test the MySQL JDBC connection
-8. Store runtime DB connection settings in `DBManager`
-9. Check whether `local_admin` and `admin` starter accounts exist
-10. Create missing default admin accounts with BCrypt password hashes
-11. Route to `AuthController`
-12. Show the authentication menu: registration, login, or exit
-13. Registration collects username, email, phone number, and password, then inserts into `accounts`
-14. Login validates username and password through repository classes
-15. Each login attempt is written through `AccountRepository`
-
-## What Is Implemented
-
-- Maven project setup via `pom.xml`
-- Maven compiler source/target set to Java 21
-- Console entry point in `app.Main`
-- Bootstrap service in `app.Bootstrap.BootConfigService`
-- Central routing through `FrontController`
-- Configuration flow via `ConfigController`
-- `.env` file validation with `dotenv-java`
-- JDBC connection test for MySQL
+- Maven setup in `pom.xml`
+- Java 21 Maven compiler source/target
+- `exec-maven-plugin` configured with `app.Main`
+- Console bootstrap through `BootConfigService`
+- Central dispatch structure through `FrontController`
+- Configuration flow through `ConfigController`
+- `.env` existence and required value validation through `dotenv-java`
+- MySQL JDBC connection test
 - Runtime DB connection settings through `DBManager`
-- Starter account checks for `local_admin` and `admin`
-- Automatic creation of missing default admin accounts
-- Default starter account values: `root_access` for `local_admin`, `admin_rights` for `admin`, `IT` department, enabled account status, and required password change
-- BCrypt password hashing for default accounts, registration, and login verification
-- Authentication menu with registration, login, and exit options
-- Registration input flow for username, email, phone number, password creation, and DB insert
-- Password creation rules: at least 10 characters, uppercase letter, lowercase letter, number, and special character
-- Login input flow with username lookup and BCrypt password check
-- `LoginResult` object for returning login success state and failure reason
-- Login attempt persistence through `AccountRepository`
-- Repository classes for account creation, authentication checks, and login attempt logging
-- Placeholder policy classes for future account/password policy logic
-- Placeholder controller/view classes for future menu, service, and UI flows
-
-## Current Features
-
-- Boot flow with system loader, config check, and routing into authentication
-- Config validation for `.env`, MySQL connection, and runtime DB setup
-- Automatic default admin setup for missing `local_admin` and `admin` accounts
-- Registration with user input validation, BCrypt password hashing, and DB insert
+- Default account check for `local_admin` and `admin`
+- Automatic creation of missing default accounts
+- BCrypt hashing for default accounts, registration, and login checks
+- Authentication menu with registration, login, and exit
+- Registration with username, email, phone number, and password validation
+- Password rules: at least 10 characters, uppercase letter, lowercase letter, number, and special character
+- Database insert for new accounts through `UserAccountRepository`
 - Login with username lookup and BCrypt password verification
-- Login result tracking with failure reasons such as username not found, invalid password, too many invalid passwords, and SQL exception
-- Login attempt logging after each login try
+- `LoginResult` for login success state and failure reason
+- Login attempt logging through `LoginLogsRepository`
+- First role check through `RoleRepository`
+- Role selection menu through `roleMenu`
+- Mermaid and Draw.io documentation under `docs/`
 
 ## Current Project Structure
 
@@ -87,12 +83,20 @@ Active flow right now:
 src/main/java/app
 |-- Main.java
 |-- Auth
-|   |-- AccountPolicyService.java
-|   |-- LoginResult.java
-|   |-- LoginService.java
-|   |-- PasswordPolicyService.java
-|   |-- PasswordService.java
-|   `-- RegistrationService.java
+|   `-- Flow
+|       |-- LoginFlow.java
+|       |-- PasswordFlow.java
+|       |-- RegistrationFlow.java
+|       `-- Services
+|           |-- AccountPolicyService.java
+|           |-- LoginService
+|           |   |-- LoginResult.java
+|           |   |-- LoginService.java
+|           |   `-- RoleValidationService.java
+|           |-- PasswordService
+|           |   `-- PasswordService.java
+|           `-- RegistrationService
+|               `-- RegistrationService.java
 |-- Bootstrap
 |   `-- BootConfigService.java
 |-- Config
@@ -101,8 +105,6 @@ src/main/java/app
 |   |-- SQLValidationService.java
 |   |-- SetDefaultAccounts.java
 |   `-- SystemAccountValidationService.java
-|-- ConsoleView
-|   `-- CLIText.java
 |-- Controller
 |   |-- AuthController.java
 |   |-- ConfigController.java
@@ -110,30 +112,42 @@ src/main/java/app
 |   |-- MenuController.java
 |   |-- ServiceController.java
 |   `-- uiController.java
+|-- Menus
+|   |-- AuthMenu.java
+|   |-- CLIText.java
+|   `-- roleMenu.java
 `-- Repository
-    |-- AccountRepository.java
-    |-- AuthenticationService.java
+    |-- LoginRepository
+    |   |-- AuthenticationRepository.java
+    |   `-- RoleRepository.java
     |-- PasswordPolicyRepository.java
-    `-- UserAccountRepository.java
+    |-- RegistrationRepository
+    |   `-- UserAccountRepository.java
+    `-- logsRepository
+        `-- LoginLogsRepository.java
 ```
 
-Additional project file:
+Additional documentation:
 
 ```text
-Query.sql
+docs
+|-- patient-management-architecture.mmd
+|-- patient-management-activity.drawio
+|-- patient-management-activity.mmd
+`-- patient-management-uml.mmd
 ```
 
 ## Requirements
 
-- JDK 21, matching the current Maven compiler plugin configuration
+- JDK 21
 - Maven 3.9+ recommended
-- MySQL server
+- MySQL Server
 - `.env` file in the project root
-- Database tables created manually before running the application
+- Database tables created manually before starting the application
 
 ## .env Setup
 
-The application currently expects these keys:
+The application currently expects these values:
 
 ```env
 DB_HOST=localhost
@@ -155,15 +169,16 @@ BOOTSTRAP_KEY=change_this_bootstrap_key
 
 Important:
 
-- The `.env` file must be located in the project root
-- All values listed above are required
-- `DB_PORT` must be numeric
-- The default account values are used when the application needs to create missing `local_admin` or `admin` rows
-- Default account permissions and department values are currently hard-coded in `SetDefaultAccounts`
+- The `.env` file must be located in the project root.
+- All values listed above are required.
+- `DB_PORT` must be numeric.
+- `DB_NAME` must exactly match the created MySQL database.
+- Default account values are used when `local_admin` or `admin` are missing.
+- Roles, jobs, permissions, department, and `requires_password_change` for default accounts are currently hard-coded in `SetDefaultAccounts`.
 
 ## Database Setup
 
-The current configuration flow depends on a valid MySQL setup before the application starts. The program reads database values from `.env`, tries to build a JDBC connection, and then checks the `accounts` table for required starter accounts.
+The application does not create tables automatically yet. The database and tables must exist before startup.
 
 Create the database:
 
@@ -171,19 +186,13 @@ Create the database:
 CREATE DATABASE patient_management_v5;
 ```
 
-Verify that the database exists:
-
-```sql
-SHOW DATABASES;
-```
-
-Switch into the database:
+Select the database:
 
 ```sql
 USE patient_management_v5;
 ```
 
-Create the `accounts` table used by the current authentication foundation:
+`accounts` table:
 
 ```sql
 CREATE TABLE accounts (
@@ -205,7 +214,7 @@ CREATE TABLE accounts (
 );
 ```
 
-Create the `login_attempts` table used by the current login attempt repository:
+`login_attempts` table:
 
 ```sql
 CREATE TABLE login_attempts (
@@ -221,7 +230,7 @@ CREATE TABLE login_attempts (
 );
 ```
 
-Create the separate `roles` table intended for account roles:
+Optional `roles` table for later role management:
 
 ```sql
 CREATE TABLE roles (
@@ -233,19 +242,19 @@ CREATE TABLE roles (
 );
 ```
 
-Insert the default account roles:
+Optional starter roles matching the current role menu:
 
 ```sql
 INSERT INTO roles (role_name, role_description)
 VALUES
     ('local_admin', 'Full infrastructure and system access'),
     ('admin', 'Administrative access for user and system management'),
-    ('auditor', 'Read-only access to logs and audit data'),
+    ('it_specialist', 'IT specialist access for system maintenance'),
+    ('it_support', 'Technical support access for troubleshooting'),
     ('doctor', 'Medical access to patient treatment data'),
     ('nurse', 'Limited medical access under doctor permissions'),
     ('finance', 'Access to financial and billing information'),
-    ('office', 'Administrative access to patient organization data'),
-    ('support', 'Technical support access for troubleshooting and assistance'),
+    ('office_staff', 'Administrative access to patient organization data'),
     ('intern', 'Restricted training role with minimal permissions'),
     ('apprentice', 'Training role with limited operational permissions');
 ```
@@ -259,16 +268,17 @@ SHOW COLUMNS FROM login_attempts;
 SHOW COLUMNS FROM roles;
 ```
 
-Important for the current config flow:
+## Default Accounts
 
-- `DB_NAME` in `.env` must match the created database exactly
-- The MySQL user from `DB_USER` must have access to that database
-- `DB_PWSD` must match the password of that MySQL user
-- The application does not create tables automatically
-- The application can create missing `local_admin` and `admin` rows if the `accounts` table already exists
-- Default admin rows are created as enabled accounts in the `IT` department and must change their password later
-- The `permission` column is used by the current default account setup
-- The login attempt table name must match `AccountRepository`, which currently inserts into `login_attempts`
+If `accounts.user_role` has no entries for `local_admin` or `admin`, missing default accounts are created.
+
+Current default values:
+
+- `local_admin`: `user_role = local_admin`, `user_job = system_administrator`, `permission = root_access`, `account_status = enabled`, `department = IT`
+- `admin`: `user_role = admin`, `user_job = application_administrator`, `permission = admin_rights`, `account_status = enabled`, `department = IT`
+- Both accounts receive `requires_password_change = true`
+- Both accounts receive the `BOOTSTRAP_KEY` from `.env`
+- Default passwords are hashed with BCrypt salt round 12
 
 ## Run The Project
 
@@ -286,26 +296,32 @@ mvn exec:java
 
 ## Dependencies
 
-- `dotenv-java`
-- `mysql-connector-j`
-- `jbcrypt`
+- `dotenv-java` 3.0.0
+- `mysql-connector-j` 9.6.0
+- `jbcrypt` 0.4
+- `exec-maven-plugin` 3.1.0
 
 ## In Progress
 
-- Login validates username and password, but no post-login session, menu, or role-based routing is connected yet
-- Failed login retry tracking is currently in memory for the active login flow
-- Login attempt rows are saved, but account locking is not persisted yet
-- Registration creates a basic account row, but activation, role assignment, and account management are still open
-- `AccountPolicyService`, `PasswordPolicyService`, and `PasswordPolicyRepository` are placeholders
-- `MenuController`, `ServiceController`, `uiController`, and `CLIText` are currently placeholders
-- The `roles` table is documented for future role handling, but current account logic still uses string values in `accounts.user_role`
-- No patient management workflow is connected yet
-- No persistent patient data logic exists yet
+- There is no session or connected main menu after successful login yet.
+- `RoleValidationService` validates the selected role but does not persist it yet.
+- The announced department check is not implemented yet.
+- Account activation and account management after registration are still open.
+- Newly registered accounts start with `account_status = waiting_for_authorization`.
+- Failed login attempts are logged, but account locking is not persisted in `accounts.failed_password_attempts` yet.
+- `roles` is currently documented for later role management; runtime code still checks `accounts.user_role`.
+- `AccountPolicyService`, `PasswordPolicyRepository`, `MenuController`, `ServiceController`, `uiController`, and `CLIText` are still placeholders.
+- Patient data, patient workflows, treatment, appointments, billing, and reporting are not implemented yet.
+- There are no automated tests yet.
 
 ## Known Current Notes
 
-- `Query.sql` currently contains a standalone login-attempt table script, but the Java repository code is the source of truth for the table name used at runtime.
-- `LoginService` only reads passwords when `System.console()` is available. Some IDE run configurations may not provide a console.
-- `PasswordService.RetypePWSD` currently expects `System.console()` and may need a scanner fallback for IDE execution.
+- The application is currently strongly console-based.
+- `LoginService.enterPWSD()` has no scanner fallback when `System.console()` is unavailable.
+- `PasswordService.RetypePWSD()` currently also expects `System.console()` and can fail in IDE run configurations without a real console.
+- `SQLValidationService.DBConnection()` logs failed DB connections but does not immediately stop the boot process at that point.
+- `EnvValidationService.CheckFileStatus()` reports a missing `.env` but does not immediately hard-stop the boot process.
+- The runtime welcome message in `Main` still shows `Version 5.0`, while the project is documented as `V5.01`.
+- Some class and method names still contain typos or inconsistent naming and should be cleaned up later.
 
 Developed by Agramm18 (c) 2026
