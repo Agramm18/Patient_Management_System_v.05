@@ -8,6 +8,7 @@ public class LoginService {
     private String EnteredUserName;
     private String EnteredPWSD;
 
+
     public void User(Scanner scanner) {
             enterUsername(scanner);
             enterPWSD();
@@ -16,17 +17,21 @@ public class LoginService {
     private void enterUsername(Scanner scanner) {
         System.out.println("\n[INFO] Please enter your username");
 
-        try {
-            String UserName = scanner.nextLine();
+        while (true) {
+            try {
+                String UserName = scanner.nextLine();
 
-            if (UserName.isBlank()) {
-                throw new IllegalArgumentException("[ERROR] This field can't be emtpy please try again");
-            } else {
-                this.EnteredUserName = UserName;
+                if (UserName.isBlank()) {
+                    throw new IllegalArgumentException("[ERROR] This field can't be emtpy please try again");
+                } else {
+                    this.EnteredUserName = UserName;
+                    break;
+                }
+            } catch (IllegalArgumentException error) {
+                System.out.println(error.getMessage());
             }
-        } catch (IllegalArgumentException error) {
-            System.out.println(error.getMessage());
         }
+
     }
 
     private void enterPWSD() {
