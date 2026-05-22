@@ -1,7 +1,6 @@
 package app.Repository;
 
-import java.sql.SQLException;
-
+import app.Auth.LoginResult;
 import app.Config.DBManager;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -9,50 +8,66 @@ import java.sql.*;
 
 public class AuthenticationService {
 
-    public boolean LoggedUser(String Username, String PWSD) {
+    private int UserRetrys = 0;
+    private int UserRetrysMAX = 5;
+
+    public LoginResult LoggedUser(String Username, String PWSD) {
 
         try {
-            boolean UserExists = CheckUserInDB(Username);
+            boolean userExists = CheckUserInDB(Username);
 
-            if (UserExists) {
-                System.out.println("\n[INFO] Continue with PWSD check");
-                boolean PasswordIsCorrect = CheckPWSD(PWSD, Username);
-
-                if (PasswordIsCorrect) {
-                    return true;
-                }
+            if (!userExists) {
+                return new LoginResult(false, "USERNAME_NOT_FOUND");
             }
 
-            return false;
+            System.out.println("\n[INFO] Continue with PWSD check");
+
+            boolean passwordIsCorrect = CheckPWSD(PWSD, Username);
+
+            if (!passwordIsCorrect) {
+                this.UserRetrys++;
+                System.out.println("[WARNING] Invalid Password detected");
+                System.out.println("[INFO] Please Notice if retrys >=5 your account will be locked");
+                System.out.println("[INFO] Failed Passwords: " + this.UserRetrys);
+
+                if (this.UserRetrys >= this.UserRetrysMAX) {
+                    return new LoginResult(false, "TO_MANY_INVALID_PASSWORDS");
+
+                }
+
+                return new LoginResult(false, "INVALID_PASSWORD");
+            }
+
+            this.UserRetrys = 0;
+
+            return new LoginResult(true, null);
 
         } catch (SQLException error) {
-            System.out.println(error.getMessage());
-            return false;
+            System.out.println("[ERROR] SQL error during login: " + error.getMessage());
+            return new LoginResult(false, "SQL_EXCEPTION");
         }
     }
 
     private boolean CheckUserInDB(String username) throws SQLException {
         System.out.println("\n[INFO] Validate the User");
 
-        String sql = "SELECT * FROM accounts WHERE account_name = ?";
+        String sql = "SELECT id FROM accounts WHERE account_name = ?";
 
-        try (Connection connection = DBManager.getConnection();
-            PreparedStatement stmt = connection.prepareStatement(sql);
+        try (
+                Connection connection = DBManager.getConnection();
+                PreparedStatement stmt = connection.prepareStatement(sql)
         ) {
             stmt.setString(1, username);
 
-            ResultSet rs = stmt.executeQuery();
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    System.out.println("[OK] Username exists in the DB\n");
+                    return true;
+                }
 
-            if (rs.next()) {
-                System.out.println("[OK] Username exists in the DB\n");
-                return true;
-
-            } else {
-                throw new IllegalArgumentException("[ERROR] This username does not exist\n");
+                System.out.println("[ERROR] This username does not exist\n");
+                return false;
             }
-        } catch (IllegalArgumentException error) {
-            System.out.println(error.getMessage());
-            return false;
         }
     }
 
@@ -61,27 +76,27 @@ public class AuthenticationService {
 
         String sql = "SELECT password_hash FROM accounts WHERE account_name = ?";
 
-        try (Connection connection = DBManager.getConnection();
-             PreparedStatement stmt = connection.prepareStatement(sql);
+        try (
+                Connection connection = DBManager.getConnection();
+                PreparedStatement stmt = connection.prepareStatement(sql)
         ) {
             stmt.setString(1, username);
 
-            ResultSet rs = stmt.executeQuery();
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    String storedHASH = rs.getString("password_hash");
+                    boolean matchesUserInput = BCrypt.checkpw(pwsd, storedHASH);
 
-            if (rs.next()) {
-                String storedHASH = rs.getString("password_hash");
-                boolean MatchesUserInput = BCrypt.checkpw(pwsd, storedHASH);
+                    if (matchesUserInput) {
+                        System.out.println("[OK] Password is correct\n");
+                        return true;
+                    }
 
-                if (MatchesUserInput) {
-                    System.out.println("[OK] Password is correct\n");
-                    return true;
-
-                } else {
-                    System.out.println("[ERROR] Password is not correct please try again\n");
+                    System.out.println("[ERROR] Password is incorrect\n");
                     return false;
                 }
+                return false;
             }
-            return false;
         }
     }
 }
