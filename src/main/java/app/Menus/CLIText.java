@@ -1,4 +1,4 @@
-package app.ConsoleView;
+package app.Menus;
 
 public class CLIText {
 }

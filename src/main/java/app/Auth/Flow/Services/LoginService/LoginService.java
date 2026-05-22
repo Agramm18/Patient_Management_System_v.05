@@ -1,7 +1,6 @@
-package app.Auth;
+package app.Auth.Flow.Services.LoginService;
 
 import java.util.Scanner;
-import java.util.Arrays;
 import java.io.Console;
 
 public class LoginService {

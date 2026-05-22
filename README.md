@@ -192,7 +192,7 @@ CREATE TABLE accounts (
     email VARCHAR(100) NOT NULL UNIQUE,
     phone_number VARCHAR(20),
     department VARCHAR(50) NOT NULL DEFAULT 'unassigned',
-    user_job VARCHAR(50) NOT NULL DEFAULT 'intern',
+    user_job VARCHAR(50) NOT NULL DEFAULT 'unassigned',
     user_role VARCHAR(50) NOT NULL DEFAULT 'unassigned',
     account_status VARCHAR(50) NOT NULL DEFAULT 'disabled',
     permission VARCHAR(50) NOT NULL DEFAULT 'read_only',

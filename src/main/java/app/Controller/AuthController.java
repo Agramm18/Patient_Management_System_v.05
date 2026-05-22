@@ -1,12 +1,8 @@
 package app.Controller;
 
-import app.Auth.AccountPolicyService;
-import app.Auth.LoginService;
-import app.Auth.RegistrationService;
-import app.Repository.AccountRepository;
-import app.Repository.AuthenticationService;
-import app.Repository.UserAccountRepository;
-import app.Auth.LoginResult;
+import app.Auth.Flow.LoginFlow;
+import app.Auth.Flow.RegistrationFlow;
+import app.Menus.AuthMenu;
 
 import java.util.Scanner;
 
@@ -20,10 +16,9 @@ public class AuthController {
 
         while (true) {
             try {
-                System.out.println("\n[INFO] Please select one of the following Options\n");
-                System.out.println("[1] Registration");
-                System.out.println("[2] Login");
-                System.out.println("[3] Exit the Program\n");
+
+                AuthMenu show = new AuthMenu();
+                show.AuthMenu();
 
                 AccountStatusSTR = scanner.nextLine().trim().toLowerCase();
 
@@ -35,50 +30,12 @@ public class AuthController {
                     if (UserValue < 1 || UserValue > 3) {
                         throw new IllegalArgumentException("[ERROR] The value can't be less than 1 or higher than 4");
                     } else if (UserValue == 1) {
-                        System.out.println("\n[INFO] You can now Register your User");
-                        RegistrationService register = new RegistrationService();
-                        register.UserAccount(scanner);
-
-                        //Collect Data from getter
-                        String Username = register.getUserName();
-                        String Email = register.getEmailAddress();
-                        String PhoneNumber = register.getPhoneNumber();
-                        String HashedPWSD = register.getHashedPWSD();
-
-                        UserAccountRepository userAccountRepository = new UserAccountRepository();
-                        userAccountRepository.newAccount(Username, Email, PhoneNumber, HashedPWSD);
-
-                        return;
+                        RegistrationFlow register = new RegistrationFlow();
+                        register.User(scanner);
 
                     } else if (UserValue == 2) {
-                        System.out.println("\n[INFO] Welcome You can now Login your User\n");
-
-                        AuthenticationService check = new AuthenticationService();
-                        AccountRepository store = new AccountRepository();
-
-                        while (true) {
-                            LoginService login = new LoginService();
-                            login.User(scanner);
-
-                            String Username = login.getEnteredUserName();
-                            String PWSD = login.getEnteredPWSD();
-
-                            LoginResult result = check.LoggedUser(Username, PWSD);
-
-                            store.LogginAttempt(
-                                    Username,
-                                    result.isSuccess(),
-                                    result.getFailureReason()
-                            );
-
-                            if (result.isSuccess()) {
-                                System.out.println("[OK] The Login where a success");
-
-                                return;
-                            } else {
-                                System.out.println("\n[ERROR] Something went wrong please try again");
-                            }
-                        }
+                        LoginFlow login = new LoginFlow();
+                        login.User(scanner);
 
                     } else {
                         System.out.println("\n[INFO] You have chosen to end this program");

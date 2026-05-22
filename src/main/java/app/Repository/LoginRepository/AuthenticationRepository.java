@@ -1,12 +1,12 @@
-package app.Repository;
+package app.Repository.LoginRepository;
 
-import app.Auth.LoginResult;
+import app.Auth.Flow.Services.LoginService.LoginResult;
 import app.Config.DBManager;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
 
-public class AuthenticationService {
+public class AuthenticationRepository {
 
     private int UserRetrys = 0;
     private int UserRetrysMAX = 5;

@@ -1,4 +1,4 @@
-package app.Auth;
+package app.Auth.Flow.Services;
 
 public class AccountPolicyService {
 

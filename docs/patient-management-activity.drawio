@@ -1,0 +1,338 @@
+<mxfile host="app.diagrams.net" modified="2026-05-14T00:00:00.000Z" agent="Codex" version="26.0.0" type="device">
+  <diagram id="patient-management-activity" name="Aktivitaetsdiagramm">
+    <mxGraphModel dx="1930" dy="1340" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2000" pageHeight="1420" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="title" value="Patient Management V5.01 - UML Aktivitaetsdiagramm des aktuellen Projektstands" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;fontSize=24;fontStyle=1;fontColor=#111827;" vertex="1" parent="1">
+          <mxGeometry x="40" y="24" width="1180" height="44" as="geometry"/>
+        </mxCell>
+        <mxCell id="legend" value="Legende: Blau = aktiver Ablauf | Orange = Entscheidung | Gruen = erfolgreicher Pfad | Grau gestrichelt = Platzhalter / noch nicht umgesetzt" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#F8FAFC;strokeColor=#CBD5E1;fontColor=#334155;fontSize=13;spacing=10;" vertex="1" parent="1">
+          <mxGeometry x="1240" y="24" width="680" height="44" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="lane_app" value="App-Start" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8FAFC;strokeColor=#CBD5E1;fontStyle=1;fontSize=16;fontColor=#0F172A;verticalAlign=top;spacingTop=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="100" width="300" height="1110" as="geometry"/>
+        </mxCell>
+        <mxCell id="lane_boot" value="Bootstrap &amp; Routing" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFF6FF;strokeColor=#93C5FD;fontStyle=1;fontSize=16;fontColor=#1E3A8A;verticalAlign=top;spacingTop=10;" vertex="1" parent="1">
+          <mxGeometry x="380" y="100" width="330" height="1110" as="geometry"/>
+        </mxCell>
+        <mxCell id="lane_config" value="Konfiguration" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0FDF4;strokeColor=#86EFAC;fontStyle=1;fontSize=16;fontColor=#14532D;verticalAlign=top;spacingTop=10;" vertex="1" parent="1">
+          <mxGeometry x="750" y="100" width="360" height="1110" as="geometry"/>
+        </mxCell>
+        <mxCell id="lane_db" value="Datenbank &amp; Accounts" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAF5FF;strokeColor=#C084FC;fontStyle=1;fontSize=16;fontColor=#581C87;verticalAlign=top;spacingTop=10;" vertex="1" parent="1">
+          <mxGeometry x="1150" y="100" width="360" height="1110" as="geometry"/>
+        </mxCell>
+        <mxCell id="lane_auth" value="Authentifizierung" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ECFEFF;strokeColor=#67E8F9;fontStyle=1;fontSize=16;fontColor=#164E63;verticalAlign=top;spacingTop=10;" vertex="1" parent="1">
+          <mxGeometry x="1550" y="100" width="380" height="1110" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="start" value="" style="ellipse;html=1;aspect=fixed;fillColor=#111827;strokeColor=#111827;" vertex="1" parent="1">
+          <mxGeometry x="175" y="150" width="30" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="main" value="&lt;b&gt;Main.main()&lt;/b&gt;&lt;br&gt;Scanner erstellen&lt;br&gt;Begruessung ausgeben" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#DBEAFE;strokeColor=#2563EB;strokeWidth=2;fontColor=#1E3A8A;fontSize=13;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="80" y="215" width="220" height="76" as="geometry"/>
+        </mxCell>
+        <mxCell id="hello" value="&lt;b&gt;BootConfigService&lt;/b&gt;&lt;br&gt;DisplayHelloMSG()&lt;br&gt;System Loader anzeigen" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#DBEAFE;strokeColor=#2563EB;strokeWidth=2;fontColor=#1E3A8A;fontSize=13;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="80" y="325" width="220" height="76" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="system_config" value="&lt;b&gt;SystemConfig(scanner)&lt;/b&gt;&lt;br&gt;Start der Boot-Phase" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#DBEAFE;strokeColor=#2563EB;strokeWidth=2;fontColor=#1E3A8A;fontSize=13;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="435" y="215" width="220" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="controller_objects" value="Controller anlegen&lt;br&gt;&lt;b&gt;Auth, Config, Menu,&lt;br&gt;Service, UI&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#E0F2FE;strokeColor=#0284C7;strokeWidth=2;fontColor=#075985;fontSize=13;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="435" y="320" width="220" height="86" as="geometry"/>
+        </mxCell>
+        <mxCell id="front_controller" value="&lt;b&gt;FrontController&lt;/b&gt;&lt;br&gt;zentraler Dispatcher&lt;br&gt;RequestType auswerten" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#E0F2FE;strokeColor=#0284C7;strokeWidth=2;fontColor=#075985;fontSize=13;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="435" y="440" width="220" height="82" as="geometry"/>
+        </mxCell>
+        <mxCell id="route_config" value="Route: &lt;b&gt;CONFIG&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#D1FAE5;strokeColor=#059669;strokeWidth=2;fontColor=#064E3B;fontSize=13;fontStyle=1;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="460" y="560" width="170" height="54" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="config_exec" value="&lt;b&gt;ConfigController.execute()&lt;/b&gt;&lt;br&gt;Config-Flow starten" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#DCFCE7;strokeColor=#16A34A;strokeWidth=2;fontColor=#14532D;fontSize=13;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="815" y="145" width="230" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="env_file" value="&lt;b&gt;EnvValidationService&lt;/b&gt;&lt;br&gt;CheckFileStatus()&lt;br&gt;.env suchen" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#DCFCE7;strokeColor=#16A34A;strokeWidth=2;fontColor=#14532D;fontSize=13;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="815" y="250" width="230" height="82" as="geometry"/>
+        </mxCell>
+        <mxCell id="d_env_exists" value=".env&lt;br&gt;vorhanden?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF7ED;strokeColor=#FB923C;strokeWidth=2;fontColor=#7C2D12;fontSize=13;spacing=4;" vertex="1" parent="1">
+          <mxGeometry x="850" y="360" width="160" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="env_values" value="&lt;b&gt;CheckENVParam()&lt;/b&gt;&lt;br&gt;DB-Werte pruefen&lt;br&gt;Default-Account-Werte pruefen" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#DCFCE7;strokeColor=#16A34A;strokeWidth=2;fontColor=#14532D;fontSize=13;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="815" y="495" width="230" height="88" as="geometry"/>
+        </mxCell>
+        <mxCell id="d_env_valid" value="Pflichtwerte&lt;br&gt;valide?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF7ED;strokeColor=#FB923C;strokeWidth=2;fontColor=#7C2D12;fontSize=13;spacing=4;" vertex="1" parent="1">
+          <mxGeometry x="850" y="615" width="160" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="sql_conn" value="&lt;b&gt;SQLValidationService&lt;/b&gt;&lt;br&gt;JDBC-URL bauen&lt;br&gt;DriverManager testen" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#DCFCE7;strokeColor=#16A34A;strokeWidth=2;fontColor=#14532D;fontSize=13;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="815" y="745" width="230" height="86" as="geometry"/>
+        </mxCell>
+        <mxCell id="d_db_reachable" value="MySQL&lt;br&gt;erreichbar?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF7ED;strokeColor=#FB923C;strokeWidth=2;fontColor=#7C2D12;fontSize=13;spacing=4;" vertex="1" parent="1">
+          <mxGeometry x="850" y="865" width="160" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="dbmanager" value="&lt;b&gt;DBManager.initialize()&lt;/b&gt;&lt;br&gt;globale DB-Runtime-Konfig speichern" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#DCFCE7;strokeColor=#16A34A;strokeWidth=2;fontColor=#14532D;fontSize=13;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="815" y="1000" width="230" height="76" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="account_flow" value="&lt;b&gt;SystemAccountValidationService&lt;/b&gt;&lt;br&gt;DBAccounts()" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#F3E8FF;strokeColor=#9333EA;strokeWidth=2;fontColor=#581C87;fontSize=13;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1215" y="145" width="230" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="check_local" value="CheckLocalAdmin()&lt;br&gt;SELECT user_role = local_admin" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#F3E8FF;strokeColor=#9333EA;strokeWidth=2;fontColor=#581C87;fontSize=13;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1215" y="250" width="230" height="72" as="geometry"/>
+        </mxCell>
+        <mxCell id="check_admin" value="CheckAdmin()&lt;br&gt;SELECT user_role = admin" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#F3E8FF;strokeColor=#9333EA;strokeWidth=2;fontColor=#581C87;fontSize=13;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1215" y="355" width="230" height="72" as="geometry"/>
+        </mxCell>
+        <mxCell id="d_roles" value="Starter-Rollen&lt;br&gt;vorhanden?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF7ED;strokeColor=#FB923C;strokeWidth=2;fontColor=#7C2D12;fontSize=13;spacing=4;" vertex="1" parent="1">
+          <mxGeometry x="1250" y="465" width="160" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="create_defaults" value="&lt;b&gt;SetDefaultAccounts&lt;/b&gt;&lt;br&gt;fehlende Admins erzeugen&lt;br&gt;BCrypt + INSERT accounts" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#F3E8FF;strokeColor=#9333EA;strokeWidth=2;fontColor=#581C87;fontSize=13;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1215" y="600" width="230" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="d_config_ok" value="configOK&lt;br&gt;true?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF7ED;strokeColor=#FB923C;strokeWidth=2;fontColor=#7C2D12;fontSize=13;spacing=4;" vertex="1" parent="1">
+          <mxGeometry x="1250" y="735" width="160" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="error_config" value="Config-Fehlerpfad&lt;br&gt;Fehler ausgeben&lt;br&gt;Auth startet nicht" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#FEE2E2;strokeColor=#DC2626;strokeWidth=2;fontColor=#7F1D1D;fontSize=13;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1215" y="930" width="230" height="86" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="route_auth" value="Route: &lt;b&gt;AUTH&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#CCFBF1;strokeColor=#0D9488;strokeWidth=2;fontColor=#134E4A;fontSize=13;fontStyle=1;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1645" y="145" width="170" height="54" as="geometry"/>
+        </mxCell>
+        <mxCell id="verify_auth" value="&lt;b&gt;AuthController&lt;/b&gt;&lt;br&gt;VerifyAccountStatus()&lt;br&gt;fragt Y/N" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#CFFAFE;strokeColor=#0891B2;strokeWidth=2;fontColor=#164E63;fontSize=13;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1615" y="245" width="230" height="82" as="geometry"/>
+        </mxCell>
+        <mxCell id="d_account" value="Account&lt;br&gt;existiert?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF7ED;strokeColor=#FB923C;strokeWidth=2;fontColor=#7C2D12;fontSize=13;spacing=4;" vertex="1" parent="1">
+          <mxGeometry x="1650" y="360" width="160" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="login_placeholder" value="&lt;b&gt;LoginService&lt;/b&gt;&lt;br&gt;aktuell: Not implemented yet" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#F3F4F6;strokeColor=#9CA3AF;strokeWidth=2;dashed=1;fontColor=#374151;fontSize=13;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1615" y="495" width="230" height="72" as="geometry"/>
+        </mxCell>
+        <mxCell id="registration" value="&lt;b&gt;RegistrationService&lt;/b&gt;&lt;br&gt;UserAccount(scanner)" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#CFFAFE;strokeColor=#0891B2;strokeWidth=2;fontColor=#164E63;fontSize=13;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1615" y="610" width="230" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="reg_data" value="Username, E-Mail, Telefon&lt;br&gt;mit Eingabe-Validierung&lt;br&gt;danach Daten anzeigen" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#CFFAFE;strokeColor=#0891B2;strokeWidth=2;fontColor=#164E63;fontSize=13;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1615" y="715" width="230" height="86" as="geometry"/>
+        </mxCell>
+        <mxCell id="d_data_ok" value="Daten&lt;br&gt;korrekt?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF7ED;strokeColor=#FB923C;strokeWidth=2;fontColor=#7C2D12;fontSize=13;spacing=4;" vertex="1" parent="1">
+          <mxGeometry x="1650" y="835" width="160" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="edit_data" value="Feld aendern&lt;br&gt;1 Username / 2 E-Mail / 3 Telefon&lt;br&gt;aktueller Code endet danach" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#F3F4F6;strokeColor=#9CA3AF;strokeWidth=2;dashed=1;fontColor=#374151;fontSize=13;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1578" y="1000" width="170" height="92" as="geometry"/>
+        </mxCell>
+        <mxCell id="pwd_flow" value="&lt;b&gt;PasswordService&lt;/b&gt;&lt;br&gt;PlainPWSD() + ValidatePWSD()&lt;br&gt;mind. 10, gross/klein, Zahl, Sonderzeichen" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#CFFAFE;strokeColor=#0891B2;strokeWidth=2;fontColor=#164E63;fontSize=13;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1780" y="975" width="120" height="118" as="geometry"/>
+        </mxCell>
+        <mxCell id="d_pwd_match" value="Passwort&lt;br&gt;bestaetigt?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF7ED;strokeColor=#FB923C;strokeWidth=2;fontColor=#7C2D12;fontSize=13;spacing=4;" vertex="1" parent="1">
+          <mxGeometry x="1780" y="825" width="120" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="hash_done" value="ConvertCharToString()&lt;br&gt;PlainToHash()&lt;br&gt;BCrypt Hash erzeugen" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#CFFAFE;strokeColor=#0891B2;strokeWidth=2;fontColor=#164E63;fontSize=13;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1770" y="695" width="140" height="94" as="geometry"/>
+        </mxCell>
+        <mxCell id="no_save" value="Registrierung:&lt;br&gt;Hash vorhanden,&lt;br&gt;DB-Speicherung noch offen" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#F3F4F6;strokeColor=#9CA3AF;strokeWidth=2;dashed=1;fontColor=#374151;fontSize=13;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1770" y="575" width="140" height="88" as="geometry"/>
+        </mxCell>
+        <mxCell id="final" value="" style="ellipse;html=1;shape=endState;fillColor=#111827;strokeColor=#111827;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1715" y="1138" width="34" height="34" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="placeholder_note" value="Aktuell vorhandene, aber noch nicht angeschlossene oder leere Klassen: MenuController, ServiceController, uiController, CLIText. Der FrontController kennt MENU, SERVICE, UI und EXIT als RequestTypes, routet im Code aktuell aber nur CONFIG und AUTH." style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;fillColor=#F9FAFB;strokeColor=#9CA3AF;dashed=1;fontColor=#374151;fontSize=14;spacing=12;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1230" width="1890" height="92" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="e1" value="" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#64748B;" edge="1" parent="1" source="start" target="main">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e2" value="" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#64748B;" edge="1" parent="1" source="main" target="hello">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e3" value="" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#64748B;" edge="1" parent="1" source="hello" target="system_config">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e4" value="" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#64748B;" edge="1" parent="1" source="system_config" target="controller_objects">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e5" value="" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#64748B;" edge="1" parent="1" source="controller_objects" target="front_controller">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e6" value="" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#64748B;" edge="1" parent="1" source="front_controller" target="route_config">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e7" value="" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#64748B;" edge="1" parent="1" source="route_config" target="config_exec">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e8" value="" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#64748B;" edge="1" parent="1" source="config_exec" target="env_file">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e9" value="" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#64748B;" edge="1" parent="1" source="env_file" target="d_env_exists">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e10" value="ja" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#16A34A;fontColor=#166534;" edge="1" parent="1" source="d_env_exists" target="env_values">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e11" value="nein" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#DC2626;fontColor=#991B1B;" edge="1" parent="1" source="d_env_exists" target="error_config">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1130" y="410"/>
+              <mxPoint x="1130" y="973"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e12" value="" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#64748B;" edge="1" parent="1" source="env_values" target="d_env_valid">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e13" value="ja" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#16A34A;fontColor=#166534;" edge="1" parent="1" source="d_env_valid" target="sql_conn">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e14" value="nein" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#DC2626;fontColor=#991B1B;" edge="1" parent="1" source="d_env_valid" target="error_config">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1130" y="665"/>
+              <mxPoint x="1130" y="973"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e15" value="" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#64748B;" edge="1" parent="1" source="sql_conn" target="d_db_reachable">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e16" value="ja" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#16A34A;fontColor=#166534;" edge="1" parent="1" source="d_db_reachable" target="dbmanager">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e17" value="nein" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#DC2626;fontColor=#991B1B;" edge="1" parent="1" source="d_db_reachable" target="error_config">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1130" y="915"/>
+              <mxPoint x="1130" y="973"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e18" value="" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#64748B;" edge="1" parent="1" source="dbmanager" target="account_flow">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1090" y="1038"/>
+              <mxPoint x="1090" y="180"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e19" value="" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#64748B;" edge="1" parent="1" source="account_flow" target="check_local">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e20" value="" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#64748B;" edge="1" parent="1" source="check_local" target="check_admin">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e21" value="" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#64748B;" edge="1" parent="1" source="check_admin" target="d_roles">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e22" value="beide vorhanden" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#16A34A;fontColor=#166534;" edge="1" parent="1" source="d_roles" target="d_config_ok">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e23" value="einer / beide fehlen" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#9333EA;fontColor=#581C87;" edge="1" parent="1" source="d_roles" target="create_defaults">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e24" value="" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#64748B;" edge="1" parent="1" source="create_defaults" target="d_config_ok">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e25" value="ja" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#16A34A;fontColor=#166534;" edge="1" parent="1" source="d_config_ok" target="route_auth">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1518" y="785"/>
+              <mxPoint x="1518" y="172"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e26" value="nein" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#DC2626;fontColor=#991B1B;" edge="1" parent="1" source="d_config_ok" target="error_config">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e27" value="" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#64748B;" edge="1" parent="1" source="error_config" target="final">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1330" y="1148"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e28" value="" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#64748B;" edge="1" parent="1" source="route_auth" target="verify_auth">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e29" value="" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#64748B;" edge="1" parent="1" source="verify_auth" target="d_account">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e30" value="leer / ungueltig" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#F97316;fontColor=#9A3412;" edge="1" parent="1" source="d_account" target="verify_auth">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1870" y="410"/>
+              <mxPoint x="1870" y="286"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e31" value="Y" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#64748B;fontColor=#334155;" edge="1" parent="1" source="d_account" target="login_placeholder">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e32" value="N" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#64748B;fontColor=#334155;" edge="1" parent="1" source="d_account" target="registration">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1600" y="410"/>
+              <mxPoint x="1600" y="645"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e33" value="" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#64748B;" edge="1" parent="1" source="registration" target="reg_data">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e34" value="" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#64748B;" edge="1" parent="1" source="reg_data" target="d_data_ok">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e35" value="nein" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#9CA3AF;fontColor=#4B5563;dashed=1;" edge="1" parent="1" source="d_data_ok" target="edit_data">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e36" value="ja" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#16A34A;fontColor=#166534;" edge="1" parent="1" source="d_data_ok" target="pwd_flow">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e37" value="ungueltig: erneut eingeben" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#F97316;fontColor=#9A3412;" edge="1" parent="1" source="pwd_flow" target="pwd_flow">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1910" y="1035"/>
+              <mxPoint x="1910" y="1035"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e38" value="valide" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#16A34A;fontColor=#166534;" edge="1" parent="1" source="pwd_flow" target="d_pwd_match">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e39" value="nein" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#F97316;fontColor=#9A3412;" edge="1" parent="1" source="d_pwd_match" target="d_data_ok">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1765" y="875"/>
+              <mxPoint x="1765" y="885"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e40" value="ja" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#16A34A;fontColor=#166534;" edge="1" parent="1" source="d_pwd_match" target="hash_done">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e41" value="" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#64748B;" edge="1" parent="1" source="hash_done" target="no_save">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e42" value="" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#64748B;" edge="1" parent="1" source="no_save" target="final">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1900" y="620"/>
+              <mxPoint x="1900" y="1155"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e43" value="" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#64748B;" edge="1" parent="1" source="login_placeholder" target="final">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1568" y="531"/>
+              <mxPoint x="1568" y="1155"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e44" value="" style="endArrow=block;html=1;rounded=1;strokeWidth=2;strokeColor=#9CA3AF;dashed=1;" edge="1" parent="1" source="edit_data" target="final">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

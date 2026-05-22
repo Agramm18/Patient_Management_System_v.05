@@ -1,6 +1,4 @@
-package app.Repository;
-
-import app.Auth.LoginService.*;
+package app.Repository.logsRepository;
 
 import app.Config.DBManager;
 import java.sql.SQLException;
@@ -8,7 +6,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.PreparedStatement;
 
-public class AccountRepository {
+public class LoginLogsRepository {
 
     public void LogginAttempt(String Username, boolean isSuccess, String failureReason) {
 

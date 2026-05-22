@@ -1,8 +1,7 @@
-package app.Auth;
-import java.awt.image.renderable.RenderableImage;
+package app.Auth.Flow.Services.RegistrationService;
 import java.util.Scanner;
 
-import app.Auth.PasswordService;
+import app.Auth.Flow.PasswordFlow;
 
 public class RegistrationService {
     private String UserName;
@@ -113,7 +112,7 @@ public class RegistrationService {
 
         while (true) {
             try {
-                System.out.println("\nINFO] Is the Data correct? Y/N\n");
+                System.out.println("\nINFO] Is the Data correct? Y/N]\n");
                 RegistrationState = scanner.nextLine().trim().toLowerCase();
 
                 if (RegistrationState.isBlank()) {
@@ -121,9 +120,9 @@ public class RegistrationService {
                 } else if (!RegistrationState.equals("y") && !RegistrationState.equals("n")) {
                     throw new IllegalArgumentException("[ERROR] Only y for yes or n for n are valid please try again");
                 } else if (RegistrationState.equals("y")) {
-                    PasswordService create = new PasswordService();
-                    create.UserPWSD(scanner);
-                    this.HashedPWSD = create.getHashedPWSD();
+                    PasswordFlow execute = new PasswordFlow();
+                    this.HashedPWSD = execute.Policy(scanner);
+
                 } else {
                     System.out.println("[INFO] Please Enter what you want to chang");
                     System.out.println("[INFO] 1 User Name");

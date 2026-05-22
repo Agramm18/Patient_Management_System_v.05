@@ -1,4 +1,4 @@
-package app.Repository;
+package app.Repository.RegistrationRepository;
 
 import app.Config.DBManager;
 import java.sql.Connection;
@@ -19,7 +19,10 @@ public class UserAccountRepository {
     }
 
     private void createUser(String Username, String Email, String PhoneNumber, String HashedPWSD ) throws SQLException {
-        String sql = "INSERT INTO accounts (account_name, email, phone_number, password_hash) VALUES (?, ?, ?, ?)";
+
+        String user_status = "waiting_for_authorization";
+
+        String sql = "INSERT INTO accounts (account_name, email, phone_number, password_hash, account_status) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection connection = DBManager.getConnection();
             PreparedStatement statement = connection.prepareStatement(sql);
@@ -28,6 +31,7 @@ public class UserAccountRepository {
             statement.setString(2, Email);
             statement.setString(3, PhoneNumber);
             statement.setString(4, HashedPWSD);
+            statement.setString(5, user_status);
 
             int rows = statement.executeUpdate();
 

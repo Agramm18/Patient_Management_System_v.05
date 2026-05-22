@@ -1,4 +1,4 @@
-package app.Auth;
+package app.Auth.Flow.Services.LoginService;
 
 public class LoginResult {
     private final boolean success;

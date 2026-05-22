@@ -1,0 +1,337 @@
+classDiagram
+  %% Patient Management V5.01 - UML class diagram as Mermaid
+  %% Copy-paste into Mermaid Live Editor or draw.io: Insert -> Advanced -> Mermaid
+  %% Current source basis: src/main/java/app
+
+  direction LR
+
+  namespace app {
+    class Main {
+      +main(args) void
+    }
+  }
+
+  namespace Bootstrap {
+    class BootConfigService {
+      +DisplayHelloMSG() void
+      +SystemConfig(scanner) void
+    }
+  }
+
+  namespace Controller {
+    class FrontController {
+      -AuthController authController
+      -ConfigController configController
+      -MenuController menuController
+      -ServiceController serviceController
+      -uiController UIController
+      +NavigateSubController(request, scanner) boolean
+    }
+
+    class RequestType {
+      <<enumeration>>
+      CONFIG
+      AUTH
+      MENU
+      SERVICE
+      UI
+      EXIT
+    }
+
+    class ConfigController {
+      -EnvValidationService envValidationService
+      -SQLValidationService sqlValidationService
+      +execute(scanner) boolean
+    }
+
+    class AuthController {
+      +VerifyAccountStatus(scanner) void
+    }
+
+    class MenuController {
+      <<placeholder>>
+    }
+
+    class ServiceController {
+      <<placeholder>>
+    }
+
+    class uiController {
+      <<placeholder>>
+    }
+  }
+
+  namespace Auth {
+    class RegistrationService {
+      -String UserName
+      -String EmailAddress
+      -String PhoneNumber
+      -String HashedPWSD
+      +UserAccount(scanner) void
+      -SetUserName(scanner) void
+      -SetEmailAddress(scanner) void
+      -SetPhoneNumber(scanner) void
+      -ShowCurrentInfo(scanner) void
+      +getUserName() String
+      +getEmailAddress() String
+      +getPhoneNumber() String
+      +getHashedPWSD() String
+    }
+
+    class PasswordService {
+      -String PlainPWSD
+      -String HashedPWSD
+      -charArray PWSDChar
+      -charArray VerifyPWSD
+      -boolean FitPWSDLength
+      -boolean ContainsUpperLetters
+      -boolean ContainsLowerLetters
+      -boolean ContainsSpecialLetters
+      -boolean ContainsNumbers
+      -int retryCount
+      -int MAX_RETRY_COUNT
+      +UserPWSD(scanner) void
+      +PlainPWSD(scanner) void
+      -ValidatePWSD() void
+      -RetypePWSD(scanner) void
+      -ConvertCharToString() void
+      -PlainToHash() void
+      +getHashedPWSD() String
+    }
+
+    class LoginService {
+      -String EnteredUserName
+      -String EnteredPWSD
+      +User(scanner) void
+      -enterUsername(scanner) void
+      -enterPWSD() void
+      +getEnteredUserName() String
+      +getEnteredPWSD() String
+    }
+  }
+
+  namespace Config {
+    class EnvValidationService {
+      -String DbHost
+      -int DBPortINT
+      -String DBName
+      -String DBUser
+      -String DbPWSD
+      +sqlHeader() void
+      +CheckFileStatus() void
+      +CheckENVParam() void
+      +setEnvValues(host, port, name, user, password) void
+      +getHost() String
+      +getPort() int
+      +getDBName() String
+      +getUser() String
+      +getPWSD() String
+    }
+
+    class SQLValidationService {
+      -EnvValidationService env
+      -String SQLUser
+      -String sqlPWSD
+      -String sqlURL
+      +SQLValidationService(env)
+      +DBConnection() void
+      +getSQLUser() String
+      +getSqlPWSD() String
+      +getSqlURL() String
+    }
+
+    class DBManager {
+      <<utility>>
+      -String sqlUser
+      -String sqlPWSD
+      -String sqlURL
+      -DBManager()
+      +initialize(user, password, URL) void
+      +getConnection() Connection
+    }
+
+    class SystemAccountValidationService {
+      -boolean LocalAdminExsist
+      -boolean adminExists
+      +DBAccounts() boolean
+      +CheckLocalAdmin() void
+      +CheckAdmin() void
+      +ValidAteResults() boolean
+    }
+
+    class SetDefaultAccounts {
+      -Dotenv dotenv
+      +DefaultAccounts(createDefaultLocalAdmin, createDefaultAdmin) boolean
+      -CreateDefaultLocalAdmin() boolean
+      -CreateDefaultAdmin() boolean
+    }
+  }
+
+  namespace Repository {
+    class UserAccountRepository {
+      +newAccount(username, email, phoneNumber, hashedPassword) void
+      -createUser(username, email, phoneNumber, hashedPassword) void
+    }
+
+    class AuthenticationService {
+      +LoggedUser(username, password) boolean
+      -CheckUserInDB(username) boolean
+      -CheckPWSD(password, username) boolean
+    }
+  }
+
+  namespace ConsoleView {
+    class CLIText {
+      <<placeholder>>
+    }
+  }
+
+  namespace External {
+    class Scanner {
+      <<java_util>>
+    }
+
+    class Console {
+      <<java_io>>
+    }
+
+    class DriverManager {
+      <<java_sql>>
+    }
+
+    class Connection {
+      <<java_sql>>
+    }
+
+    class PreparedStatement {
+      <<java_sql>>
+    }
+
+    class ResultSet {
+      <<java_sql>>
+    }
+
+    class Dotenv {
+      <<dotenv_java>>
+      +load() Dotenv
+      +get(key) String
+    }
+
+    class BCrypt {
+      <<jbcrypt>>
+      +gensalt(rounds) String
+      +hashpw(password, salt) String
+      +checkpw(password, hash) boolean
+    }
+
+    class EnvFile {
+      <<file>>
+      DB_HOST
+      DB_PORT
+      DB_NAME
+      DB_USER
+      DB_PWSD
+      LOCAL_ADMIN_NAME
+      LOCAL_ADMIN_PWSD
+      LOCAL_ADMIN_EMAIL
+      ADMIN_NAME
+      ADMIN_PWSD_DEFAULT
+      ADMIN_EMAIL_DEFAULT
+      BOOTSTRAP_KEY
+    }
+
+    class AccountsTable {
+      <<database_table>>
+      id
+      account_name
+      email
+      phone_number
+      department
+      user_job
+      user_role
+      account_status
+      permission
+      password_hash
+      requires_password_change
+      failed_password_attempts
+      bootstrap_key
+      created_at
+      updated_at
+    }
+  }
+
+  Main ..> Scanner : creates
+  Main ..> BootConfigService : creates and starts
+
+  BootConfigService ..> AuthController : creates
+  BootConfigService ..> ConfigController : creates
+  BootConfigService ..> MenuController : creates
+  BootConfigService ..> ServiceController : creates
+  BootConfigService ..> uiController : creates
+  BootConfigService ..> FrontController : creates dispatcher
+  BootConfigService ..> RequestType : sends CONFIG and AUTH
+
+  FrontController *-- AuthController : holds
+  FrontController *-- ConfigController : holds
+  FrontController *-- MenuController : holds
+  FrontController *-- ServiceController : holds
+  FrontController *-- uiController : holds
+  FrontController ..> RequestType : switch
+  FrontController ..> ConfigController : CONFIG route
+  FrontController ..> AuthController : AUTH route
+
+  ConfigController ..> EnvValidationService : creates and validates
+  ConfigController ..> SQLValidationService : creates and connects
+  ConfigController ..> DBManager : initialize runtime config
+  ConfigController ..> SystemAccountValidationService : verifies starter accounts
+  SQLValidationService --> EnvValidationService : reads DB values
+  SQLValidationService ..> DriverManager : connection test
+  SQLValidationService ..> Connection : opens test connection
+  EnvValidationService ..> EnvFile : validates required keys
+  EnvValidationService ..> Dotenv : loads values
+
+  DBManager ..> DriverManager : getConnection()
+  DBManager ..> Connection : returns
+
+  SystemAccountValidationService ..> DBManager : getConnection()
+  SystemAccountValidationService ..> PreparedStatement : SELECT accounts
+  SystemAccountValidationService ..> ResultSet : checks local_admin/admin
+  SystemAccountValidationService ..> SetDefaultAccounts : creates missing defaults
+  SystemAccountValidationService ..> AccountsTable : reads
+
+  SetDefaultAccounts ..> Dotenv : loads default account values
+  SetDefaultAccounts ..> BCrypt : hashes default passwords
+  SetDefaultAccounts ..> DBManager : getConnection()
+  SetDefaultAccounts ..> PreparedStatement : INSERT default accounts
+  SetDefaultAccounts ..> AccountsTable : writes
+
+  AuthController ..> RegistrationService : option 1
+  AuthController ..> LoginService : option 2
+  AuthController ..> UserAccountRepository : saves new account
+  AuthController ..> AuthenticationService : verifies login
+
+  RegistrationService ..> Scanner : reads input
+  RegistrationService ..> PasswordService : creates password hash
+  PasswordService ..> Scanner : fallback password input
+  PasswordService ..> Console : hidden password input
+  PasswordService ..> BCrypt : hashpw()
+  LoginService ..> Scanner : reads username
+  LoginService ..> Console : hidden password input
+
+  UserAccountRepository ..> DBManager : getConnection()
+  UserAccountRepository ..> PreparedStatement : INSERT account
+  UserAccountRepository ..> AccountsTable : writes
+
+  AuthenticationService ..> DBManager : getConnection()
+  AuthenticationService ..> PreparedStatement : SELECT account/hash
+  AuthenticationService ..> ResultSet : reads password_hash
+  AuthenticationService ..> BCrypt : checkpw()
+  AuthenticationService ..> AccountsTable : reads
+
+  note for Main "Application entry point. Creates Scanner, prints welcome text, then starts BootConfigService."
+  note for BootConfigService "Boot phase creates controllers and routes CONFIG first. AUTH starts only when configOK is true."
+  note for FrontController "RequestType contains CONFIG, AUTH, MENU, SERVICE, UI, EXIT. Current switch handles CONFIG and AUTH."
+  note for MenuController "Currently empty placeholder."
+  note for ServiceController "Currently empty placeholder."
+  note for uiController "Currently empty placeholder."
+  note for CLIText "Currently empty placeholder."
