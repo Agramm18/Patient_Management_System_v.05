@@ -3,7 +3,7 @@ package app.Auth.Flow.Services.AuthSecurityService;
 import java.util.Scanner;
 import app.Menus.roleMenu;
 
-public class RoleValidationService {
+public class RoleValidation {
 
     public void RequestedRole(Scanner scanner) {
         boolean selectedRoleIsValid = false;
