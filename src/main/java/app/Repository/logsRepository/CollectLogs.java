@@ -6,7 +6,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.PreparedStatement;
 
-public class LoginLogsRepository {
+public class CollectLogs {
 
     public void LogginAttempt(String Username, boolean isSuccess, String failureReason) {
 
