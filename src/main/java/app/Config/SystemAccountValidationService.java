@@ -22,6 +22,7 @@ public class SystemAccountValidationService {
 
     public void CheckLocalAdmin() {
         System.out.println("\n[INFO] Checking for an Local Admin in the DB");
+        int role = 1;
 
         String sql = "SELECT ID FROM accounts WHERE user_role = ? LIMIT 1";
 
@@ -29,7 +30,7 @@ public class SystemAccountValidationService {
             Connection connection = DBManager.getConnection();
             PreparedStatement statement = connection.prepareStatement(sql)
         ) {
-            statement.setString(1, "local_admin");
+            statement.setInt(1, role);
 
             ResultSet result = statement.executeQuery();
 
@@ -50,14 +51,14 @@ public class SystemAccountValidationService {
 
     public void CheckAdmin() {
         System.out.println("\n[INFO] Checking for an Admin in the DB");
-
+        int role = 2;
         String sql = "SELECT ID FROM accounts WHERE user_role = ? LIMIT 1";
 
         try (
             Connection connection = DBManager.getConnection();
             PreparedStatement statement = connection.prepareStatement(sql)
         ) {
-            statement.setString(1, "admin");
+            statement.setInt(1, role);
 
             ResultSet result = statement.executeQuery();
 
