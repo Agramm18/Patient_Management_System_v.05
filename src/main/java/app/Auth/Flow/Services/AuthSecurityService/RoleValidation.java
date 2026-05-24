@@ -1,4 +1,4 @@
-package app.Auth.Flow.Services.LoginService;
+package app.Auth.Flow.Services.AuthSecurityService;
 
 import java.util.Scanner;
 import app.Menus.roleMenu;
