@@ -1,6 +1,6 @@
 package app.Auth.Flow;
 import app.Auth.Flow.Services.RegistrationService.RegistrationService;
-import app.Repository.RegistrationRepository.UserAccountRepository;
+import app.Repository.RegistrationRepository.CreateAccount;
 
 import java.util.Scanner;
 
@@ -17,7 +17,7 @@ public class RegistrationFlow {
         String PhoneNumber = register.getPhoneNumber();
         String HashedPWSD = register.getHashedPWSD();
 
-        UserAccountRepository userAccountRepository = new UserAccountRepository();
+        CreateAccount userAccountRepository = new CreateAccount();
         userAccountRepository.newAccount(Username, Email, PhoneNumber, HashedPWSD);
 
     }
