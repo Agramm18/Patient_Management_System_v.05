@@ -33,8 +33,8 @@ public class SetDefaultAccounts {
         String BootstrapKey = dotenv.get("BOOTSTRAP_KEY");
 
         String HashedLocalPWSD;
-        String role = "local_admin";
-        String account_status = "enabled";
+        int role = 1;
+        int status = 6;
         String job = "system_administrator";
         String permission = "root_access";
         boolean needs_change = true;
@@ -53,10 +53,10 @@ public class SetDefaultAccounts {
         ) {
             statement.setString(1, LocalAdminName);
             statement.setString(2, LocalAdminEmail);
-            statement.setString(3, role);
+            statement.setInt(3, role);
             statement.setString(4, HashedLocalPWSD);
             statement.setString(5, BootstrapKey);
-            statement.setString(6, account_status);
+            statement.setInt(6, status);
             statement.setString(7, job);
             statement.setString(8, permission);
             statement.setBoolean(9, needs_change);
@@ -88,8 +88,8 @@ public class SetDefaultAccounts {
         String AdminEmail = dotenv.get("ADMIN_EMAIL_DEFAULT");
         String Bootstrap_Key = dotenv.get("BOOTSTRAP_KEY");
         String HashedPWSD;
-        String role = "admin";
-        String account_status_admin = "enabled";
+        int role = 2;
+        int status = 6;
         String admin_job = "application_administrator";
         String permission = "admin_rights";
         boolean needs_change = true;
@@ -108,10 +108,10 @@ public class SetDefaultAccounts {
         ) {
             statement.setString(1, AdminName);
             statement.setString(2, AdminEmail);
-            statement.setString(3, role);
+            statement.setInt(3, role);
             statement.setString(4, HashedPWSD);
             statement.setString(5, Bootstrap_Key);
-            statement.setString(6, account_status_admin);
+            statement.setInt(6, status);
             statement.setString(7, admin_job);
             statement.setString(8, permission);
             statement.setBoolean(9, needs_change);
