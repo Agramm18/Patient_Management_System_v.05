@@ -5,7 +5,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public class UserAccountRepository {
+public class CreateAccount {
 
     public void newAccount(String Username, String Email, String PhoneNumber, String HashedPWSD) {
         System.out.println("\n[INFO] Creating new User Account inside the DB");
