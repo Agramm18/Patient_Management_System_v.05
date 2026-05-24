@@ -3,7 +3,7 @@ package app.Auth.Flow.Services.LoginService;
 import java.util.Scanner;
 import java.io.Console;
 
-public class LoginService {
+public class LoginInputCollector {
     private String EnteredUserName;
     private String EnteredPWSD;
 
