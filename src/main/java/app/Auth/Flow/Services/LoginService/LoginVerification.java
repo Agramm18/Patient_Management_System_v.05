@@ -1,0 +1,91 @@
+package app.Auth.Flow.Services.LoginService;
+
+import java.sql.SQLException;
+import java.util.Scanner;
+
+import app.Auth.Flow.Services.AuthSecurityService.CollectLogs;
+import app.Auth.Flow.Services.AuthSecurityService.RoleValidation;
+import app.Repository.LoginRepository.CheckUserInDB;
+
+public class LoginVerification {
+    private int UserRetrys = 0;
+    private int UserRetrysMAX = 5;
+
+    private final CheckUserInDB repository = new CheckUserInDB();
+
+    public enum UserStatus {
+        ACTIVE,
+        DISABLED,
+        PENDING,
+        LOCKED,
+        ON_QUARANTINE,
+        WAITING_FOR_PASSWORD_CHANGE
+    };
+
+    private String AccountStatus;
+
+
+    public CollectLogs LoggedUser(String Username, String PWSD, Scanner scanner) {
+
+        try {
+            boolean UserValid = repository.CheckUserInDB(Username);
+            boolean PasswordOK = repository.CheckPWSD(PWSD, Username);
+            String UserStatus = repository.CheckUserStatus(Username);
+
+            if (!UserValid) {
+                return new CollectLogs(false, "USERNAME_NOT_FOUND");
+            }
+
+            System.out.println("\n[INFO] Continue with PWSD check");
+
+            if (!PasswordOK) {
+                this.UserRetrys++;
+                System.out.println("[WARNING] Invalid Password detected");
+                System.out.println("[INFO] Please Notice if retrys >=5 your account will be locked");
+                System.out.println("[INFO] Failed Passwords: " + this.UserRetrys);
+
+                if (this.UserRetrys >= this.UserRetrysMAX) {
+                    return new CollectLogs(false, "TO_MANY_INVALID_PASSWORDS");
+
+                }
+
+                return new CollectLogs(false, "INVALID_PASSWORD");
+            }
+
+            if (UserStatus == null) {
+                return new CollectLogs(false, "Unknown Account Status");
+            }
+
+            switch (UserStatus) {
+                case "active":
+                    System.out.println("[OK] The User account is active");
+                    return new CollectLogs(true, null);
+                case "disabled":
+                    System.out.println("[WARNING] This account is Locked an must be activated by an administrator");
+                    return new CollectLogs(false, "Account is Locked");
+                case "pending":
+                    System.out.println("[INFO] This account is not fully activated");
+                    RoleValidation check = new RoleValidation();
+                    check.RequestedRole(scanner);
+                    return new CollectLogs(true, "Must be authorized");
+                case "locked":
+                    System.out.println("[WARNING] This account is locked and must be activated by an administrator");
+                    return new CollectLogs(false, "Account is locked");
+                case "on_quarantine":
+                    System.out.println("[FATAL] This account is on quarantine and must be checked");
+                    return new CollectLogs(false, "Account is on quarantine based on malicious activities");
+                case "waiting_for_password_change":
+                    System.out.println("[INFO] Please change your current password to continue");
+                    return new CollectLogs(true, "Account needs a password change");
+            }
+
+            this.UserRetrys = 0;
+
+            return new CollectLogs(true, null);
+
+        } catch (SQLException error) {
+            System.out.println("[ERROR] SQL error during login: " + error.getMessage());
+            return new CollectLogs(false, "SQL_EXCEPTION");
+        }
+    }
+}
