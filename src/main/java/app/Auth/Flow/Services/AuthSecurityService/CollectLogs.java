@@ -1,10 +1,10 @@
-package app.Auth.Flow.Services.LoginService;
+package app.Auth.Flow.Services.AuthSecurityService;
 
-public class LoginResult {
+public class CollectLogs {
     private final boolean success;
     private final String failureReason;
 
-    public LoginResult(boolean success, String failureReason) {
+    public CollectLogs(boolean success, String failureReason) {
         this.success = success;
         this.failureReason = failureReason;
     }
