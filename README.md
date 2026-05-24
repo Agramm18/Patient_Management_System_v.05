@@ -182,57 +182,19 @@ The application does not create tables automatically yet. The database and table
 
 Create the database:
 
-```sql
+```mysql
 CREATE DATABASE patient_management_v5;
 ```
 
 Select the database:
 
-```sql
+```mysql
 USE patient_management_v5;
 ```
 
-`accounts` table:
+Required `roles` table:
 
-```sql
-CREATE TABLE accounts (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    account_name VARCHAR(50) NOT NULL UNIQUE,
-    email VARCHAR(100) NOT NULL UNIQUE,
-    phone_number VARCHAR(20),
-    department VARCHAR(50) NOT NULL DEFAULT 'unassigned',
-    user_job VARCHAR(50) NOT NULL DEFAULT 'unassigned',
-    user_role VARCHAR(50) NOT NULL DEFAULT 'unassigned',
-    account_status VARCHAR(50) NOT NULL DEFAULT 'disabled',
-    permission VARCHAR(50) NOT NULL DEFAULT 'read_only',
-    password_hash VARCHAR(255) NOT NULL,
-    requires_password_change BOOLEAN NOT NULL DEFAULT FALSE,
-    failed_password_attempts INT NOT NULL DEFAULT 0,
-    bootstrap_key VARCHAR(255) DEFAULT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-```
-
-`login_attempts` table:
-
-```sql
-CREATE TABLE login_attempts (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    account_id INT NULL,
-    entered_username VARCHAR(50) NOT NULL,
-    failure_reason VARCHAR(50) NULL,
-    is_success BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_login_attempts_account
-        FOREIGN KEY (account_id) REFERENCES accounts(id)
-        ON DELETE SET NULL
-);
-```
-
-Optional `roles` table for later role management:
-
-```sql
+```mysql
 CREATE TABLE roles (
     id INT AUTO_INCREMENT PRIMARY KEY,
     role_name VARCHAR(50) NOT NULL UNIQUE,
@@ -242,9 +204,9 @@ CREATE TABLE roles (
 );
 ```
 
-Optional starter roles matching the current role menu:
+Starter roles matching the current role menu:
 
-```sql
+```mysql
 INSERT INTO roles (role_name, role_description)
 VALUES
     ('local_admin', 'Full infrastructure and system access'),
@@ -259,13 +221,104 @@ VALUES
     ('apprentice', 'Training role with limited operational permissions');
 ```
 
+`account_status` table:
+
+```mysql
+CREATE TABLE account_status (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    status VARCHAR(50) NOT NULL DEFAULT 'disabled',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+INSERT INTO account_status (status)
+VALUES
+('active'),
+('disabled'),
+('pending'),
+('locked'),
+('on_quarantine'),
+('waiting_for_password_change');
+```
+
+`accounts` table:
+
+```mysql
+CREATE TABLE accounts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    account_name VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    phone_number VARCHAR(20),
+    department VARCHAR(50) NOT NULL DEFAULT 'unassigned',
+    user_job VARCHAR(50) NOT NULL DEFAULT 'unassigned',
+    user_role INT NOT NULL DEFAULT 10,
+    account_status INT NOT NULL DEFAULT 2,
+    permission VARCHAR(50) NOT NULL DEFAULT 'read_only',
+    password_hash VARCHAR(255) NOT NULL,
+    requires_password_change BOOLEAN NOT NULL DEFAULT FALSE,
+    failed_password_attempts INT NOT NULL DEFAULT 0,
+    bootstrap_key VARCHAR(255) DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (user_role) REFERENCES roles(id),
+    FOREIGN KEY (account_status) REFERENCES account_status(id)
+);
+```
+
+`login_attempts` table:
+
+```mysql
+CREATE TABLE login_attempts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    account_id INT NULL,
+    entered_username VARCHAR(50) NOT NULL,
+    failure_reason VARCHAR(50) NULL,
+    is_success BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_login_attempts_account
+        FOREIGN KEY (account_id) REFERENCES accounts(id)
+        ON DELETE SET NULL
+);
+```
+
+`access_management` table:
+
+```mysql
+CREATE TABLE access_management (
+   id INT AUTO_INCREMENT PRIMARY KEY,
+
+   requested_by INT NOT NULL,
+   requested_role INT NOT NULL,
+    requested_job VARCHAR(50) NOT NULL,
+    
+   request_status INT NOT NULL DEFAULT 3,
+
+   approved_by INT NULL,
+    approved_at TIMESTAMP NULL,
+
+   request_reason TEXT NULL,
+    reject_reason TEXT NULL,
+
+   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+   FOREIGN KEY (requested_by) REFERENCES accounts(id),
+   FOREIGN KEY (requested_role) REFERENCES roles(id),
+   FOREIGN KEY (approved_by) REFERENCES accounts(id),
+    FOREIGN KEY (request_status) REFERENCES account_status(id)
+);
+```
+
 Optional checks:
 
-```sql
+```mysql
 SHOW TABLES;
+SHOW COLUMNS FROM roles;
+SHOW COLUMNS FROM account_status;
 SHOW COLUMNS FROM accounts;
 SHOW COLUMNS FROM login_attempts;
-SHOW COLUMNS FROM roles;
+SHOW COLUMNS FROM access_management;
 ```
 
 ## Default Accounts
