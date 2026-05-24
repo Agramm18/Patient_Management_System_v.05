@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import java.sql.ResultSet;
 
 
-public class RoleRepository {
+public class CheckRoles {
 
     public boolean UserRole(String Username) {
         String sqlCheckUser = "SELECT id, user_role FROM accounts WHERE account_name = ?";
