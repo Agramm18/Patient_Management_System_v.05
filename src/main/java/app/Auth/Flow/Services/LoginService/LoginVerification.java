@@ -5,6 +5,7 @@ import java.util.Scanner;
 
 import app.Auth.Flow.Services.AuthSecurityService.CollectLogs;
 import app.Auth.Flow.Services.AuthSecurityService.RoleValidation;
+import app.Menus.DepartmentMenu;
 import app.Repository.LoginRepository.CheckUserInDB;
 
 public class LoginVerification {
@@ -65,8 +66,10 @@ public class LoginVerification {
                     return new CollectLogs(false, "Account is Locked");
                 case "pending":
                     System.out.println("[INFO] This account is not fully activated");
-                    RoleValidation check = new RoleValidation();
-                    check.RequestedRole(scanner);
+
+                    FirstLogin run = new FirstLogin();
+                    run.FirstSetup(Username, scanner);
+
                     return new CollectLogs(true, "Must be authorized");
                 case "locked":
                     System.out.println("[WARNING] This account is locked and must be activated by an administrator");
