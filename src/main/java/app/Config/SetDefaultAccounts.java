@@ -38,7 +38,7 @@ public class SetDefaultAccounts {
         String job = "system_administrator";
         String permission = "root_access";
         boolean needs_change = true;
-        String department = "IT";
+        int department = 5;
 
 
         System.out.println("[INFO] Hashing Password");
@@ -60,7 +60,7 @@ public class SetDefaultAccounts {
             statement.setString(7, job);
             statement.setString(8, permission);
             statement.setBoolean(9, needs_change);
-            statement.setString(10, department);
+            statement.setInt(10, department);
 
             int rows = statement.executeUpdate();
 
@@ -93,7 +93,7 @@ public class SetDefaultAccounts {
         String admin_job = "application_administrator";
         String permission = "admin_rights";
         boolean needs_change = true;
-        String department = "IT";
+        int department = 5;
 
         System.out.println("[INFO] Hashing Password");
         HashedPWSD = BCrypt.hashpw(AdminPWSD, BCrypt.gensalt(12));
@@ -115,7 +115,7 @@ public class SetDefaultAccounts {
             statement.setString(7, admin_job);
             statement.setString(8, permission);
             statement.setBoolean(9, needs_change);
-            statement.setString(10, department);
+            statement.setInt(10, department);
 
             int rows = statement.executeUpdate();
 
