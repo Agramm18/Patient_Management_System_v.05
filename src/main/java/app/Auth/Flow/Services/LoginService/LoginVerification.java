@@ -8,9 +8,19 @@ import app.Auth.Flow.Services.AuthSecurityService.RoleValidation;
 import app.Menus.DepartmentMenu;
 import app.Repository.LoginRepository.CheckUserInDB;
 
+
+/*
+     This Section Checks the Username and Validate how to proceed after the first Login
+
+     If pending -> first setup
+     If active -> display Menu based on Department & Job
+     If waiting_for_password_change & user_job = admin or local_admin -> the password must be changed to unlock these accounts
+
+*/
+
 public class LoginVerification {
-    private int UserRetrys = 0;
-    private int UserRetrysMAX = 5;
+    private int RETRYS = 0;
+    private int RETRYS_MAX = 5;
 
     private final CheckUserInDB repository = new CheckUserInDB();
 
@@ -26,26 +36,26 @@ public class LoginVerification {
     private String AccountStatus;
 
 
-    public CollectLogs LoggedUser(String Username, String PWSD, Scanner scanner) {
+    public CollectLogs loggedUser(String Username, String PWSD, Scanner scanner) {
 
         try {
-            boolean UserValid = repository.CheckUserInDB(Username);
-            boolean PasswordOK = repository.CheckPWSD(PWSD, Username);
-            String UserStatus = repository.CheckUserStatus(Username);
+            boolean userValid = repository.checkUserInDB(Username);
+            boolean passwordOK = repository.checkPWSD(PWSD, Username);
+            String userStatus = repository.checkUserStatus(Username);
 
-            if (!UserValid) {
+            if (!userValid) {
                 return new CollectLogs(false, "USERNAME_NOT_FOUND");
             }
 
             System.out.println("\n[INFO] Continue with PWSD check");
 
-            if (!PasswordOK) {
-                this.UserRetrys++;
+            if (!passwordOK) {
+                this.RETRYS++;
                 System.out.println("[WARNING] Invalid Password detected");
                 System.out.println("[INFO] Please Notice if retrys >=5 your account will be locked");
-                System.out.println("[INFO] Failed Passwords: " + this.UserRetrys);
+                System.out.println("[INFO] Failed Passwords: " + this.RETRYS);
 
-                if (this.UserRetrys >= this.UserRetrysMAX) {
+                if (this.RETRYS >= this.RETRYS_MAX) {
                     return new CollectLogs(false, "TO_MANY_INVALID_PASSWORDS");
 
                 }
@@ -53,11 +63,11 @@ public class LoginVerification {
                 return new CollectLogs(false, "INVALID_PASSWORD");
             }
 
-            if (UserStatus == null) {
+            if (userStatus == null) {
                 return new CollectLogs(false, "Unknown Account Status");
             }
 
-            switch (UserStatus) {
+            switch (userStatus) {
                 case "active":
                     System.out.println("[OK] The User account is active");
                     return new CollectLogs(true, null);
@@ -68,7 +78,7 @@ public class LoginVerification {
                     System.out.println("[INFO] This account is not fully activated");
 
                     FirstLogin run = new FirstLogin();
-                    run.FirstSetup(Username, scanner);
+                    run.firstSetup(Username, scanner);
 
                     return new CollectLogs(true, "Must be authorized");
                 case "locked":
@@ -82,7 +92,7 @@ public class LoginVerification {
                     return new CollectLogs(true, "Account needs a password change");
             }
 
-            this.UserRetrys = 0;
+            this.RETRYS = 0;
 
             return new CollectLogs(true, null);
 

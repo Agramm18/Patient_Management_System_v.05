@@ -3,9 +3,17 @@ package app.Auth.Flow.Services.AuthSecurityService;
 import java.util.Scanner;
 import app.Menus.roleMenu;
 
+/*
+    This part of the Code is for the Role handling
+    later this will check if the input was valid.
+    based on the input the role will select and redirected to the DB
+
+ */
+
+
 public class RoleValidation {
 
-    public void RequestedRole(Scanner scanner) {
+    public void requestRoles(Scanner scanner) {
         boolean selectedRoleIsValid = false;
 
         while (!selectedRoleIsValid) {
@@ -16,12 +24,11 @@ public class RoleValidation {
                 String selectedRoleSTR;
                 int selectedRole;
 
-                //Show all valid roles
+                //Build Object to show Available roles
                 roleMenu show = new roleMenu();
-
-                //Collect Roles via User Input
                 show.Roles();
 
+                //Collect roles via user input
                 System.out.println("\nPlease choose a role");
                 selectedRoleSTR = scanner.nextLine();
 
@@ -29,8 +36,9 @@ public class RoleValidation {
                 if (selectedRoleSTR.trim().isEmpty()) {
                     throw new IllegalArgumentException("[ERROR] This field can't be empty please try again");
                 } else {
-                    selectedRole = Integer.parseInt(selectedRoleSTR);
+                    selectedRole = Integer.parseInt(selectedRoleSTR); //Convert Str value to int
 
+                    //Check if the role is on an valid range
                     if (selectedRole < 1 || selectedRole > 10) {
                         throw new IllegalArgumentException("[ERROR] The chosen value is out of range the value can't be less than 1 or higher than 10");
                     } else {

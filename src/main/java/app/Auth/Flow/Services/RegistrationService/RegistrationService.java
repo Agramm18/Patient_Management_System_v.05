@@ -3,36 +3,51 @@ import java.util.Scanner;
 
 import app.Auth.Flow.PasswordFlow;
 
-public class RegistrationService {
-    private String UserName;
-    private String EmailAddress;
-    private String PhoneNumber;
-    private String HashedPWSD;
 
-    public void UserAccount(Scanner scanner) {
+/*
+    This is the Basic Registration for a User
+
+     Following things will be collected
+
+     - Username
+     - Hashed PWSD
+     - Email Address
+     - Phone Number
+
+       If everything is valid it will be stored via a getter and redirected to the DB query
+
+*/
+
+public class RegistrationService {
+    private String userName;
+    private String emailAddress;
+    private String phoneNumber;
+    private String hashedPWSD;
+
+    public void userAccunt(Scanner scanner) {
         System.out.println("[INFO] Creating User Account");
-        SetUserName(scanner);
-        SetEmailAddress(scanner);
-        SetPhoneNumber(scanner);
-        ShowCurrentInfo(scanner);
+        setUserName(scanner);
+        setEmailAddress(scanner);
+        setPhoneNumber(scanner);
+        showCurrentInfo(scanner);
     }
 
-    private void SetUserName(Scanner scanner) {
+    private void setUserName(Scanner scanner) {
         System.out.println("\n[INFO] Setting UserName");
-        String DefaulUserName;
+        String defaultUserName;
 
         while (true) {
             try {
                 System.out.println("[INFO] Please Enter your UserName");
-                DefaulUserName =  scanner.nextLine();
+                defaultUserName =  scanner.nextLine();
 
-                if (DefaulUserName.isBlank()) {
+                if (defaultUserName.isBlank()) {
                     throw new IllegalArgumentException("[ERROR] This field can't be empty please try again");
-                } else if (DefaulUserName.length() < 5 || DefaulUserName.length() > 20) {
+                } else if (defaultUserName.length() < 5 || defaultUserName.length() > 20) {
                     throw new IllegalArgumentException("[ERROR] The Username can't be shorter than 5 or longer than 20 letters please try again");
                 } else {
                     System.out.println("[OK] The UserName is now setted");
-                    this.UserName = DefaulUserName;
+                    this.userName = defaultUserName;
                     break;
                 }
             } catch (IllegalArgumentException error) {
@@ -43,24 +58,24 @@ public class RegistrationService {
     }
 
     //Set The Email Address and validate if the Email Address is valid
-    private void SetEmailAddress(Scanner scanner) {
+    private void setEmailAddress(Scanner scanner) {
         System.out.println("\n[INFO] Setting E-Mail Adress");
-        String UserEmail;
+        String userEmail;
 
         while (true) {
             try {
                 System.out.println("\n[INFO] Please enter your E-Mail Adress");
-                UserEmail = scanner.nextLine();
+                userEmail = scanner.nextLine();
 
-                if (UserEmail.isBlank()) {
+                if (userEmail.isBlank()) {
                     throw new IllegalArgumentException("[ERROR] This field can't be empty please try again");
-                } else if (UserEmail.length() >= 254) {
+                } else if (userEmail.length() >= 254) {
                     throw new IllegalArgumentException("[ERROR] The E-Mail can't be longer than 254 signs");
-                } else if (!UserEmail.contains("@")) {
+                } else if (!userEmail.contains("@")) {
                     throw new IllegalArgumentException("[ERROR] It seems the @ sign is missing please try again");
                 } else {
                     System.out.println("[OK] Your Email Adress is set");
-                    this.EmailAddress = UserEmail;
+                    this.emailAddress = userEmail;
                     break;
                 }
             } catch (IllegalArgumentException error) {
@@ -70,28 +85,27 @@ public class RegistrationService {
 
     }
 
-
-    //Set the PhoneNumber and validate if the Phone Number is valid
-    private void SetPhoneNumber(Scanner scanner) {
+    //Set the Phonenumber and validate if the Phone Number is valid
+    private void setPhoneNumber(Scanner scanner) {
         System.out.println("\n[INFO] Setting Phone Number");
         System.out.println("[INFO] Number Format: +49123456789");
 
-        String UserPhone;
+        String userPhone;
 
         while (true) {
             try {
                 System.out.println("\n[INFO] Please enter your Phone Number");
-                UserPhone = scanner.nextLine();
+                userPhone = scanner.nextLine();
 
-                if (UserPhone.isBlank()) {
+                if (userPhone.isBlank()) {
                     throw new IllegalArgumentException("[ERROR] This field can't be empty please try again");
-                } else if (UserPhone.length() > 15) {
+                } else if (userPhone.length() > 15) {
                     throw new IllegalArgumentException("[ERROR] Your phone number can't be longer than 15 please try again");
-                } else if (UserPhone.charAt(0) != '+') {
+                } else if (userPhone.charAt(0) != '+') {
                     throw new IllegalArgumentException("[ERROR] The Format is invalid please try again");
                 } else {
                     System.out.println("[OK] The Number is Valid an will be setted");
-                    this.PhoneNumber = UserPhone;
+                    this.phoneNumber = userPhone;
                     break;
                 }
             } catch (IllegalArgumentException error) {
@@ -101,46 +115,50 @@ public class RegistrationService {
     }
 
     //Printing the Results and allowing changes
-    private void ShowCurrentInfo(Scanner scanner) {
+    private void showCurrentInfo(Scanner scanner) {
         System.out.println("\n[INFO] Showing your Info");
-        System.out.println("[DEBUG] User Name: " + this.UserName);
-        System.out.println("[DEBUG] Email Adress: " + this.EmailAddress);
-        System.out.println("[DEBUG] Phone Number: " + this.PhoneNumber + "\n");
+        System.out.println("[DEBUG] User Name: " + this.userName);
+        System.out.println("[DEBUG] Email Adress: " + this.emailAddress);
+        System.out.println("[DEBUG] Phone Number: " + this.phoneNumber + "\n");
 
-        String RegistrationState;
-        int ChangeValue;
+        String registrationState;
+        int changeValue;
 
         while (true) {
             try {
                 System.out.println("\nINFO] Is the Data correct? Y/N]\n");
-                RegistrationState = scanner.nextLine().trim().toLowerCase();
+                registrationState = scanner.nextLine().trim().toLowerCase();
 
-                if (RegistrationState.isBlank()) {
+                if (registrationState.isBlank()) {
                     throw new IllegalArgumentException("[ERROR] This field can't be empty please try again");
-                } else if (!RegistrationState.equals("y") && !RegistrationState.equals("n")) {
+                } else if (!registrationState.equals("y") && !registrationState.equals("n")) {
                     throw new IllegalArgumentException("[ERROR] Only y for yes or n for n are valid please try again");
-                } else if (RegistrationState.equals("y")) {
+                } else if (registrationState.equals("y")) {
+
+                    //If everything is valid the password flow runs through the registration
                     PasswordFlow execute = new PasswordFlow();
-                    this.HashedPWSD = execute.Policy(scanner);
+                    this.hashedPWSD = execute.policy(scanner);
 
                 } else {
+
+                    //If anything is incorrect you can change the value
                     System.out.println("[INFO] Please Enter what you want to chang");
                     System.out.println("[INFO] 1 User Name");
                     System.out.println("[INFO] 2 Email Address");
                     System.out.println("[INFO] 3 Phone Number");
 
-                    ChangeValue = scanner.nextInt();
+                    changeValue = scanner.nextInt();
                     scanner.nextLine();
 
-                    if (ChangeValue == 0) {
+                    if (changeValue == 0) {
                         throw new IllegalArgumentException("[ERROR] The Value can't be 0 or empty please try again");
-                    } else if (ChangeValue == 1) {
-                        SetUserName(scanner);
-                    } else if (ChangeValue == 2) {
-                        SetEmailAddress(scanner);
-                    } else if (ChangeValue == 3) {
-                        SetPhoneNumber(scanner);
-                    } else if (ChangeValue > 3) {
+                    } else if (changeValue == 1) {
+                        setUserName(scanner);
+                    } else if (changeValue == 2) {
+                        setEmailAddress(scanner);
+                    } else if (changeValue == 3) {
+                        setPhoneNumber(scanner);
+                    } else if (changeValue > 3) {
                         throw new IllegalArgumentException("[ERROR] The Value is out of range please try again");
                     }
                 }
@@ -152,18 +170,18 @@ public class RegistrationService {
     }
 
     public String getUserName() {
-        return this.UserName;
+        return this.userName;
     }
 
     public String getEmailAddress() {
-        return this.EmailAddress;
+        return this.emailAddress;
     }
 
     public String getPhoneNumber() {
-        return this.PhoneNumber;
+        return this.phoneNumber;
     }
 
     public String getHashedPWSD() {
-        return this.HashedPWSD;
+        return this.hashedPWSD;
     }
 }

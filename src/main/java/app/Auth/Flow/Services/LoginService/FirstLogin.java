@@ -8,9 +8,28 @@ import app.Menus.DepartmentMenu;
 import app.Menus.JobMenus.*;
 import app.Repository.LoginRepository.HandleAccessManagement;
 
+/*
+    In this class the first login is handled if the User status is pending in the DB accounts
+
+    Following things will be handled
+
+    1. Setting your Department
+    2. Setting your Job
+    3. Setting your Role
+    4. Setting your Permissions
+
+    If that was set up successfully the DB Will updated your status as active
+
+    The current flow is something like this:
+
+    Show Menu -> Collect User Input as Str. -> Validate Input -> Convert as int -> Validate Input
+    Save Request in Access Management
+
+*/
+
 public class FirstLogin {
 
-    public void FirstSetup(String Username, Scanner scanner) {
+    public void firstSetup(String Username, Scanner scanner) {
 
         DepartmentMenu show = new DepartmentMenu();
         show.Departments();
@@ -18,11 +37,11 @@ public class FirstLogin {
         System.out.println("\n[INFO] Please setup an Department");
 
         SelectDepartment choose = new SelectDepartment();
-        choose.Department(scanner);
+        choose.department(scanner);
 
-        int Department = choose.getSelectedDepartment();
+        int department = choose.getSelectedDepartment();
 
-        switch (Department) {
+        switch (department) {
             case 1:
                 MedicalJobsMenu showMedical = new MedicalJobsMenu();
                 showMedical.jobsMenu();
@@ -71,6 +90,6 @@ public class FirstLogin {
 
 
         HandleAccessManagement run = new HandleAccessManagement();
-        run.AccessManagement(Username, Department);
+        run.AccessManagement(Username, department);
     }
 }

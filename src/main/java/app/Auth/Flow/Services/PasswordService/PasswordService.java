@@ -6,11 +6,32 @@ import java.io.Console;
 import java.util.Arrays;
 import java.util.Scanner;
 
+
+/*
+    This section handles the Password Validation & Creation
+
+    The Password must be
+
+    - Contain a lowerCase Letter
+    - Contain a upperCase Letter
+    - Contain a number
+    - contain a specialLetter
+    - Must be at least 10 letters long
+
+    After that you are forced to type in the same password again
+
+    Then the PWSD Will converted from char to string
+
+    And then the plain password will be hashed with bcrypt
+
+    After that the password is stored in a getter to direct it to the DB querry
+*/
+
 public class PasswordService {
-    String PlainPWSD;
-    String HashedPWSD;
-    char[] PWSDChar;
-    char[] VerifyPWSD;
+    String plainPWSD;
+    String hashedPWSD;
+    char[] pwsdCHAR;
+    char[] verifyPWSD;
 
     //Password Credentials
     private boolean FitPWSDLength;
@@ -21,15 +42,16 @@ public class PasswordService {
     private int retryCount = 0;
     private static final int MAX_RETRY_COUNT = 3;
 
-    public void UserPWSD(Scanner scanner) {
+    //Parrent Method to call other methods
+    public void userPWSD(Scanner scanner) {
         System.out.println("[INFO] Running through password creation");
         System.out.println("[INFO] Creating plain text PWSD");
 
         while (true) {
-            PlainPWSD(scanner);
+            plainPWSD(scanner);
             try {
                 System.out.println("[INFO] Running through validation process and validate if the password is valid");
-                ValidatePWSD();
+                validatePWSD();
                 break;
             } catch (IllegalStateException error) {
                 System.out.println(error.getMessage());
@@ -43,15 +65,16 @@ public class PasswordService {
             }
         }
 
-        RetypePWSD(scanner);
+        retypePWSD(scanner);
         System.out.println("[INFO] Converting Char back to string");
-        ConvertCharToString();
+        convertCHARtoString();
         System.out.println("[INFO] Hashing String values to an unreadable format");
         PlainToHash();
         System.out.println("[OK] Password where hashed successfully");
     }
 
-    public void PlainPWSD(Scanner scanner) {
+    //Collect the Plain Password with invisible Console input
+    public void plainPWSD(Scanner scanner) {
 
         while (true) {
             try {
@@ -60,11 +83,11 @@ public class PasswordService {
                 if (console != null) {
 
                     //Create pwsd with inivisible user input
-                    PWSDChar = console.readPassword("[INFO] Please set a password for your account: ");
+                    pwsdCHAR = console.readPassword("[INFO] Please set a password for your account: ");
                     break;
                 } else {
                     System.out.println("[INFO] Please set a password for your account");
-                    PWSDChar = scanner.nextLine().toCharArray();
+                    pwsdCHAR = scanner.nextLine().toCharArray();
                     break;
                 }
             } catch (Exception error) {
@@ -73,79 +96,84 @@ public class PasswordService {
         }
     }
 
-    private void ValidatePWSD() {
+    //Run through the Password credentials and check if they're all valid
+    private void validatePWSD() {
 
         //Password credentials
-        boolean HasUpper = false;
-        boolean HasLower = false;
-        boolean HasSpecial = false;
-        boolean HasNumbers = false;
-        boolean FitLength = false;
-        int FailedAttemtps = 0;
+        boolean hasUpper = false;
+        boolean hasLower = false;
+        boolean hasSpecial = false;
+        boolean hasNumbers = false;
+        boolean fitLength = false;
+        int failedAttempts = 0;
 
         //Check if the password fit to the credentaisl
-        if (this.PWSDChar.length == 0) {
+        if (this.pwsdCHAR.length == 0) {
             throw new IllegalStateException("[ERROR] Your Password can't be empty!");
-        } else if (this.PWSDChar.length < 10) {
+        } else if (this.pwsdCHAR.length < 10) {
             throw new IllegalStateException("[ERROR] Your password must bee at least 10 letters long");
         } else {
-            FitLength = true;
+            fitLength = true;
         }
 
         //Check if the PWSD fit to the credentials if thats the case the default vars will be sett to true
-        for (char c : PWSDChar) {
+        for (char c : pwsdCHAR) {
             if (Character.isUpperCase(c)) {
-                HasUpper = true;
+                hasUpper = true;
             }
 
             if (Character.isLowerCase(c)) {
-                HasLower = true;
+                hasLower = true;
             }
 
             if (Character.isDigit(c)) {
-                HasNumbers = true;
+                hasNumbers = true;
             }
 
             if (!Character.isLetterOrDigit(c)) {
-                HasSpecial = true;
+                hasSpecial = true;
             }
         }
 
         //Throw errors based on the value
-        if (!HasUpper) {
+        if (!hasUpper) {
             throw new IllegalStateException("[ERROR] Please note that your Password need to contain Uppercase Letters to be valid");
-        } else if (!HasLower) {
+        } else if (!hasLower) {
             throw new IllegalStateException("[ERROR] Please note that your Password need to contain Lowercase Letters to be valid");
-        } else if (!HasNumbers) {
+        } else if (!hasNumbers) {
             throw new IllegalStateException("[ERROR] Please note that your Password need to contain Numbers to be valid");
-        } else if (!HasSpecial) {
+        } else if (!hasSpecial) {
             throw new IllegalStateException("[ERROR] Please note that your Password need to contain a Special Letter (e.g. !%$§§%&/) to be valid");
         }
     }
 
-    private void RetypePWSD(Scanner scanner) {
+    //Force the user to retype the password
+    private void retypePWSD(Scanner scanner) {
         Console console = System.console();
 
-        this.VerifyPWSD = console.readPassword("[INFO] Please retype your password from before: ");
+        this.verifyPWSD = console.readPassword("[INFO] Please retype your password from before: ");
 
-        if (this.VerifyPWSD.length == 0 || !Arrays.equals(this.PWSDChar, this.VerifyPWSD)) {
+        //Check if the Passwords are match if not the user must retype the password then
+        if (this.verifyPWSD.length == 0 || !Arrays.equals(this.pwsdCHAR, this.verifyPWSD)) {
             throw new IllegalArgumentException("[ERROR] The verification password can't be empty and must be equal to the password from before");
         } else {
             System.out.println("[OK] Your password is correct an fit to all the credentials");
         }
     }
 
-    private void ConvertCharToString() {
-        this.PlainPWSD = String.valueOf(PWSDChar);
+    //Convert the Char back to string to get the Value of it
+    private void convertCHARtoString() {
+        this.plainPWSD = String.valueOf(pwsdCHAR);
         System.out.println("[OK] Passwords are converted");
     }
 
+    //Hash the password with bcrypt and the string value
     private void PlainToHash() {
-
-        this.HashedPWSD = BCrypt.hashpw(PlainPWSD, BCrypt.gensalt(15));
+        this.hashedPWSD = BCrypt.hashpw(plainPWSD, BCrypt.gensalt(15));
     }
 
+    //Store the pwsd in a getter
     public String getHashedPWSD() {
-        return this.HashedPWSD;
+        return this.hashedPWSD;
     }
 }
