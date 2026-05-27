@@ -7,7 +7,7 @@ import java.sql.*;
 
 public class CheckUserInDB {
 
-    public boolean CheckUserInDB(String username) throws SQLException {
+    public boolean checkUserInDB(String username) throws SQLException {
         System.out.println("\n[INFO] Validate the User");
 
         String sql = "SELECT id FROM accounts WHERE account_name = ?";
@@ -34,7 +34,7 @@ public class CheckUserInDB {
         return false;
     }
 
-    public boolean CheckPWSD(String pwsd, String username) throws SQLException {
+    public boolean checkPWSD(String pwsd, String username) throws SQLException {
         System.out.println("\n[INFO] Checking User password");
 
         String sql = "SELECT password_hash FROM accounts WHERE account_name = ?";
@@ -63,7 +63,7 @@ public class CheckUserInDB {
         }
     }
 
-    public String CheckUserStatus(String username) throws SQLException {
+    public String checkUserStatus(String username) throws SQLException {
         System.out.println("[INFO] Checking account status");
 
         String AccountStatus;

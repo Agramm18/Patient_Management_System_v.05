@@ -4,8 +4,6 @@ import java.sql.SQLException;
 import java.util.Scanner;
 
 import app.Auth.Flow.Services.AuthSecurityService.CollectLogs;
-import app.Auth.Flow.Services.AuthSecurityService.RoleValidation;
-import app.Menus.DepartmentMenu;
 import app.Repository.LoginRepository.CheckUserInDB;
 
 

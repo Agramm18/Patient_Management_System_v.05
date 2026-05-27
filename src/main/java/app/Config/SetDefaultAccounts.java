@@ -38,7 +38,7 @@ public class SetDefaultAccounts {
         String job = "system_administrator";
         String permission = "root_access";
         boolean needs_change = true;
-        int department = 5;
+        int department = 11;
 
 
         System.out.println("[INFO] Hashing Password");

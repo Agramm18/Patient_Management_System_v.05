@@ -1,15 +1,15 @@
 package app.Bootstrap;
 
+import app.CLIText.DisplayMessages.LoaderMSG;
 import app.Controller.*;
+
 import java.util.Scanner;
 
 public class BootConfigService {
-    public void DisplayHelloMSG() {
-        System.out.println("\n==================================================");
-        System.out.println("                 SYSTEM LOADER");
-        System.out.println("--------------------------------------------------");
-        System.out.println("  Loading program modules...");
-        System.out.println("==================================================\n");
+
+    public void displayLoader() {
+        LoaderMSG show = new LoaderMSG();
+        show.message();
     }
 
     public void SystemConfig(Scanner scanner) {

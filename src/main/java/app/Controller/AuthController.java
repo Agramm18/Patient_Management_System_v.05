@@ -2,7 +2,7 @@ package app.Controller;
 
 import app.Auth.Flow.LoginFlow;
 import app.Auth.Flow.RegistrationFlow;
-import app.Menus.AuthMenu;
+import app.CLIText.Menus.Program.AuthMenu;
 
 import java.util.Scanner;
 
@@ -18,7 +18,7 @@ public class AuthController {
             try {
 
                 AuthMenu show = new AuthMenu();
-                show.AuthMenu();
+                show.authMenu();
 
                 AccountStatusSTR = scanner.nextLine().trim().toLowerCase();
 
@@ -31,11 +31,11 @@ public class AuthController {
                         throw new IllegalArgumentException("[ERROR] The value can't be less than 1 or higher than 4");
                     } else if (UserValue == 1) {
                         RegistrationFlow register = new RegistrationFlow();
-                        register.User(scanner);
+                        register.user(scanner);
 
                     } else if (UserValue == 2) {
                         LoginFlow login = new LoginFlow();
-                        login.User(scanner);
+                        login.user(scanner);
 
                     } else {
                         System.out.println("\n[INFO] You have chosen to end this program");

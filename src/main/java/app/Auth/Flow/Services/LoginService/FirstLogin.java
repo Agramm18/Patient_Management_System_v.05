@@ -3,9 +3,8 @@ package app.Auth.Flow.Services.LoginService;
 import java.util.Scanner;
 
 import app.Auth.Flow.Services.AuthSecurityService.SelectDepartment;
-import app.Auth.Flow.Services.AuthSecurityService.SelectJob;
-import app.Menus.DepartmentMenu;
-import app.Menus.JobMenus.*;
+import app.CLIText.Menus.Departments.DepartmentMenu;
+import app.CLIText.Menus.DepartmentJobs.*;
 import app.Repository.LoginRepository.HandleAccessManagement;
 
 /*
@@ -32,7 +31,7 @@ public class FirstLogin {
     public void firstSetup(String Username, Scanner scanner) {
 
         DepartmentMenu show = new DepartmentMenu();
-        show.Departments();
+        show.departments();
 
         System.out.println("\n[INFO] Please setup an Department");
 

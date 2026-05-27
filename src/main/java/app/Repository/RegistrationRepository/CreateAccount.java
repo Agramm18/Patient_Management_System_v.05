@@ -22,8 +22,9 @@ public class CreateAccount {
 
         int UserStatus = 3;
         int UserRole = 9;
+        int Department = 12;
 
-        String sql = "INSERT INTO accounts (account_name, email, phone_number, password_hash, account_status, user_role) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO accounts (account_name, email, phone_number, password_hash, account_status, user_role, department) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection connection = DBManager.getConnection();
             PreparedStatement statement = connection.prepareStatement(sql);
@@ -34,6 +35,7 @@ public class CreateAccount {
             statement.setString(4, HashedPWSD);
             statement.setInt(5, UserStatus);
             statement.setInt(6, UserRole);
+            statement.setInt(7, Department);
 
             int rows = statement.executeUpdate();
 

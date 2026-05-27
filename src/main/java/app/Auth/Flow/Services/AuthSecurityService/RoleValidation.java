@@ -1,7 +1,7 @@
 package app.Auth.Flow.Services.AuthSecurityService;
 
 import java.util.Scanner;
-import app.Menus.roleMenu;
+import app.CLIText.Menus.Program.roleMenu;
 
 /*
     This part of the Code is for the Role handling
@@ -26,7 +26,7 @@ public class RoleValidation {
 
                 //Build Object to show Available roles
                 roleMenu show = new roleMenu();
-                show.Roles();
+                show.roles();
 
                 //Collect roles via user input
                 System.out.println("\nPlease choose a role");

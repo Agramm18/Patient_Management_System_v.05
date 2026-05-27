@@ -1,8 +1,8 @@
-package app.Menus;
+package app.CLIText.Menus.Departments;
 
 public class DepartmentMenu {
 
-    public void Departments() {
+    public void departments() {
         System.out.println("\n==================================================");
         System.out.println("                Available Departments");
         System.out.println("==================================================");

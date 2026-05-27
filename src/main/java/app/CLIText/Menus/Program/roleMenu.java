@@ -1,8 +1,8 @@
-package app.Menus;
+package app.CLIText.Menus.Program;
 
 public class roleMenu {
 
-    public void Roles() {
+    public void roles() {
 
         System.out.println("\n==================================================");
         System.out.println("                ROLE SELECTION MENU");

@@ -223,7 +223,7 @@ For `pending` accounts, the current flow is:
 
 1. `FirstLogin.FirstSetup(username, scanner)` displays `DepartmentMenu`.
 2. `SelectDepartment` validates a department number from `1` to `11`.
-3. `FirstLogin` displays the matching job menu class from `app.Menus.JobMenus`.
+3. `FirstLogin` displays the matching job menu class from `app.CLIText.Menus.DepartmentJobs`.
 4. `HandleAccessManagement` stores the access request.
 
 Current limitations:
