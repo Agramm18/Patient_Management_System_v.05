@@ -6,10 +6,19 @@ import app.CLIText.Menus.Program.AuthMenu;
 
 import java.util.Scanner;
 
+
+/*
+    This section is a controller where the User has to choose what he wants to do
+
+    1. Register a New account (Will redirect to  RegistrationFlow.java)
+    2. Login an existent Account (Will redirect to LoginFlow.java)
+    3. To exit the Program
+*/
+
 public class AuthController {
 
-    public void VerifyAccountStatus(Scanner scanner) {
-        String AccountStatusSTR;
+    public void verifyAccountStatus(Scanner scanner) {
+        String accountStatusSTR;
 
         System.out.println("\n[INFO] Verify the user");
         System.out.println("[INFO] Running through the login & registration process\n");
@@ -20,20 +29,20 @@ public class AuthController {
                 AuthMenu show = new AuthMenu();
                 show.authMenu();
 
-                AccountStatusSTR = scanner.nextLine().trim().toLowerCase();
+                accountStatusSTR = scanner.nextLine().trim().toLowerCase();
 
-                if (AccountStatusSTR.isBlank()) {
+                if (accountStatusSTR.isBlank()) {
                     throw new IllegalArgumentException("[ERROR] Please type in something to continue");
                 } else {
-                    int UserValue = Integer.parseInt(AccountStatusSTR);
+                    int userValue = Integer.parseInt(accountStatusSTR);
 
-                    if (UserValue < 1 || UserValue > 3) {
+                    if (userValue < 1 || userValue > 3) {
                         throw new IllegalArgumentException("[ERROR] The value can't be less than 1 or higher than 4");
-                    } else if (UserValue == 1) {
+                    } else if (userValue == 1) {
                         RegistrationFlow register = new RegistrationFlow();
                         register.user(scanner);
 
-                    } else if (UserValue == 2) {
+                    } else if (userValue == 2) {
                         LoginFlow login = new LoginFlow();
                         login.user(scanner);
 

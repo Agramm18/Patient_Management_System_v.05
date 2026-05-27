@@ -1,9 +1,30 @@
-package app.Config;
+package app.Repository.RegistrationRepository;
 
 import app.Config.DBManager;
 import java.sql.*;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.mindrot.jbcrypt.BCrypt;
+
+/*
+    In this Section the default Accounts for the Local Admin and Admin are created
+
+    1. Local Admin Values
+
+    1. Department: System
+    2. Status: waiting_for_password_change
+    3. role: local_admin
+    4. permission: root_access
+
+    2. Admin Values
+
+    1. Department: IT
+    2. Status: waiting_for_password_change
+    3. role: admin
+    4. permission: admin_rights
+
+    This Accounts where created as default Accounts with the values form the .env
+*/
+
 
 public class SetDefaultAccounts {
     private final Dotenv dotenv = Dotenv.load();

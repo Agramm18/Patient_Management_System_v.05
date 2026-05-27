@@ -1,6 +1,22 @@
 package app.Controller;
 import java.util.Scanner;
-//Main Controller classes that navigate the System
+
+/*
+    This Section is the Frontcontroller which basically Manage the other controllers
+
+    The Idea behind this was to have a Parent Controller who calls the child Controller such as Auth, Config etc.
+    The main reason behind this is to keep the code reliable and maintainable so I can clearly see which class calls which.
+
+    Currently only Config and Auth are called the normal runtime should should be
+
+    1. Config
+    2. Auth
+    3. Menu
+    4. Service
+
+    So I can call the Menus based on the Department of the User to maintain Security
+*/
+
 public class FrontController {
     private final AuthController authController;
     private final ConfigController configController;
@@ -27,14 +43,14 @@ public class FrontController {
     }
 
     //Handle UseCase via RequestType
-    public boolean NavigateSubController(RequestType request, Scanner scanner) {
+    public boolean navigateSubController(RequestType request, Scanner scanner) {
 
         switch (request) {
             case CONFIG:
                 return configController.execute(scanner);
 
             case AUTH:
-                authController.VerifyAccountStatus(scanner);
+                authController.verifyAccountStatus(scanner);
                 return true;
         }
 

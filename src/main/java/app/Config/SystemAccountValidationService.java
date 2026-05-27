@@ -1,5 +1,5 @@
 package app.Config;
-import app.Config.DBManager;
+import app.Repository.RegistrationRepository.SetDefaultAccounts;
 
 import java.sql.*;
 

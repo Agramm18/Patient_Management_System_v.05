@@ -4,6 +4,15 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+
+/*
+ This section is the DB Manager who collects the Username, PWSD and Url from the SQL Connection
+
+ The Idea behind this was to Maintain a global connection instead of injecting everytime the Connection so I can Import the connection
+
+
+*/
+
 public final class DBManager {
     private static String sqlUser;
     private static String sqlPWSD;
@@ -16,7 +25,7 @@ public final class DBManager {
     public static void initialize(
             String user,
             String password,
-            String URL
+            String url
     ) {
         System.out.println("\n[INFO] Building global DB Connection");
         System.out.println("[INFO] Save global DB runtime config");
@@ -24,7 +33,7 @@ public final class DBManager {
 
         sqlUser = user;
         sqlPWSD = password;
-        sqlURL = URL;
+        sqlURL = url;
     }
 
     public static Connection getConnection() throws SQLException {
