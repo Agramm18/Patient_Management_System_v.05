@@ -1,12 +1,12 @@
 # Patient Management System V5.01
 
-Java 21 console project for a patient management system. The current implementation focuses on bootstrapping, controller routing, `.env` validation, MySQL connection setup, default administrator account creation, registration, login, account status checks, login attempt logging, and first groundwork for access requests.
+Java 21 console project for a patient management system. The current implementation focuses on bootstrapping, controller routing, environment validation, MySQL connection setup, default administrator account creation, registration, login, account status checks, login attempt logging, and initial access-request handling for pending accounts.
 
 The project is not a complete patient management application yet. Patient records, treatment workflows, appointments, billing, reporting, administration workflows, a connected main application menu after login, and a graphical UI are still planned work.
 
 ## Current Project Status
 
-The application is structured into bootstrap, controller, configuration, authentication flow, service, menu, and repository layers.
+The application is structured into bootstrap, controller, configuration, authentication flow, service, CLI text/menu, and repository layers.
 
 Current runtime entry path:
 
@@ -22,17 +22,18 @@ Main implemented areas:
 
 - Maven project setup with Java 21 compiler configuration.
 - Console bootstrap through `BootConfigService`.
+- CLI startup, loader, config, auth, department, and department-job text menus.
 - Central dispatcher structure through `FrontController`.
 - Configuration startup through `ConfigController`.
 - `.env` file validation through `EnvValidationService`.
 - MySQL JDBC URL creation and connection test through `SQLValidationService`.
-- Runtime connection settings through `DBManager`.
-- Default account checks through `SystemAccountValidationService`.
-- Automatic creation of missing `local_admin` and `admin` accounts through `SetDefaultAccounts`.
+- Runtime database connection settings through `DBManager`.
+- Default account checks through `CheckForDefaultAccounts`.
+- Automatic creation of missing `local_admin` and `admin` accounts through `CreateDefaultAccounts`.
 - Registration through `RegistrationFlow`, `RegistrationService`, `PasswordFlow`, `PasswordService`, and `CreateAccount`.
 - BCrypt hashing for default accounts, registration passwords, and login verification.
 - Login through `LoginFlow`, `LoginInputCollector`, `LoginVerification`, and `CheckUserInDB`.
-- Account status checks during login.
+- Account status handling during login.
 - Login attempt persistence through `app.Repository.logsRepository.CollectLogs`.
 - First-login/access-request groundwork for `pending` accounts through `FirstLogin`, `DepartmentMenu`, `SelectDepartment`, department job menus, and `HandleAccessManagement`.
 - SQL schema documentation in `sqlDESCRIPTION.md`.
@@ -40,20 +41,20 @@ Main implemented areas:
 
 ## Current Runtime Flow
 
-1. `app.Main` creates a `Scanner`, prints the welcome text, and starts `BootConfigService`.
+1. `app.Main` creates a `Scanner`, prints the startup message, displays the loader, and starts `BootConfigService`.
 2. `BootConfigService.SystemConfig(scanner)` creates controller objects.
 3. `FrontController` routes first to `CONFIG`.
 4. `ConfigController.execute(scanner)` validates `.env`, tests SQL connection settings, initializes `DBManager`, and checks starter accounts.
 5. `EnvValidationService` requires database values and default account values from `.env`.
 6. `SQLValidationService` builds `jdbc:mysql://<host>:<port>/<database>` and tests the connection.
 7. `DBManager` stores the runtime connection settings.
-8. `SystemAccountValidationService` checks whether the starter administrator accounts exist.
-9. `SetDefaultAccounts` creates missing default accounts with BCrypt password hashes.
+8. `CheckForDefaultAccounts` checks whether the starter administrator accounts exist.
+9. `CreateDefaultAccounts` creates missing default accounts with BCrypt password hashes.
 10. If configuration succeeds, `FrontController` routes to `AUTH`.
 11. `AuthController` shows the authentication menu: registration, login, or exit.
 12. Registration collects username, email, phone number, and password.
 13. `PasswordService` validates, confirms, and hashes the password.
-14. `CreateAccount` stores the new account as `pending` with role `intern`.
+14. `CreateAccount` stores the new account as `pending`, `intern`, and `unassigned`.
 15. Login collects username and password, validates both, checks account status, and logs the attempt.
 16. If the account status is `pending`, `FirstLogin` starts the current access-request flow.
 17. `FirstLogin` asks for a department, displays the matching job menu stub, and stores an access request through `HandleAccessManagement`.
@@ -85,12 +86,34 @@ src/main/java/app
 |               `-- RegistrationService.java
 |-- Bootstrap
 |   `-- BootConfigService.java
+|-- CLIText
+|   |-- DisplayMessages
+|   |   |-- ConfigMSG.java
+|   |   |-- LoaderMSG.java
+|   |   `-- StartMSG.java
+|   `-- Menus
+|       |-- DepartmentJobs
+|       |   |-- AdministrationJobsMenu.java
+|       |   |-- EmergencyJobsMenu.java
+|       |   |-- FinanceJobsMenu.java
+|       |   |-- itJobsMenu.java
+|       |   |-- LaboratoryJobsMenu.java
+|       |   |-- MedicalJobsMenu.java
+|       |   |-- OfficeJobsMenu.java
+|       |   |-- PharmacyJobsMenu.java
+|       |   |-- SecurityJobsMenu.java
+|       |   |-- SystemJobsMenu.java
+|       |   `-- TrainingJobsMenu.java
+|       |-- Departments
+|       |   `-- DepartmentMenu.java
+|       `-- Program
+|           |-- AuthMenu.java
+|           `-- roleMenu.java
 |-- Config
+|   |-- CheckForDefaultAccounts.java
 |   |-- DBManager.java
 |   |-- EnvValidationService.java
-|   |-- SQLValidationService.java
-|   |-- SetDefaultAccounts.java
-|   `-- SystemAccountValidationService.java
+|   `-- SQLValidationService.java
 |-- Controller
 |   |-- AuthController.java
 |   |-- ConfigController.java
@@ -98,33 +121,18 @@ src/main/java/app
 |   |-- MenuController.java
 |   |-- ServiceController.java
 |   `-- uiController.java
-|-- Menus
-|   |-- AuthMenu.java
-|   |-- CLIText.java
-|   |-- DepartmentMenu.java
-|   |-- roleMenu.java
-|   `-- JobMenus
-|       |-- AdministrationJobsMenu.java
-|       |-- EmergencyJobsMenu.java
-|       |-- FinanceJobsMenu.java
-|       |-- LaboratoryJobsMenu.java
-|       |-- MedicalJobsMenu.java
-|       |-- OfficeJobsMenu.java
-|       |-- PharmacyJobsMenu.java
-|       |-- SecurityJobsMenu.java
-|       |-- SystemJobsMenu.java
-|       |-- TrainingJobsMenu.java
-|       `-- itJobsMenu.java
 `-- Repository
-    |-- PasswordPolicyRepository.java
-    |-- LoginRepository
+    |-- AuthRepository
     |   |-- CheckRoles.java
-    |   |-- CheckUserInDB.java
     |   `-- HandleAccessManagement.java
-    |-- RegistrationRepository
-    |   `-- CreateAccount.java
-    `-- logsRepository
-        `-- CollectLogs.java
+    |-- ConfigRepository
+    |   `-- CreateDefaultAccounts.java
+    |-- LoginRepository
+    |   `-- CheckUserInDB.java
+    |-- logsRepository
+    |   `-- CollectLogs.java
+    `-- RegistrationRepository
+        `-- CreateAccount.java
 ```
 
 Additional project files:
@@ -152,15 +160,15 @@ README.md
 
 ## Environment Setup
 
-Create a `.env` file in the project root. The complete list of required values is documented in `sqlDESCRIPTION.md`.
+Create a `.env` file in the project root. The complete environment and database setup is documented in `sqlDESCRIPTION.md`.
 
 ## Database Setup
 
-The application does not create the full database schema automatically yet. Database schema, seed data, required environment values, and current ID dependencies are documented in `sqlDESCRIPTION.md`.
+The SQL setup is intentionally kept out of this README. Use `sqlDESCRIPTION.md` for all database setup details.
 
 ## Default Accounts
 
-At startup, `SystemAccountValidationService` checks for the starter administrator accounts. If one or both accounts are missing, `SetDefaultAccounts` creates them from `.env` values. The exact database values are documented in `sqlDESCRIPTION.md`.
+At startup, `CheckForDefaultAccounts` checks whether the starter administrator accounts exist. If one or both accounts are missing, `CreateDefaultAccounts` creates them from `.env` values. The exact database values are documented in `sqlDESCRIPTION.md`.
 
 ## Registration
 
@@ -176,7 +184,7 @@ Current validation:
 - Password must contain uppercase letters, lowercase letters, numbers, and special characters.
 - Password confirmation must match.
 
-New accounts currently start as `pending` and `intern`. The underlying database defaults and IDs are documented in `sqlDESCRIPTION.md`.
+New accounts currently start as `pending`, `intern`, and `unassigned`. The exact database values and IDs are documented in `sqlDESCRIPTION.md`.
 
 ## Login
 
@@ -221,17 +229,18 @@ waiting_for_password_change
 
 For `pending` accounts, the current flow is:
 
-1. `FirstLogin.FirstSetup(username, scanner)` displays `DepartmentMenu`.
+1. `FirstLogin.firstSetup(username, scanner)` displays `DepartmentMenu`.
 2. `SelectDepartment` validates a department number from `1` to `11`.
 3. `FirstLogin` displays the matching job menu class from `app.CLIText.Menus.DepartmentJobs`.
-4. `HandleAccessManagement` stores the access request.
+4. `HandleAccessManagement.accessManagement(username, department)` stores the access request.
 
 Current limitations:
 
 - Job menus only display placeholder text.
 - `SelectJob` exists but is empty.
 - Job selection is not collected yet.
-- Requested job and requested role are not based on user selection yet.
+- Requested job is stored as `unassigned`.
+- Requested role currently defaults to `intern`.
 - Account approval, rejection, and activation workflows are not implemented yet.
 
 ## Run The Project
@@ -240,6 +249,12 @@ Build:
 
 ```bash
 mvn clean package
+```
+
+Compile without packaging:
+
+```bash
+mvn -DskipTests compile
 ```
 
 Start:
@@ -266,9 +281,8 @@ Dependencies are defined in `pom.xml`:
 - Password change for `waiting_for_password_change` accounts is not implemented yet.
 - Failed login counters are tracked in memory during a login flow, but are not persisted yet.
 - Account locking after too many failed login attempts is not persisted yet.
-- `RoleValidation` and `roleMenu` still exist, but they are not part of the active pending-login flow.
-- `CheckRoles` is present but does not match the current role handling and is not part of the active login flow.
-- `AccountPolicy`, `SelectJob`, `PasswordPolicyRepository`, `MenuController`, `ServiceController`, `uiController`, and `CLIText` are placeholders.
+- `RoleValidation`, `roleMenu`, and `CheckRoles` still exist, but they are not part of the active pending-login flow.
+- `AccountPolicy`, `SelectJob`, `MenuController`, `ServiceController`, and `uiController` are placeholders.
 - Most department job menu classes are placeholders.
 - Patient data, treatment, appointment, billing, reporting, and UI workflows are not implemented yet.
 - There are no automated tests yet.
@@ -276,11 +290,10 @@ Dependencies are defined in `pom.xml`:
 ## Known Current Notes
 
 - The application is currently console-based.
-- `LoginInputCollector.enterPWSD()` only handles password input when `System.console()` is available. IDE run configurations without a real console can hang at login.
-- `PasswordService.RetypePWSD()` expects `System.console()` and can fail in environments without a real console.
+- `LoginInputCollector.enterPWSD()` only handles password input when `System.console()` is available. IDE run configurations without a real console can block the login flow.
+- `PasswordService.retypePWSD()` expects `System.console()` and can fail in environments without a real console.
 - `SQLValidationService.DBConnection()` logs failed DB connections but does not immediately hard-stop the boot process itself.
-- `EnvValidationService.CheckFileStatus()` reports a missing `.env` but does not immediately hard-stop the boot process itself.
-- The runtime welcome message in `Main` still prints `Version 5.0`, while the project is documented as `V5.01`.
+- `EnvValidationService.checkFileStatus()` reports a missing `.env` but does not immediately hard-stop the boot process itself.
 - Some class and method names still contain typos or inconsistent naming and should be cleaned up later.
 - The Mermaid and Draw.io documentation under `docs/` may need another pass after the latest class and database changes.
 
