@@ -1,7 +1,6 @@
 package app.Controller;
 import java.util.Scanner;
 import app.Config.*;
-import app.Controller.FrontController.RequestType;
 
 /*
     This Section is a controller that routes the user to the Auth Process
@@ -31,7 +30,7 @@ public class ConfigController {
                 configurate.getSqlURL()
         );
 
-        SystemAccountValidationService CheckStatus = new SystemAccountValidationService();
-        return CheckStatus.DBAccounts();
+        CheckForDefaultAccounts CheckStatus = new CheckForDefaultAccounts();
+        return CheckStatus.dbAccounts();
     }
 }

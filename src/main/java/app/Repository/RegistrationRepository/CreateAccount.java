@@ -5,6 +5,29 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+
+/*
+    In this Section the Account Creation is Handled
+
+    Following things are current implemented
+
+    1. Username
+    2. Email
+    2. Phone Number
+    3. Hashed PWSD
+    4. User Status
+    5. User Role
+    6. Department
+
+    A Default Account is created with the Following Default States
+
+    1. Role -> Intern
+    2. Department -> Unassigned
+    3. User Status -> Pending
+    5. User Permission -> Read Only
+
+*/
+
 public class CreateAccount {
 
     public void newAccount(String Username, String Email, String PhoneNumber, String HashedPWSD) {

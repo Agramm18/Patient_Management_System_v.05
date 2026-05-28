@@ -1,4 +1,4 @@
-package app.Repository.LoginRepository;
+package app.Repository.AuthRepository;
 
 import app.Config.DBManager;
 import java.sql.Connection;
@@ -7,9 +7,17 @@ import java.sql.SQLException;
 import java.sql.ResultSet;
 
 
+/*
+    In this Section the Code from the User will be checked
+
+    Basend on
+
+    1. Username + ID
+*/
+
 public class CheckRoles {
 
-    public boolean UserRole(String Username) {
+    public boolean userRole(String Username) {
         String sqlCheckUser = "SELECT id, user_role FROM accounts WHERE account_name = ?";
 
         try (Connection connection = DBManager.getConnection();

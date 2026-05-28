@@ -1,4 +1,4 @@
-package app.Repository.LoginRepository;
+package app.Repository.AuthRepository;
 
 
 import app.Config.DBManager;
@@ -7,18 +7,28 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 
+
+/*
+    In this Section the Access Management is Handled
+
+    Current things are Handled now
+
+    1. Who makes the Request (Username)
+    2. Which Department is Requested
+*/
+
 public class HandleAccessManagement {
     private static final String DEFAULT_REQUESTED_JOB = "unassigned";
     private static final int DEFAULT_REQUESTED_ROLE = 9;
 
-    private int RequestedBy;
-    private int RequestedDepartment;
+    private int requestedBy;
+    private int requestedDepartment;
 
-    public void AccessManagement(String Username, int Department) {
-        this.RequestedDepartment = Department;
+    public void accessManagement(String Username, int Department) {
+        this.requestedDepartment = Department;
         collectUser(Username);
 
-        if (this.RequestedBy > 0) {
+        if (this.requestedBy > 0) {
             insertData();
         } else {
             System.out.println("[ERROR] No valid account by the Username " + Username + "Where found");
@@ -37,10 +47,10 @@ public class HandleAccessManagement {
             ResultSet rs = stmt.executeQuery();
 
                 if (rs.next()) {
-                    this.RequestedBy = rs.getInt("id");
+                    this.requestedBy = rs.getInt("id");
 
-                    System.out.println("[OK] Username is Sucsessfully Collected");
-                    System.out.println("[INFO] Requested by Account id: " + this.RequestedBy);
+                    System.out.println("[OK] Username is Successfully Collected");
+                    System.out.println("[INFO] Requested by Account id: " + this.requestedBy);
                 } else {
                     System.out.println("[ERROR] No account found with this username");
                 }
@@ -58,8 +68,8 @@ public class HandleAccessManagement {
         try (Connection connection = DBManager.getConnection();
             PreparedStatement stmt = connection.prepareStatement(sql);
         ) {
-            stmt.setInt(1, this.RequestedBy);
-            stmt.setInt(2, this.RequestedDepartment);
+            stmt.setInt(1, this.requestedBy);
+            stmt.setInt(2, this.requestedDepartment);
             stmt.setString(3, DEFAULT_REQUESTED_JOB);
             stmt.setInt(4, DEFAULT_REQUESTED_ROLE);
 

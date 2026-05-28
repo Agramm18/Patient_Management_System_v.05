@@ -5,6 +5,18 @@ import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
 
+
+/*
+    In this Section the User is Checked in the DB
+
+    Following things are current be checked
+
+    1. If the User even exist in the DB
+    2. If the Hashed Password matches with the Password in the DB
+    3. What the Status is in from the User
+
+*/
+
 public class CheckUserInDB {
 
     public boolean checkUserInDB(String username) throws SQLException {
@@ -66,7 +78,7 @@ public class CheckUserInDB {
     public String checkUserStatus(String username) throws SQLException {
         System.out.println("[INFO] Checking account status");
 
-        String AccountStatus;
+        String accountStatus;
 
         String sql = "SELECT s.status FROM accounts a JOIN account_status s ON a.account_status = s.id WHERE account_name = ?";
 
@@ -78,9 +90,9 @@ public class CheckUserInDB {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                AccountStatus = rs.getString("status");
-                System.out.println("[INFO] Current Account Status: " + AccountStatus);
-                return AccountStatus;
+                accountStatus = rs.getString("status");
+                System.out.println("[INFO] Current Account Status: " + accountStatus);
+                return accountStatus;
             }
 
         } catch (SQLException error) {

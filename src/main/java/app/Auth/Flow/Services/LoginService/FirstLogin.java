@@ -5,7 +5,7 @@ import java.util.Scanner;
 import app.Auth.Flow.Services.AuthSecurityService.SelectDepartment;
 import app.CLIText.Menus.Departments.DepartmentMenu;
 import app.CLIText.Menus.DepartmentJobs.*;
-import app.Repository.LoginRepository.HandleAccessManagement;
+import app.Repository.AuthRepository.HandleAccessManagement;
 
 /*
     In this class the first login is handled if the User status is pending in the DB accounts
@@ -89,6 +89,6 @@ public class FirstLogin {
 
 
         HandleAccessManagement run = new HandleAccessManagement();
-        run.AccessManagement(Username, department);
+        run.accessManagement(Username, department);
     }
 }

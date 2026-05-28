@@ -6,9 +6,20 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.PreparedStatement;
 
+
+/*
+    This Section handles the DB Action for the Login logs
+
+    following things are saved right now
+
+    1. Who tried to log in (Username)
+    2. Was the Login a Success
+    3. If not failure reason
+*/
+
 public class CollectLogs {
 
-    public void LogginAttempt(String Username, boolean isSuccess, String failureReason) {
+    public void loginAttempts(String Username, boolean isSuccess, String failureReason) {
 
         String username = Username;
 

@@ -1,4 +1,4 @@
-package app.Repository.RegistrationRepository;
+package app.Repository.ConfigRepository;
 
 import app.Config.DBManager;
 import java.sql.*;
@@ -26,25 +26,25 @@ import org.mindrot.jbcrypt.BCrypt;
 */
 
 
-public class SetDefaultAccounts {
+public class CreateDefaultAccounts {
     private final Dotenv dotenv = Dotenv.load();
 
-    public boolean DefaultAccounts(boolean CreateDefaultLocalAdmin, boolean CreateDefaultAdmin) {
+    public boolean defaultAccounts(boolean CreateDefaultLocalAdmin, boolean CreateDefaultAdmin) {
         boolean localAdminCreated = true;
         boolean adminCreated = true;
 
         if (CreateDefaultLocalAdmin) {
-            localAdminCreated = CreateDefaultLocalAdmin();
+            localAdminCreated = createLocalDefaultAdmin();
         }
 
         if (CreateDefaultAdmin) {
-            adminCreated = CreateDefaultAdmin();
+            adminCreated = createDefaultAdmin();
         }
 
         return adminCreated && localAdminCreated;
     }
 
-    private boolean CreateDefaultLocalAdmin() {
+    private boolean createLocalDefaultAdmin() {
 
         System.out.println("\n[INFO] Creating Local Admin");
 
@@ -102,7 +102,7 @@ public class SetDefaultAccounts {
         }
     }
 
-    private boolean CreateDefaultAdmin() {
+    private boolean createDefaultAdmin() {
         System.out.println("\n[INFO] Creating Admin");
         String AdminName = dotenv.get("ADMIN_NAME");
         String AdminPWSD = dotenv.get("ADMIN_PWSD_DEFAULT");

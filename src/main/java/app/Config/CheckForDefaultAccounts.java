@@ -1,26 +1,39 @@
 package app.Config;
-import app.Repository.RegistrationRepository.SetDefaultAccounts;
+import app.Repository.ConfigRepository.CreateDefaultAccounts;
 
 import java.sql.*;
 
-public class SystemAccountValidationService {
 
-    private boolean LocalAdminExsist;
+/*
+    This Section Checks if an Admin and an Local Admin Account Exist in the DB
+
+    it checks for the name and role and collects a boolean
+
+    If the Local Admin Account exists and The Admin does not -> A Admin account will be created (false, true)
+    If the Admin Account exist but the Local Admin does not -> The Local Admin will be created (true, false)
+    If both Accounts does not exist -> Both Accounts will be created (false, false)
+
+
+*/
+
+public class CheckForDefaultAccounts {
+
+    private boolean localAdminExist;
     private boolean adminExists;
 
     //Method to check if a Local Admin or DB Admin Exsist
-    public boolean DBAccounts() {
-        System.out.println("\n[INFO] Checking if a Admin or a Local Admin exsists in the DB");
-        System.out.println("[INFO] If none of the roles exsists a default LocalAdmin will be added");
-        System.out.println("[INFO] If either one of these exsists the other default role will be added");
+    public boolean dbAccounts() {
+        System.out.println("\n[INFO] Checking if a Admin or a Local Admin exists in the DB");
+        System.out.println("[INFO] If none of the roles exists a default LocalAdmin will be added");
+        System.out.println("[INFO] If either one of these exists the other default role will be added");
 
-        CheckLocalAdmin();
-        CheckAdmin();
+        checkLocalAdmin();
+        checkAdmin();
 
-        return ValidAteResults();
+        return validateResults();
     }
 
-    public void CheckLocalAdmin() {
+    public void checkLocalAdmin() {
         System.out.println("\n[INFO] Checking for an Local Admin in the DB");
         int role = 1;
 
@@ -35,12 +48,12 @@ public class SystemAccountValidationService {
             ResultSet result = statement.executeQuery();
 
             if(result.next()) {
-                System.out.println("[OK] Local Admin exsist");
-                this.LocalAdminExsist = true;
+                System.out.println("[OK] Local Admin exist");
+                this.localAdminExist = true;
 
             } else {
-                System.out.println("[WARING] No Local Admin exsist in the DB");
-                this.LocalAdminExsist = false;
+                System.out.println("[WARING] No Local Admin exist in the DB");
+                this.localAdminExist = false;
             }
 
         } catch (SQLException error) {
@@ -49,7 +62,7 @@ public class SystemAccountValidationService {
         }
     }
 
-    public void CheckAdmin() {
+    public void checkAdmin() {
         System.out.println("\n[INFO] Checking for an Admin in the DB");
         int role = 2;
         String sql = "SELECT ID FROM accounts WHERE user_role = ? LIMIT 1";
@@ -76,25 +89,25 @@ public class SystemAccountValidationService {
         }
     }
 
-    public boolean ValidAteResults() {
+    public boolean validateResults() {
 
-        SetDefaultAccounts create = new SetDefaultAccounts();
+        CreateDefaultAccounts create = new CreateDefaultAccounts();
 
-        if (this.adminExists && this.LocalAdminExsist) {
-            System.out.println("[OK] Both starter Accounts exsists in the DB");
+        if (this.adminExists && this.localAdminExist) {
+            System.out.println("[OK] Both starter Accounts exists in the DB");
             return true;
         }
 
         else if (this.adminExists) {
             System.out.println("\n[INFO] The Default Local Admin will be created");
-            return create.DefaultAccounts(true, false);
+            return create.defaultAccounts(true, false);
 
-        } else if (this.LocalAdminExsist) {
+        } else if (this.localAdminExist) {
             System.out.println("\n[INFO] The Default Admin will be created");
-            return create.DefaultAccounts(false, true);
+            return create.defaultAccounts(false, true);
         } else {
             System.out.println("\n[INFO] Both the Local Admin and Admin will be created");
-            return create.DefaultAccounts(true, true);
+            return create.defaultAccounts(true, true);
         }
     }
 }

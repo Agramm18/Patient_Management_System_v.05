@@ -32,7 +32,7 @@ public class LoginFlow {
             app.Auth.Flow.Services.AuthSecurityService.CollectLogs result = check.loggedUser(Username, PWSD, scanner);
 
             //Collect values for logs
-            store.LogginAttempt(
+            store.loginAttempts(
                     Username,
                     result.isSuccess(),
                     result.getFailureReason()
