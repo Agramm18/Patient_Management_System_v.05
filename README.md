@@ -1,65 +1,58 @@
 # Patient Management System V5.01
 
-Java 21 console project for a patient management system. The current implementation focuses on bootstrapping, controller routing, environment validation, MySQL connection setup, default administrator account creation, registration, login, account status checks, login attempt logging, and initial access-request handling for pending accounts.
+Java 21 console application for the early-stage Patient Management System. The current implementation focuses on application bootstrapping, controller routing, environment validation, database connection initialization, starter account creation, registration, login, login attempt logging, password hashing, password-change handling for starter accounts, and first-login access requests for pending users.
 
-The project is not a complete patient management application yet. Patient records, treatment workflows, appointments, billing, reporting, administration workflows, a connected main application menu after login, and a graphical UI are still planned work.
+This is not a complete patient management application yet. Patient records, treatment workflows, appointments, billing, reporting, administration workflows, a connected main menu after login, and a graphical UI are still planned work.
 
-## Current Project Status
+## Current Status
 
-The application is structured into bootstrap, controller, configuration, authentication flow, service, CLI text/menu, and repository layers.
+The application is structured into these layers:
 
-Current runtime entry path:
+- Bootstrap and startup entry point
+- Front controller and subcontrollers
+- Configuration services
+- Authentication flows
+- Authentication and registration services
+- CLI display text and menu classes
+- Repository classes for persistence operations
 
-1. `app.Main`
-2. `BootConfigService`
-3. `FrontController`
-4. `ConfigController`
-5. `AuthController`
-6. Authentication flows under `app.Auth.Flow`
-7. Database access through repository classes under `app.Repository`
+Implemented runtime areas:
 
-Main implemented areas:
-
-- Maven project setup with Java 21 compiler configuration.
-- Console bootstrap through `BootConfigService`.
-- CLI startup, loader, config, auth, department, and department-job text menus.
-- Central dispatcher structure through `FrontController`.
+- Maven project setup with Java 21.
+- Console startup through `app.Main` and `BootConfigService`.
+- Central routing through `FrontController`.
 - Configuration startup through `ConfigController`.
-- `.env` file validation through `EnvValidationService`.
-- MySQL JDBC URL creation and connection test through `SQLValidationService`.
-- Runtime database connection settings through `DBManager`.
-- Default account checks through `CheckForDefaultAccounts`.
+- Environment validation through `EnvValidationService`.
+- Runtime connection setup through `SQLValidationService` and `DBManager`.
+- Starter account checks through `CheckForDefaultAccounts`.
 - Automatic creation of missing `local_admin` and `admin` accounts through `CreateDefaultAccounts`.
 - Registration through `RegistrationFlow`, `RegistrationService`, `PasswordFlow`, `PasswordService`, and `CreateAccount`.
-- BCrypt hashing for default accounts, registration passwords, and login verification.
+- BCrypt password hashing for registration, starter accounts, and login verification.
 - Login through `LoginFlow`, `LoginInputCollector`, `LoginVerification`, and `CheckUserInDB`.
-- Account status handling during login.
-- Login attempt persistence through `app.Repository.logsRepository.CollectLogs`.
-- First-login/access-request groundwork for `pending` accounts through `FirstLogin`, `DepartmentMenu`, `SelectDepartment`, department job menus, and `HandleAccessManagement`.
-- SQL schema documentation in `sqlDESCRIPTION.md`.
-- Mermaid and Draw.io documentation under `docs/`.
+- Account status handling for active, disabled, pending, locked, quarantined, and password-change accounts.
+- Password update flow for starter accounts with `waiting_for_password_change` status.
+- Login attempt logging through `app.Repository.logsRepository.CollectLogs`.
+- First-login access request groundwork through `FirstLogin`, `DepartmentMenu`, `SelectDepartment`, department job menus, and `HandleAccessManagement`.
+- Mermaid documentation under `docs/`.
 
-## Current Runtime Flow
+All database schema, seed data, environment keys, default account database values, and setup SQL are documented in `sqlDESCRIPTION.md`.
 
-1. `app.Main` creates a `Scanner`, prints the startup message, displays the loader, and starts `BootConfigService`.
-2. `BootConfigService.SystemConfig(scanner)` creates controller objects.
-3. `FrontController` routes first to `CONFIG`.
-4. `ConfigController.execute(scanner)` validates `.env`, tests SQL connection settings, initializes `DBManager`, and checks starter accounts.
-5. `EnvValidationService` requires database values and default account values from `.env`.
-6. `SQLValidationService` builds `jdbc:mysql://<host>:<port>/<database>` and tests the connection.
-7. `DBManager` stores the runtime connection settings.
-8. `CheckForDefaultAccounts` checks whether the starter administrator accounts exist.
-9. `CreateDefaultAccounts` creates missing default accounts with BCrypt password hashes.
-10. If configuration succeeds, `FrontController` routes to `AUTH`.
-11. `AuthController` shows the authentication menu: registration, login, or exit.
-12. Registration collects username, email, phone number, and password.
-13. `PasswordService` validates, confirms, and hashes the password.
-14. `CreateAccount` stores the new account as `pending`, `intern`, and `unassigned`.
-15. Login collects username and password, validates both, checks account status, and logs the attempt.
-16. If the account status is `pending`, `FirstLogin` starts the current access-request flow.
-17. `FirstLogin` asks for a department, displays the matching job menu stub, and stores an access request through `HandleAccessManagement`.
+## Runtime Flow
 
-## Current Project Structure
+1. `app.Main` creates a shared `Scanner`, prints the startup message, displays the loader, and starts `BootConfigService`.
+2. `BootConfigService.SystemConfig(scanner)` creates the controller objects.
+3. `FrontController` routes to `CONFIG`.
+4. `ConfigController.execute(scanner)` validates the environment, builds the database connection configuration, initializes `DBManager`, and checks starter accounts.
+5. `CheckForDefaultAccounts` checks whether `local_admin` and `admin` starter accounts exist.
+6. `CreateDefaultAccounts` creates missing starter accounts from environment values.
+7. If configuration succeeds, `FrontController` routes to `AUTH`.
+8. `AuthController` displays the authentication menu: registration, login, or exit.
+9. Registration collects username, email, phone number, and password.
+10. Login collects username and password, verifies credentials, resolves account status, and logs the attempt.
+11. Pending users enter the first-login access request flow.
+12. Starter accounts with password-change status must create a new password before they are activated.
+
+## Project Structure
 
 ```text
 src/main/java/app
@@ -88,7 +81,9 @@ src/main/java/app
 |   `-- BootConfigService.java
 |-- CLIText
 |   |-- DisplayMessages
+|   |   |-- AuthMSG.java
 |   |   |-- ConfigMSG.java
+|   |   |-- DefaultAccountsMSG.java
 |   |   |-- LoaderMSG.java
 |   |   `-- StartMSG.java
 |   `-- Menus
@@ -124,7 +119,9 @@ src/main/java/app
 `-- Repository
     |-- AuthRepository
     |   |-- CheckRoles.java
-    |   `-- HandleAccessManagement.java
+    |   |-- CheckSystemAccounts.java
+    |   |-- HandleAccessManagement.java
+    |   `-- UpdateUserPWSD.java
     |-- ConfigRepository
     |   `-- CreateDefaultAccounts.java
     |-- LoginRepository
@@ -139,9 +136,9 @@ Additional project files:
 
 ```text
 docs
-|-- patient-management-architecture.mmd
 |-- patient-management-activity.drawio
 |-- patient-management-activity.mmd
+|-- patient-management-architecture.mmd
 `-- patient-management-uml.mmd
 
 Query.sql
@@ -155,20 +152,19 @@ README.md
 - JDK 21
 - Maven 3.9+ recommended
 - MySQL-compatible database
-- `.env` file in the project root
-- Database setup from `sqlDESCRIPTION.md`
+- A valid `.env` file in the project root
+- Database setup completed from `sqlDESCRIPTION.md`
 
-## Environment Setup
+## Configuration And Database Documentation
 
-Create a `.env` file in the project root. The complete environment and database setup is documented in `sqlDESCRIPTION.md`.
+Keep database-related setup out of this README. Use `sqlDESCRIPTION.md` for:
 
-## Database Setup
-
-The SQL setup is intentionally kept out of this README. Use `sqlDESCRIPTION.md` for all database setup details.
-
-## Default Accounts
-
-At startup, `CheckForDefaultAccounts` checks whether the starter administrator accounts exist. If one or both accounts are missing, `CreateDefaultAccounts` creates them from `.env` values. The exact database values are documented in `sqlDESCRIPTION.md`.
+- Required environment keys
+- Database creation
+- Table definitions
+- Required seed data and IDs
+- Starter account database values
+- Runtime persistence notes
 
 ## Registration
 
@@ -184,7 +180,7 @@ Current validation:
 - Password must contain uppercase letters, lowercase letters, numbers, and special characters.
 - Password confirmation must match.
 
-New accounts currently start as `pending`, `intern`, and `unassigned`. The exact database values and IDs are documented in `sqlDESCRIPTION.md`.
+After validation, the account is persisted through `CreateAccount` with the initial database state documented in `sqlDESCRIPTION.md`.
 
 ## Login
 
@@ -210,10 +206,10 @@ disabled
 
 pending
 - Login password check succeeds.
-- `FirstLogin` starts the access-request groundwork.
+- FirstLogin starts the access-request flow.
 - The user selects a department.
 - The matching department job menu is displayed.
-- The access request is stored through `HandleAccessManagement`.
+- The access request is stored through HandleAccessManagement.
 
 locked
 - Login fails.
@@ -222,7 +218,10 @@ on_quarantine
 - Login fails.
 
 waiting_for_password_change
-- Login is treated as successful, but the password change flow is not implemented yet.
+- The user must create a new password.
+- UpdateUserPWSD updates the stored password hash.
+- The account status is changed to active.
+- The password-change flag is cleared.
 ```
 
 ## Pending Account Access Request
@@ -237,10 +236,10 @@ For `pending` accounts, the current flow is:
 Current limitations:
 
 - Job menus only display placeholder text.
-- `SelectJob` exists but is empty.
+- `SelectJob` exists but is not implemented yet.
 - Job selection is not collected yet.
-- Requested job is stored as `unassigned`.
-- Requested role currently defaults to `intern`.
+- Requested job uses the current default documented in `sqlDESCRIPTION.md`.
+- Requested role uses the current default documented in `sqlDESCRIPTION.md`.
 - Account approval, rejection, and activation workflows are not implemented yet.
 
 ## Run The Project
@@ -278,12 +277,12 @@ Dependencies are defined in `pom.xml`:
 - First-login access request storage exists only as groundwork.
 - Department selection is stored, but job and role selection are not implemented yet.
 - Account approval and administration workflows are not implemented yet.
-- Password change for `waiting_for_password_change` accounts is not implemented yet.
 - Failed login counters are tracked in memory during a login flow, but are not persisted yet.
 - Account locking after too many failed login attempts is not persisted yet.
 - `RoleValidation`, `roleMenu`, and `CheckRoles` still exist, but they are not part of the active pending-login flow.
+- `CheckSystemAccounts` exists, but the current password-change login path uses account status and `UpdateUserPWSD` directly.
 - `AccountPolicy`, `SelectJob`, `MenuController`, `ServiceController`, and `uiController` are placeholders.
-- Most department job menu classes are placeholders.
+- Department job menu classes are placeholders.
 - Patient data, treatment, appointment, billing, reporting, and UI workflows are not implemented yet.
 - There are no automated tests yet.
 
@@ -291,29 +290,29 @@ Dependencies are defined in `pom.xml`:
 
 - The application is currently console-based.
 - `LoginInputCollector.enterPWSD()` only handles password input when `System.console()` is available. IDE run configurations without a real console can block the login flow.
-- `PasswordService.retypePWSD()` expects `System.console()` and can fail in environments without a real console.
-- `SQLValidationService.DBConnection()` logs failed DB connections but does not immediately hard-stop the boot process itself.
-- `EnvValidationService.checkFileStatus()` reports a missing `.env` but does not immediately hard-stop the boot process itself.
-- Some class and method names still contain typos or inconsistent naming and should be cleaned up later.
-- The Mermaid and Draw.io documentation under `docs/` may need another pass after the latest class and database changes.
+- `PasswordService.plainPWSD()` has a scanner fallback, but `PasswordService.retypePWSD()` expects `System.console()` and can fail in environments without a real console.
+- Environment validation reports missing or invalid values, but the current flow can still continue into connection setup afterward.
+- Connection validation reports failed connections, but the current flow relies on later startup checks to return failure.
+- Some class and method names still contain typos or inconsistent casing and should be cleaned up later.
+- `docs/patient-management-uml.mmd` documents the current class-level structure. SQL schema details are kept in `sqlDESCRIPTION.md`.
 
 ## Future Plans
 
-### Testing and Development
+### Testing And Development
 
 - Unit tests
 - Integration tests
 - Debugging setup
 - Automated test pipeline
 
-### Backend and Infrastructure
+### Backend And Infrastructure
 
 - REST API support
 - Redis integration for caching and session management
 - Docker and Kubernetes compatibility
 - Cloud compatibility with AWS, Azure, and similar platforms
 
-### Monitoring and Security
+### Monitoring And Security
 
 - Audit logging
 - Security monitoring
@@ -323,7 +322,7 @@ Dependencies are defined in `pom.xml`:
 
 - JavaFX graphical user interface
 
-### AI and Data Processing
+### AI And Data Processing
 
 - Machine learning integration into application workflows using Python and JSON
 
