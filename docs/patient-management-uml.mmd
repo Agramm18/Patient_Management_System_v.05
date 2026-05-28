@@ -1,7 +1,8 @@
 classDiagram
-  %% Patient Management V5.01 - UML class diagram as Mermaid
+  %% Patient Management V5.01 - current UML class diagram as Mermaid
+  %% Source basis: src/main/java/app, README.md and sqlDESCRIPTION.md
+  %% Last synchronized: 2026-05-28
   %% Copy-paste into Mermaid Live Editor or draw.io: Insert -> Advanced -> Mermaid
-  %% Current source basis: src/main/java/app
 
   direction LR
 
@@ -13,7 +14,7 @@ classDiagram
 
   namespace Bootstrap {
     class BootConfigService {
-      +DisplayHelloMSG() void
+      +displayLoader() void
       +SystemConfig(scanner) void
     }
   }
@@ -25,7 +26,8 @@ classDiagram
       -MenuController menuController
       -ServiceController serviceController
       -uiController UIController
-      +NavigateSubController(request, scanner) boolean
+      +FrontController(authController, configController, menuController, serviceController, UIController)
+      +navigateSubController(request, scanner) boolean
     }
 
     class RequestType {
@@ -45,7 +47,7 @@ classDiagram
     }
 
     class AuthController {
-      +VerifyAccountStatus(scanner) void
+      +verifyAccountStatus(scanner) void
     }
 
     class MenuController {
@@ -61,28 +63,44 @@ classDiagram
     }
   }
 
-  namespace Auth {
+  namespace AuthFlow {
+    class RegistrationFlow {
+      +user(scanner) void
+    }
+
+    class LoginFlow {
+      +user(scanner) void
+    }
+
+    class PasswordFlow {
+      +policy(scanner) String
+    }
+  }
+
+  namespace RegistrationServicePkg {
     class RegistrationService {
-      -String UserName
-      -String EmailAddress
-      -String PhoneNumber
-      -String HashedPWSD
-      +UserAccount(scanner) void
-      -SetUserName(scanner) void
-      -SetEmailAddress(scanner) void
-      -SetPhoneNumber(scanner) void
-      -ShowCurrentInfo(scanner) void
+      -String userName
+      -String emailAddress
+      -String phoneNumber
+      -String hashedPWSD
+      +userAccunt(scanner) void
+      -setUserName(scanner) void
+      -setEmailAddress(scanner) void
+      -setPhoneNumber(scanner) void
+      -showCurrentInfo(scanner) void
       +getUserName() String
       +getEmailAddress() String
       +getPhoneNumber() String
       +getHashedPWSD() String
     }
+  }
 
+  namespace PasswordServicePkg {
     class PasswordService {
-      -String PlainPWSD
-      -String HashedPWSD
-      -charArray PWSDChar
-      -charArray VerifyPWSD
+      ~String plainPWSD
+      ~String hashedPWSD
+      ~charArray pwsdCHAR
+      ~charArray verifyPWSD
       -boolean FitPWSDLength
       -boolean ContainsUpperLetters
       -boolean ContainsLowerLetters
@@ -90,37 +108,89 @@ classDiagram
       -boolean ContainsNumbers
       -int retryCount
       -int MAX_RETRY_COUNT
-      +UserPWSD(scanner) void
-      +PlainPWSD(scanner) void
-      -ValidatePWSD() void
-      -RetypePWSD(scanner) void
-      -ConvertCharToString() void
+      +userPWSD(scanner) void
+      +plainPWSD(scanner) void
+      -validatePWSD() void
+      -retypePWSD(scanner) void
+      -convertCHARtoString() void
       -PlainToHash() void
       +getHashedPWSD() String
     }
+  }
 
-    class LoginService {
-      -String EnteredUserName
-      -String EnteredPWSD
-      +User(scanner) void
+  namespace LoginServicePkg {
+    class LoginInputCollector {
+      -String enteredUserName
+      -String enteredPWSD
+      +user(scanner) void
       -enterUsername(scanner) void
       -enterPWSD() void
       +getEnteredUserName() String
       +getEnteredPWSD() String
     }
+
+    class LoginVerification {
+      -int RETRYS
+      -int RETRYS_MAX
+      -CheckUserInDB repository
+      -String AccountStatus
+      +loggedUser(Username, PWSD, scanner) AuthCollectLogs
+    }
+
+    class UserStatus {
+      <<enumeration>>
+      ACTIVE
+      DISABLED
+      PENDING
+      LOCKED
+      ON_QUARANTINE
+      WAITING_FOR_PASSWORD_CHANGE
+    }
+
+    class FirstLogin {
+      +firstSetup(Username, scanner) void
+    }
+  }
+
+  namespace AuthSecurityService {
+    class AccountPolicy {
+      <<placeholder>>
+    }
+
+    class AuthCollectLogs {
+      <<value object>>
+      -boolean success
+      -String failureReason
+      +CollectLogs(success, failureReason)
+      +isSuccess() boolean
+      +getFailureReason() String
+    }
+
+    class RoleValidation {
+      +requestRoles(scanner) void
+    }
+
+    class SelectDepartment {
+      -int selectedDepartment
+      +department(scanner) void
+      +getSelectedDepartment() int
+    }
+
+    class SelectJob {
+      <<placeholder>>
+    }
   }
 
   namespace Config {
     class EnvValidationService {
-      -String DbHost
-      -int DBPortINT
-      -String DBName
-      -String DBUser
-      -String DbPWSD
-      +sqlHeader() void
-      +CheckFileStatus() void
-      +CheckENVParam() void
-      +setEnvValues(host, port, name, user, password) void
+      -String dbHost
+      -int dbPortINT
+      -String dbName
+      -String dbUser
+      -String dbPWSD
+      +checkFileStatus() void
+      +checkENVParam() void
+      +setEnvValues(Host, port, Name, User, PWSD) void
       +getHost() String
       +getPort() int
       +getDBName() String
@@ -146,73 +216,178 @@ classDiagram
       -String sqlPWSD
       -String sqlURL
       -DBManager()
-      +initialize(user, password, URL) void
+      +initialize(user, password, url) void
       +getConnection() Connection
     }
 
-    class SystemAccountValidationService {
-      -boolean LocalAdminExsist
+    class CheckForDefaultAccounts {
+      -boolean localAdminExist
       -boolean adminExists
-      +DBAccounts() boolean
-      +CheckLocalAdmin() void
-      +CheckAdmin() void
-      +ValidAteResults() boolean
+      +dbAccounts() boolean
+      +checkLocalAdmin() void
+      +checkAdmin() void
+      +validateResults() boolean
+    }
+  }
+
+  namespace RepositoryAuth {
+    class CheckRoles {
+      +userRole(Username) boolean
     }
 
-    class SetDefaultAccounts {
+    class HandleAccessManagement {
+      -String DEFAULT_REQUESTED_JOB
+      -int DEFAULT_REQUESTED_ROLE
+      -int requestedBy
+      -int requestedDepartment
+      +accessManagement(Username, Department) void
+      -collectUser(username) void
+      -insertData() void
+    }
+  }
+
+  namespace RepositoryConfig {
+    class CreateDefaultAccounts {
       -Dotenv dotenv
-      +DefaultAccounts(createDefaultLocalAdmin, createDefaultAdmin) boolean
-      -CreateDefaultLocalAdmin() boolean
-      -CreateDefaultAdmin() boolean
+      +defaultAccounts(CreateDefaultLocalAdmin, CreateDefaultAdmin) boolean
+      -createLocalDefaultAdmin() boolean
+      -createDefaultAdmin() boolean
     }
   }
 
-  namespace Repository {
-    class UserAccountRepository {
-      +newAccount(username, email, phoneNumber, hashedPassword) void
-      -createUser(username, email, phoneNumber, hashedPassword) void
-    }
-
-    class AuthenticationService {
-      +LoggedUser(username, password) boolean
-      -CheckUserInDB(username) boolean
-      -CheckPWSD(password, username) boolean
+  namespace RepositoryLogin {
+    class CheckUserInDB {
+      +checkUserInDB(username) boolean
+      +checkPWSD(pwsd, username) boolean
+      +checkUserStatus(username) String
     }
   }
 
-  namespace ConsoleView {
-    class CLIText {
-      <<placeholder>>
+  namespace RepositoryLogs {
+    class RepositoryCollectLogs {
+      +loginAttempts(Username, isSuccess, failureReason) void
+    }
+  }
+
+  namespace RepositoryRegistration {
+    class CreateAccount {
+      +newAccount(Username, Email, PhoneNumber, HashedPWSD) void
+      -createUser(Username, Email, PhoneNumber, HashedPWSD) void
+    }
+  }
+
+  namespace DisplayMessages {
+    class StartMSG {
+      +startMSG() void
+    }
+
+    class LoaderMSG {
+      +message() void
+    }
+
+    class ConfigMSG {
+      +configMSG() void
+    }
+  }
+
+  namespace ProgramMenus {
+    class AuthMenu {
+      +authMenu() void
+    }
+
+    class roleMenu {
+      +roles() void
+    }
+  }
+
+  namespace DepartmentMenus {
+    class DepartmentMenu {
+      +departments() void
+    }
+  }
+
+  namespace DepartmentJobMenus {
+    class MedicalJobsMenu {
+      +jobsMenu() void
+    }
+
+    class EmergencyJobsMenu {
+      +jobsMenu() void
+    }
+
+    class LaboratoryJobsMenu {
+      +jobsMenu() void
+    }
+
+    class PharmacyJobsMenu {
+      +jobsMenu() void
+    }
+
+    class itJobsMenu {
+      +jobsMenu() void
+    }
+
+    class SecurityJobsMenu {
+      +jobsMenu() void
+    }
+
+    class FinanceJobsMenu {
+      +jobsMenu() void
+    }
+
+    class OfficeJobsMenu {
+      +jobsMenu() void
+    }
+
+    class AdministrationJobsMenu {
+      +jobsMenu() void
+    }
+
+    class TrainingJobsMenu {
+      +jobsMenu() void
+    }
+
+    class SystemJobsMenu {
+      +jobsMenu() void
     }
   }
 
   namespace External {
     class Scanner {
-      <<java_util>>
+      <<java.util>>
     }
 
     class Console {
-      <<java_io>>
+      <<java.io>>
+    }
+
+    class File {
+      <<java.io>>
     }
 
     class DriverManager {
-      <<java_sql>>
+      <<java.sql>>
+      +getConnection(url, user, password) Connection
     }
 
     class Connection {
-      <<java_sql>>
+      <<java.sql>>
     }
 
     class PreparedStatement {
-      <<java_sql>>
+      <<java.sql>>
     }
 
     class ResultSet {
-      <<java_sql>>
+      <<java.sql>>
+    }
+
+    class SQLException {
+      <<java.sql>>
     }
 
     class Dotenv {
-      <<dotenv_java>>
+      <<dotenv-java>>
       +load() Dotenv
       +get(key) String
     }
@@ -239,6 +414,34 @@ classDiagram
       ADMIN_EMAIL_DEFAULT
       BOOTSTRAP_KEY
     }
+  }
+
+  namespace Database {
+    class RolesTable {
+      <<database_table>>
+      id
+      role_name
+      role_description
+      created_at
+      updated_at
+    }
+
+    class AccountStatusTable {
+      <<database_table>>
+      id
+      status
+      created_at
+      updated_at
+    }
+
+    class DepartmentsTable {
+      <<database_table>>
+      id
+      department_name
+      department_description
+      created_at
+      updated_at
+    }
 
     class AccountsTable {
       <<database_table>>
@@ -258,18 +461,46 @@ classDiagram
       created_at
       updated_at
     }
+
+    class LoginAttemptsTable {
+      <<database_table>>
+      id
+      account_id
+      entered_username
+      failure_reason
+      is_success
+      created_at
+    }
+
+    class AccessManagementTable {
+      <<database_table>>
+      id
+      requested_by
+      requested_department
+      requested_job
+      requested_role
+      request_status
+      approved_by
+      approved_at
+      request_reason
+      reject_reason
+      created_at
+      updated_at
+    }
   }
 
   Main ..> Scanner : creates
+  Main ..> StartMSG : prints startup text
   Main ..> BootConfigService : creates and starts
 
+  BootConfigService ..> LoaderMSG : displayLoader()
   BootConfigService ..> AuthController : creates
   BootConfigService ..> ConfigController : creates
-  BootConfigService ..> MenuController : creates
-  BootConfigService ..> ServiceController : creates
-  BootConfigService ..> uiController : creates
+  BootConfigService ..> MenuController : creates placeholder
+  BootConfigService ..> ServiceController : creates placeholder
+  BootConfigService ..> uiController : creates placeholder
   BootConfigService ..> FrontController : creates dispatcher
-  BootConfigService ..> RequestType : sends CONFIG and AUTH
+  BootConfigService ..> RequestType : routes CONFIG then AUTH
 
   FrontController *-- AuthController : holds
   FrontController *-- ConfigController : holds
@@ -279,59 +510,139 @@ classDiagram
   FrontController ..> RequestType : switch
   FrontController ..> ConfigController : CONFIG route
   FrontController ..> AuthController : AUTH route
+  FrontController ..> Scanner : passes input
 
   ConfigController ..> EnvValidationService : creates and validates
   ConfigController ..> SQLValidationService : creates and connects
   ConfigController ..> DBManager : initialize runtime config
-  ConfigController ..> SystemAccountValidationService : verifies starter accounts
-  SQLValidationService --> EnvValidationService : reads DB values
-  SQLValidationService ..> DriverManager : connection test
-  SQLValidationService ..> Connection : opens test connection
-  EnvValidationService ..> EnvFile : validates required keys
+  ConfigController ..> CheckForDefaultAccounts : checks starter accounts
+
+  EnvValidationService ..> ConfigMSG : prints config header
+  EnvValidationService ..> File : checks .env
   EnvValidationService ..> Dotenv : loads values
+  EnvValidationService ..> EnvFile : validates required keys
 
-  DBManager ..> DriverManager : getConnection()
+  SQLValidationService --> EnvValidationService : reads DB values
+  SQLValidationService ..> DriverManager : tests connection
+  SQLValidationService ..> Connection : opens test connection
+  SQLValidationService ..> SQLException : handles errors
+
+  DBManager ..> DriverManager : opens configured connections
   DBManager ..> Connection : returns
+  DBManager ..> SQLException : throws
 
-  SystemAccountValidationService ..> DBManager : getConnection()
-  SystemAccountValidationService ..> PreparedStatement : SELECT accounts
-  SystemAccountValidationService ..> ResultSet : checks local_admin/admin
-  SystemAccountValidationService ..> SetDefaultAccounts : creates missing defaults
-  SystemAccountValidationService ..> AccountsTable : reads
+  CheckForDefaultAccounts ..> DBManager : getConnection()
+  CheckForDefaultAccounts ..> PreparedStatement : SELECT accounts
+  CheckForDefaultAccounts ..> ResultSet : checks role rows
+  CheckForDefaultAccounts ..> CreateDefaultAccounts : creates missing accounts
+  CheckForDefaultAccounts ..> AccountsTable : reads
+  CheckForDefaultAccounts ..> RolesTable : uses role IDs 1 and 2
 
-  SetDefaultAccounts ..> Dotenv : loads default account values
-  SetDefaultAccounts ..> BCrypt : hashes default passwords
-  SetDefaultAccounts ..> DBManager : getConnection()
-  SetDefaultAccounts ..> PreparedStatement : INSERT default accounts
-  SetDefaultAccounts ..> AccountsTable : writes
+  CreateDefaultAccounts ..> Dotenv : reads default account values
+  CreateDefaultAccounts ..> EnvFile : reads admin credentials
+  CreateDefaultAccounts ..> BCrypt : hashes default passwords
+  CreateDefaultAccounts ..> DBManager : getConnection()
+  CreateDefaultAccounts ..> PreparedStatement : INSERT accounts
+  CreateDefaultAccounts ..> AccountsTable : writes
+  CreateDefaultAccounts ..> DepartmentsTable : uses IT and System IDs
+  CreateDefaultAccounts ..> AccountStatusTable : uses waiting_for_password_change
+  CreateDefaultAccounts ..> RolesTable : uses local_admin/admin
 
-  AuthController ..> RegistrationService : option 1
-  AuthController ..> LoginService : option 2
-  AuthController ..> UserAccountRepository : saves new account
-  AuthController ..> AuthenticationService : verifies login
+  AuthController ..> AuthMenu : displays auth menu
+  AuthController ..> RegistrationFlow : option 1
+  AuthController ..> LoginFlow : option 2
+  AuthController ..> Scanner : reads menu input
 
-  RegistrationService ..> Scanner : reads input
-  RegistrationService ..> PasswordService : creates password hash
+  RegistrationFlow ..> RegistrationService : collects profile data
+  RegistrationFlow ..> CreateAccount : persists pending account
+  RegistrationService ..> Scanner : reads profile data
+  RegistrationService ..> PasswordFlow : creates password hash
+  PasswordFlow ..> PasswordService : validates and hashes password
   PasswordService ..> Scanner : fallback password input
   PasswordService ..> Console : hidden password input
   PasswordService ..> BCrypt : hashpw()
-  LoginService ..> Scanner : reads username
-  LoginService ..> Console : hidden password input
 
-  UserAccountRepository ..> DBManager : getConnection()
-  UserAccountRepository ..> PreparedStatement : INSERT account
-  UserAccountRepository ..> AccountsTable : writes
+  CreateAccount ..> DBManager : getConnection()
+  CreateAccount ..> PreparedStatement : INSERT account
+  CreateAccount ..> AccountsTable : writes pending intern account
+  CreateAccount ..> AccountStatusTable : uses pending
+  CreateAccount ..> RolesTable : uses intern
+  CreateAccount ..> DepartmentsTable : uses unassigned
 
-  AuthenticationService ..> DBManager : getConnection()
-  AuthenticationService ..> PreparedStatement : SELECT account/hash
-  AuthenticationService ..> ResultSet : reads password_hash
-  AuthenticationService ..> BCrypt : checkpw()
-  AuthenticationService ..> AccountsTable : reads
+  LoginFlow ..> LoginInputCollector : collects credentials
+  LoginFlow ..> LoginVerification : verifies credentials
+  LoginFlow ..> RepositoryCollectLogs : persists login attempt
+  LoginFlow ..> AuthCollectLogs : reads result object
+  LoginInputCollector ..> Scanner : username input
+  LoginInputCollector ..> Console : hidden password input
 
-  note for Main "Application entry point. Creates Scanner, prints welcome text, then starts BootConfigService."
-  note for BootConfigService "Boot phase creates controllers and routes CONFIG first. AUTH starts only when configOK is true."
-  note for FrontController "RequestType contains CONFIG, AUTH, MENU, SERVICE, UI, EXIT. Current switch handles CONFIG and AUTH."
+  LoginVerification *-- CheckUserInDB : repository field
+  LoginVerification ..> UserStatus : documents possible status values
+  LoginVerification ..> AuthCollectLogs : returns result object
+  LoginVerification ..> FirstLogin : pending account setup
+  LoginVerification ..> SQLException : handles login SQL errors
+  LoginVerification ..> Scanner : passes to FirstLogin
+
+  CheckUserInDB ..> DBManager : getConnection()
+  CheckUserInDB ..> PreparedStatement : SELECT account/hash/status
+  CheckUserInDB ..> ResultSet : reads records
+  CheckUserInDB ..> BCrypt : checkpw()
+  CheckUserInDB ..> AccountsTable : reads
+  CheckUserInDB ..> AccountStatusTable : joins account status
+
+  RepositoryCollectLogs ..> DBManager : getConnection()
+  RepositoryCollectLogs ..> PreparedStatement : SELECT account and INSERT log
+  RepositoryCollectLogs ..> ResultSet : reads account id
+  RepositoryCollectLogs ..> AccountsTable : reads account id
+  RepositoryCollectLogs ..> LoginAttemptsTable : writes
+
+  FirstLogin ..> DepartmentMenu : shows department choices
+  FirstLogin ..> SelectDepartment : validates selected department
+  FirstLogin ..> MedicalJobsMenu : department 1
+  FirstLogin ..> EmergencyJobsMenu : department 2
+  FirstLogin ..> LaboratoryJobsMenu : department 3
+  FirstLogin ..> PharmacyJobsMenu : department 4
+  FirstLogin ..> itJobsMenu : department 5
+  FirstLogin ..> SecurityJobsMenu : department 6
+  FirstLogin ..> FinanceJobsMenu : department 7
+  FirstLogin ..> OfficeJobsMenu : department 8
+  FirstLogin ..> AdministrationJobsMenu : department 9
+  FirstLogin ..> TrainingJobsMenu : department 10
+  FirstLogin ..> SystemJobsMenu : department 11
+  FirstLogin ..> HandleAccessManagement : stores access request
+
+  SelectDepartment ..> Scanner : reads department id
+  RoleValidation ..> Scanner : reads role id
+  RoleValidation ..> roleMenu : shows role menu
+
+  HandleAccessManagement ..> DBManager : getConnection()
+  HandleAccessManagement ..> PreparedStatement : SELECT account and INSERT request
+  HandleAccessManagement ..> ResultSet : reads account id
+  HandleAccessManagement ..> AccountsTable : reads requester
+  HandleAccessManagement ..> AccessManagementTable : writes access request
+  HandleAccessManagement ..> DepartmentsTable : requested_department
+  HandleAccessManagement ..> RolesTable : requested_role default intern
+
+  CheckRoles ..> DBManager : getConnection()
+  CheckRoles ..> PreparedStatement : SELECT role
+  CheckRoles ..> ResultSet : reads user_role
+  CheckRoles ..> AccountsTable : reads
+  CheckRoles ..> RolesTable : checks assigned role
+
+  AccountsTable --> RolesTable : user_role
+  AccountsTable --> AccountStatusTable : account_status
+  AccountsTable --> DepartmentsTable : department
+  LoginAttemptsTable --> AccountsTable : account_id
+  AccessManagementTable --> AccountsTable : requested_by and approved_by
+  AccessManagementTable --> DepartmentsTable : requested_department
+  AccessManagementTable --> RolesTable : requested_role
+  AccessManagementTable --> AccountStatusTable : request_status
+
+  note for AuthCollectLogs "Source class: app.Auth.Flow.Services.AuthSecurityService.CollectLogs. Renamed in this diagram to avoid collision."
+  note for RepositoryCollectLogs "Source class: app.Repository.logsRepository.CollectLogs. Renamed in this diagram to avoid collision."
+  note for FrontController "Current switch handles CONFIG and AUTH. MENU, SERVICE, UI and EXIT exist in RequestType but are not routed yet."
   note for MenuController "Currently empty placeholder."
   note for ServiceController "Currently empty placeholder."
   note for uiController "Currently empty placeholder."
-  note for CLIText "Currently empty placeholder."
+  note for AccountPolicy "Currently empty placeholder."
+  note for SelectJob "Currently placeholder for future requested-job selection."

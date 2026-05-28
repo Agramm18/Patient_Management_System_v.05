@@ -37,6 +37,10 @@ public class LoginFlow {
                     result.isSuccess(),
                     result.getFailureReason()
             );
+
+            if (result.isSuccess()) {
+                return;
+            }
         }
     }
 

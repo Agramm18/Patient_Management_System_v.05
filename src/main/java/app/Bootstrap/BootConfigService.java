@@ -1,5 +1,6 @@
 package app.Bootstrap;
 
+import app.CLIText.DisplayMessages.AuthMSG;
 import app.CLIText.DisplayMessages.LoaderMSG;
 import app.Controller.*;
 
@@ -28,14 +29,17 @@ public class BootConfigService {
             boolean configOK = dispatcher.navigateSubController(FrontController.RequestType.CONFIG, scanner);
 
             if (configOK) {
-                System.out.println("[OK] System Config where a sucsess");
-                System.out.println("[INFO] Starting Authentication phase");
+                System.out.println("\n[OK] System Config where a success");
+                System.out.println("[INFO] Starting Authentication phase\n");
+
+                AuthMSG show = new AuthMSG();
+                show.msg();
 
                 dispatcher.navigateSubController(FrontController.RequestType.AUTH, scanner);
             }
         } catch (Exception error) {
             System.out.println("[FATAL] Boot failed " + error.getMessage());
-            System.out.println("[INFO] System won't load and will be shutted down right now");
+            System.out.println("[INFO] System won't load and will be shut down right now");
             System.exit(1);
         }
     }

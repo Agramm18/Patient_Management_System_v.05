@@ -3,7 +3,11 @@ package app.Auth.Flow.Services.LoginService;
 import java.sql.SQLException;
 import java.util.Scanner;
 
+import app.Auth.Flow.PasswordFlow;
 import app.Auth.Flow.Services.AuthSecurityService.CollectLogs;
+import app.Auth.Flow.Services.PasswordService.PasswordService;
+import app.Repository.AuthRepository.CheckSystemAccounts;
+import app.Repository.AuthRepository.UpdateUserPWSD;
 import app.Repository.LoginRepository.CheckUserInDB;
 
 
@@ -86,8 +90,24 @@ public class LoginVerification {
                     System.out.println("[FATAL] This account is on quarantine and must be checked");
                     return new CollectLogs(false, "Account is on quarantine based on malicious activities");
                 case "waiting_for_password_change":
-                    System.out.println("[INFO] Please change your current password to continue");
-                    return new CollectLogs(true, "Account needs a password change");
+                    System.out.println("\n[INFO] First Login for a System Account recognized");
+                    System.out.println("[INFO] Please change your current password to continue\n");
+
+                    PasswordService update = new PasswordService();
+                    update.userPWSD(scanner);
+
+                    String hashedPWSD = update.getHashedPWSD();
+
+                    System.out.println("[INFO] Updating User PWSD");
+
+                    UpdateUserPWSD change = new UpdateUserPWSD();
+                    boolean changeSuccsess = change.dbValues(Username, hashedPWSD);
+
+                    if (changeSuccsess) {
+                        return new CollectLogs(true, "First Login for System account");
+                    } else {
+                        return new CollectLogs(false, "Password need to change");
+                    }
             }
 
             this.RETRYS = 0;

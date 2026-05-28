@@ -1,4 +1,5 @@
 package app.Config;
+import app.CLIText.DisplayMessages.DefaultAccountsMSG;
 import app.Repository.ConfigRepository.CreateDefaultAccounts;
 
 import java.sql.*;
@@ -23,6 +24,10 @@ public class CheckForDefaultAccounts {
 
     //Method to check if a Local Admin or DB Admin Exsist
     public boolean dbAccounts() {
+
+        DefaultAccountsMSG display = new DefaultAccountsMSG();
+        display.msg();
+
         System.out.println("\n[INFO] Checking if a Admin or a Local Admin exists in the DB");
         System.out.println("[INFO] If none of the roles exists a default LocalAdmin will be added");
         System.out.println("[INFO] If either one of these exists the other default role will be added");

@@ -19,9 +19,7 @@ public class AuthController {
 
     public void verifyAccountStatus(Scanner scanner) {
         String accountStatusSTR;
-
-        System.out.println("\n[INFO] Verify the user");
-        System.out.println("[INFO] Running through the login & registration process\n");
+        System.out.println("\n[INFO] Running through the Registration or Login process\n");
 
         while (true) {
             try {
