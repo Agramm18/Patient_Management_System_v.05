@@ -1,30 +1,10 @@
-# SQL Description
+# Database Setup
 
-This file contains all database-related documentation for the Patient Management System V5.01 project. Keep SQL setup, schema details, seed data, required IDs, default account database values, and database checks in this file.
+This file contains the database-related documentation for the Patient Management System V5.01 project. Keep SQL setup, schema details, seed data, required IDs, default account database values, and database checks in this file.
 
-## Environment Variables
+## Environment Configuration
 
-Create a `.env` file in the project root with the following keys:
-
-```env
-DB_HOST=localhost
-DB_PORT=3306
-DB_NAME=patient_management_v5
-DB_USER=your_mysql_user
-DB_PWSD=your_mysql_password
-
-LOCAL_ADMIN_NAME=local_admin
-LOCAL_ADMIN_PWSD=change_this_default_password
-LOCAL_ADMIN_EMAIL=local_admin@example.com
-
-ADMIN_NAME=admin
-ADMIN_PWSD_DEFAULT=change_this_default_password
-ADMIN_EMAIL_DEFAULT=admin@example.com
-
-BOOTSTRAP_KEY=change_this_bootstrap_key
-```
-
-`DB_PORT` must be numeric. `DB_NAME` must match the database created below. The default account values are used only when one or both starter accounts are missing.
+Create the project `.env` file from [ENV_SETUP.md](./ENV_SETUP.md) before running the application. The `DB_NAME` value must match the database created below.
 
 ## Database Creation
 

@@ -1,8 +1,8 @@
 classDiagram
-  %% Patient Management V5.01 - current UML class diagram as Mermaid
-  %% Source basis: src/main/java/app, README.md and sqlDESCRIPTION.md
+  %% Patient Management V5.01 - current Java class diagram
   %% Last synchronized: 2026-05-28
-  %% Copy-paste into Mermaid Live Editor or draw.io: Insert -> Advanced -> Mermaid
+  %% SQL schema details are intentionally documented in sqlDESCRIPTION.md.
+  %% Copy into Mermaid Live Editor or draw.io: Insert -> Advanced -> Mermaid
 
   direction LR
 
@@ -60,6 +60,55 @@ classDiagram
 
     class uiController {
       <<placeholder>>
+    }
+  }
+
+  namespace Config {
+    class EnvValidationService {
+      -String dbHost
+      -int dbPortINT
+      -String dbName
+      -String dbUser
+      -String dbPWSD
+      +checkFileStatus() void
+      +checkENVParam() void
+      +setEnvValues(Host, port, Name, User, PWSD) void
+      +getHost() String
+      +getPort() int
+      +getDBName() String
+      +getUser() String
+      +getPWSD() String
+    }
+
+    class SQLValidationService {
+      -EnvValidationService env
+      -String SQLUser
+      -String sqlPWSD
+      -String sqlURL
+      +SQLValidationService(env)
+      +DBConnection() void
+      +getSQLUser() String
+      +getSqlPWSD() String
+      +getSqlURL() String
+    }
+
+    class DBManager {
+      <<utility>>
+      -String sqlUser
+      -String sqlPWSD
+      -String sqlURL
+      -DBManager()
+      +initialize(user, password, url) void
+      +getConnection() Connection
+    }
+
+    class CheckForDefaultAccounts {
+      -boolean localAdminExist
+      -boolean adminExists
+      +dbAccounts() boolean
+      +checkLocalAdmin() void
+      +checkAdmin() void
+      +validateResults() boolean
     }
   }
 
@@ -134,7 +183,7 @@ classDiagram
       -int RETRYS_MAX
       -CheckUserInDB repository
       -String AccountStatus
-      +loggedUser(Username, PWSD, scanner) AuthCollectLogs
+      +loggedUser(Username, PWSD, scanner) AuthLogResult
     }
 
     class UserStatus {
@@ -157,7 +206,7 @@ classDiagram
       <<placeholder>>
     }
 
-    class AuthCollectLogs {
+    class AuthLogResult {
       <<value object>>
       -boolean success
       -String failureReason
@@ -181,58 +230,13 @@ classDiagram
     }
   }
 
-  namespace Config {
-    class EnvValidationService {
-      -String dbHost
-      -int dbPortINT
-      -String dbName
-      -String dbUser
-      -String dbPWSD
-      +checkFileStatus() void
-      +checkENVParam() void
-      +setEnvValues(Host, port, Name, User, PWSD) void
-      +getHost() String
-      +getPort() int
-      +getDBName() String
-      +getUser() String
-      +getPWSD() String
-    }
-
-    class SQLValidationService {
-      -EnvValidationService env
-      -String SQLUser
-      -String sqlPWSD
-      -String sqlURL
-      +SQLValidationService(env)
-      +DBConnection() void
-      +getSQLUser() String
-      +getSqlPWSD() String
-      +getSqlURL() String
-    }
-
-    class DBManager {
-      <<utility>>
-      -String sqlUser
-      -String sqlPWSD
-      -String sqlURL
-      -DBManager()
-      +initialize(user, password, url) void
-      +getConnection() Connection
-    }
-
-    class CheckForDefaultAccounts {
-      -boolean localAdminExist
-      -boolean adminExists
-      +dbAccounts() boolean
-      +checkLocalAdmin() void
-      +checkAdmin() void
-      +validateResults() boolean
-    }
-  }
-
   namespace RepositoryAuth {
     class CheckRoles {
       +userRole(Username) boolean
+    }
+
+    class CheckSystemAccounts {
+      +checkUserStatus(Username) boolean
     }
 
     class HandleAccessManagement {
@@ -243,6 +247,11 @@ classDiagram
       +accessManagement(Username, Department) void
       -collectUser(username) void
       -insertData() void
+    }
+
+    class UpdateUserPWSD {
+      +dbValues(Username, hashedPWSD) boolean
+      -changePWSDStatus(Username) void
     }
   }
 
@@ -264,7 +273,7 @@ classDiagram
   }
 
   namespace RepositoryLogs {
-    class RepositoryCollectLogs {
+    class LoginAttemptRepository {
       +loginAttempts(Username, isSuccess, failureReason) void
     }
   }
@@ -287,6 +296,14 @@ classDiagram
 
     class ConfigMSG {
       +configMSG() void
+    }
+
+    class AuthMSG {
+      +msg() void
+    }
+
+    class DefaultAccountsMSG {
+      +msg() void
     }
   }
 
@@ -399,99 +416,14 @@ classDiagram
       +checkpw(password, hash) boolean
     }
 
-    class EnvFile {
-      <<file>>
-      DB_HOST
-      DB_PORT
-      DB_NAME
-      DB_USER
-      DB_PWSD
-      LOCAL_ADMIN_NAME
-      LOCAL_ADMIN_PWSD
-      LOCAL_ADMIN_EMAIL
-      ADMIN_NAME
-      ADMIN_PWSD_DEFAULT
-      ADMIN_EMAIL_DEFAULT
-      BOOTSTRAP_KEY
-    }
-  }
-
-  namespace Database {
-    class RolesTable {
-      <<database_table>>
-      id
-      role_name
-      role_description
-      created_at
-      updated_at
-    }
-
-    class AccountStatusTable {
-      <<database_table>>
-      id
-      status
-      created_at
-      updated_at
-    }
-
-    class DepartmentsTable {
-      <<database_table>>
-      id
-      department_name
-      department_description
-      created_at
-      updated_at
-    }
-
-    class AccountsTable {
-      <<database_table>>
-      id
-      account_name
-      email
-      phone_number
-      department
-      user_job
-      user_role
-      account_status
-      permission
-      password_hash
-      requires_password_change
-      failed_password_attempts
-      bootstrap_key
-      created_at
-      updated_at
-    }
-
-    class LoginAttemptsTable {
-      <<database_table>>
-      id
-      account_id
-      entered_username
-      failure_reason
-      is_success
-      created_at
-    }
-
-    class AccessManagementTable {
-      <<database_table>>
-      id
-      requested_by
-      requested_department
-      requested_job
-      requested_role
-      request_status
-      approved_by
-      approved_at
-      request_reason
-      reject_reason
-      created_at
-      updated_at
+    class MySQLSchema {
+      <<database_schema_reference>>
     }
   }
 
   Main ..> Scanner : creates
   Main ..> StartMSG : prints startup text
-  Main ..> BootConfigService : creates and starts
+  Main ..> BootConfigService : starts
 
   BootConfigService ..> LoaderMSG : displayLoader()
   BootConfigService ..> AuthController : creates
@@ -500,7 +432,8 @@ classDiagram
   BootConfigService ..> ServiceController : creates placeholder
   BootConfigService ..> uiController : creates placeholder
   BootConfigService ..> FrontController : creates dispatcher
-  BootConfigService ..> RequestType : routes CONFIG then AUTH
+  BootConfigService ..> AuthMSG : prints auth phase header
+  BootConfigService ..> RequestType : CONFIG then AUTH
 
   FrontController *-- AuthController : holds
   FrontController *-- ConfigController : holds
@@ -512,41 +445,36 @@ classDiagram
   FrontController ..> AuthController : AUTH route
   FrontController ..> Scanner : passes input
 
-  ConfigController ..> EnvValidationService : creates and validates
-  ConfigController ..> SQLValidationService : creates and connects
+  ConfigController ..> EnvValidationService : validates environment
+  ConfigController ..> SQLValidationService : validates connection config
   ConfigController ..> DBManager : initialize runtime config
   ConfigController ..> CheckForDefaultAccounts : checks starter accounts
 
   EnvValidationService ..> ConfigMSG : prints config header
   EnvValidationService ..> File : checks .env
   EnvValidationService ..> Dotenv : loads values
-  EnvValidationService ..> EnvFile : validates required keys
 
-  SQLValidationService --> EnvValidationService : reads DB values
+  SQLValidationService --> EnvValidationService : reads environment values
   SQLValidationService ..> DriverManager : tests connection
   SQLValidationService ..> Connection : opens test connection
-  SQLValidationService ..> SQLException : handles errors
+  SQLValidationService ..> SQLException : handles connection errors
 
   DBManager ..> DriverManager : opens configured connections
   DBManager ..> Connection : returns
   DBManager ..> SQLException : throws
 
+  CheckForDefaultAccounts ..> DefaultAccountsMSG : prints starter account header
   CheckForDefaultAccounts ..> DBManager : getConnection()
-  CheckForDefaultAccounts ..> PreparedStatement : SELECT accounts
-  CheckForDefaultAccounts ..> ResultSet : checks role rows
+  CheckForDefaultAccounts ..> PreparedStatement : checks starter accounts
+  CheckForDefaultAccounts ..> ResultSet : reads results
   CheckForDefaultAccounts ..> CreateDefaultAccounts : creates missing accounts
-  CheckForDefaultAccounts ..> AccountsTable : reads
-  CheckForDefaultAccounts ..> RolesTable : uses role IDs 1 and 2
+  CheckForDefaultAccounts ..> MySQLSchema : reads accounts and roles
 
-  CreateDefaultAccounts ..> Dotenv : reads default account values
-  CreateDefaultAccounts ..> EnvFile : reads admin credentials
-  CreateDefaultAccounts ..> BCrypt : hashes default passwords
+  CreateDefaultAccounts ..> Dotenv : reads starter values
+  CreateDefaultAccounts ..> BCrypt : hashes starter passwords
   CreateDefaultAccounts ..> DBManager : getConnection()
-  CreateDefaultAccounts ..> PreparedStatement : INSERT accounts
-  CreateDefaultAccounts ..> AccountsTable : writes
-  CreateDefaultAccounts ..> DepartmentsTable : uses IT and System IDs
-  CreateDefaultAccounts ..> AccountStatusTable : uses waiting_for_password_change
-  CreateDefaultAccounts ..> RolesTable : uses local_admin/admin
+  CreateDefaultAccounts ..> PreparedStatement : inserts accounts
+  CreateDefaultAccounts ..> MySQLSchema : writes starter accounts
 
   AuthController ..> AuthMenu : displays auth menu
   AuthController ..> RegistrationFlow : option 1
@@ -558,43 +486,40 @@ classDiagram
   RegistrationService ..> Scanner : reads profile data
   RegistrationService ..> PasswordFlow : creates password hash
   PasswordFlow ..> PasswordService : validates and hashes password
-  PasswordService ..> Scanner : fallback password input
+  PasswordService ..> Scanner : fallback input for first password
   PasswordService ..> Console : hidden password input
   PasswordService ..> BCrypt : hashpw()
 
   CreateAccount ..> DBManager : getConnection()
-  CreateAccount ..> PreparedStatement : INSERT account
-  CreateAccount ..> AccountsTable : writes pending intern account
-  CreateAccount ..> AccountStatusTable : uses pending
-  CreateAccount ..> RolesTable : uses intern
-  CreateAccount ..> DepartmentsTable : uses unassigned
+  CreateAccount ..> PreparedStatement : inserts account
+  CreateAccount ..> MySQLSchema : writes registered account
 
   LoginFlow ..> LoginInputCollector : collects credentials
   LoginFlow ..> LoginVerification : verifies credentials
-  LoginFlow ..> RepositoryCollectLogs : persists login attempt
-  LoginFlow ..> AuthCollectLogs : reads result object
+  LoginFlow ..> LoginAttemptRepository : persists login attempt
+  LoginFlow ..> AuthLogResult : reads result object
   LoginInputCollector ..> Scanner : username input
   LoginInputCollector ..> Console : hidden password input
 
   LoginVerification *-- CheckUserInDB : repository field
-  LoginVerification ..> UserStatus : documents possible status values
-  LoginVerification ..> AuthCollectLogs : returns result object
+  LoginVerification ..> UserStatus : status branches
+  LoginVerification ..> AuthLogResult : returns result object
   LoginVerification ..> FirstLogin : pending account setup
-  LoginVerification ..> SQLException : handles login SQL errors
-  LoginVerification ..> Scanner : passes to FirstLogin
+  LoginVerification ..> PasswordService : password-change accounts
+  LoginVerification ..> UpdateUserPWSD : persists changed password
+  LoginVerification ..> SQLException : handles login errors
+  LoginVerification ..> Scanner : passes to subflows
 
   CheckUserInDB ..> DBManager : getConnection()
-  CheckUserInDB ..> PreparedStatement : SELECT account/hash/status
-  CheckUserInDB ..> ResultSet : reads records
+  CheckUserInDB ..> PreparedStatement : selects account data
+  CheckUserInDB ..> ResultSet : reads account data
   CheckUserInDB ..> BCrypt : checkpw()
-  CheckUserInDB ..> AccountsTable : reads
-  CheckUserInDB ..> AccountStatusTable : joins account status
+  CheckUserInDB ..> MySQLSchema : reads accounts and status
 
-  RepositoryCollectLogs ..> DBManager : getConnection()
-  RepositoryCollectLogs ..> PreparedStatement : SELECT account and INSERT log
-  RepositoryCollectLogs ..> ResultSet : reads account id
-  RepositoryCollectLogs ..> AccountsTable : reads account id
-  RepositoryCollectLogs ..> LoginAttemptsTable : writes
+  LoginAttemptRepository ..> DBManager : getConnection()
+  LoginAttemptRepository ..> PreparedStatement : selects account and inserts log
+  LoginAttemptRepository ..> ResultSet : reads account id
+  LoginAttemptRepository ..> MySQLSchema : writes login attempt
 
   FirstLogin ..> DepartmentMenu : shows department choices
   FirstLogin ..> SelectDepartment : validates selected department
@@ -616,31 +541,29 @@ classDiagram
   RoleValidation ..> roleMenu : shows role menu
 
   HandleAccessManagement ..> DBManager : getConnection()
-  HandleAccessManagement ..> PreparedStatement : SELECT account and INSERT request
+  HandleAccessManagement ..> PreparedStatement : selects account and inserts request
   HandleAccessManagement ..> ResultSet : reads account id
-  HandleAccessManagement ..> AccountsTable : reads requester
-  HandleAccessManagement ..> AccessManagementTable : writes access request
-  HandleAccessManagement ..> DepartmentsTable : requested_department
-  HandleAccessManagement ..> RolesTable : requested_role default intern
+  HandleAccessManagement ..> MySQLSchema : writes access request
+
+  UpdateUserPWSD ..> DBManager : getConnection()
+  UpdateUserPWSD ..> PreparedStatement : updates password and status
+  UpdateUserPWSD ..> MySQLSchema : writes account update
+
+  CheckSystemAccounts ..> DBManager : getConnection()
+  CheckSystemAccounts ..> PreparedStatement : reads account password-change flag
+  CheckSystemAccounts ..> ResultSet : reads account
+  CheckSystemAccounts ..> MySQLSchema : reads accounts
 
   CheckRoles ..> DBManager : getConnection()
-  CheckRoles ..> PreparedStatement : SELECT role
-  CheckRoles ..> ResultSet : reads user_role
-  CheckRoles ..> AccountsTable : reads
-  CheckRoles ..> RolesTable : checks assigned role
+  CheckRoles ..> PreparedStatement : reads assigned role
+  CheckRoles ..> ResultSet : reads account
+  CheckRoles ..> MySQLSchema : reads accounts and roles
 
-  AccountsTable --> RolesTable : user_role
-  AccountsTable --> AccountStatusTable : account_status
-  AccountsTable --> DepartmentsTable : department
-  LoginAttemptsTable --> AccountsTable : account_id
-  AccessManagementTable --> AccountsTable : requested_by and approved_by
-  AccessManagementTable --> DepartmentsTable : requested_department
-  AccessManagementTable --> RolesTable : requested_role
-  AccessManagementTable --> AccountStatusTable : request_status
-
-  note for AuthCollectLogs "Source class: app.Auth.Flow.Services.AuthSecurityService.CollectLogs. Renamed in this diagram to avoid collision."
-  note for RepositoryCollectLogs "Source class: app.Repository.logsRepository.CollectLogs. Renamed in this diagram to avoid collision."
-  note for FrontController "Current switch handles CONFIG and AUTH. MENU, SERVICE, UI and EXIT exist in RequestType but are not routed yet."
+  note for AuthLogResult "Source class: app.Auth.Flow.Services.AuthSecurityService.CollectLogs. Renamed in this diagram to avoid collision."
+  note for LoginAttemptRepository "Source class: app.Repository.logsRepository.CollectLogs. Renamed in this diagram to avoid collision."
+  note for MySQLSchema "Table definitions, required IDs, seed data, default account values, and setup SQL are documented in sqlDESCRIPTION.md."
+  note for FrontController "Current switch routes CONFIG and AUTH. MENU, SERVICE, UI, and EXIT exist in RequestType but are not routed yet."
+  note for CheckSystemAccounts "Repository helper exists, but the current LoginVerification password-change path uses account status and UpdateUserPWSD directly."
   note for MenuController "Currently empty placeholder."
   note for ServiceController "Currently empty placeholder."
   note for uiController "Currently empty placeholder."

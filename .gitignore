@@ -17,8 +17,11 @@
 # Logs
 *.log
 
-# Optional (nur wenn nötig)
+# Optional
 *.dump.idea/
 target/
 .env
 .DS_Store
+
+# SQL
+*.sql
