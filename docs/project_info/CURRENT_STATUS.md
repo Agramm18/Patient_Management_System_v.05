@@ -1,8 +1,20 @@
 # Current Project Status
 
-Patient Management System V5.01 is currently a Java 21 console application. The project is in an early development stage and focuses mainly on startup configuration, database connection handling, authentication, registration, starter accounts, and first-login access requests.
+Last synchronized: 2026-05-29.
 
-It is not a complete patient management system yet. Patient records, appointments, billing, reporting, treatment workflows, a graphical UI, and full administration workflows are still planned features.
+Patient Management System V5.01 is currently a Java 21 console application. The active implementation focuses on application bootstrapping, local configuration validation, MySQL connectivity, account registration, login, starter account creation, password handling, login attempt logging, and the first groundwork for access requests.
+
+The project is not a complete patient management system yet. Patient records, appointments, billing, treatment workflows, reporting, full administration workflows, a graphical UI, REST APIs, and deployment tooling are still outside the implemented runtime.
+
+## Active Scope
+
+The currently active runtime is:
+
+```text
+Main -> BootConfigService -> FrontController -> ConfigController -> AuthController
+```
+
+Only the `CONFIG` and `AUTH` controller routes are active. `MENU`, `SERVICE`, `UI`, and `EXIT` exist in the controller enum but are not implemented as routed application phases yet.
 
 ## Implemented
 
@@ -10,66 +22,78 @@ The current application includes:
 
 - Maven project setup with Java 21.
 - Console startup through `app.Main`.
-- Boot process through `BootConfigService`.
-- Central routing through `FrontController`.
+- Boot orchestration through `BootConfigService`.
+- Controller dispatch through `FrontController`.
 - Configuration startup through `ConfigController`.
-- `.env` validation through `EnvValidationService`.
-- MySQL connection setup through `SQLValidationService` and `DBManager`.
-- Automatic starter account checks through `CheckForDefaultAccounts`.
-- Automatic creation of missing `local_admin` and `admin` accounts through `CreateDefaultAccounts`.
-- User registration through `RegistrationFlow`, `RegistrationService`, `PasswordFlow`, and `CreateAccount`.
-- BCrypt password hashing for registered users and starter accounts.
-- Login through `LoginFlow`, `LoginInputCollector`, `LoginVerification`, and `CheckUserInDB`.
+- Local environment validation through `EnvValidationService`.
+- MySQL JDBC URL creation and connection checks through `SQLValidationService`.
+- Runtime database connection access through `DBManager`.
+- Starter account checks through `CheckForDefaultAccounts`.
+- Automatic creation of missing `local_admin` and `admin` starter accounts through `CreateDefaultAccounts`.
+- BCrypt password hashing for starter accounts and registered users.
+- Registration through `RegistrationFlow`, `RegistrationService`, `PasswordFlow`, and `CreateAccount`.
+- Login input collection through `LoginInputCollector`.
+- Username, password, and account status checks through `LoginVerification` and `CheckUserInDB`.
 - Account status handling for `active`, `disabled`, `pending`, `locked`, `on_quarantine`, and `waiting_for_password_change`.
-- First password change for starter accounts.
-- Login attempt logging into the `login_attempts` table.
+- First password change flow for starter accounts in `waiting_for_password_change`.
+- Password update and activation for starter accounts through `UpdateUserPWSD`.
+- Login attempt persistence through `app.Repository.logsRepository.CollectLogs`.
+- Failed password counting over recent login attempts through `CountFailedLoginAttempts`.
+- Placeholder password policy status routing through `ExecutePWSDPolicy`.
 - First-login access request groundwork for pending users.
-- Department selection and placeholder department job menus.
+- Department selection through `DepartmentMenu` and `SelectDepartment`.
+- Department-specific job menu placeholders.
 - Access request storage through `HandleAccessManagement`.
 
-## Runtime Flow
+## Current Runtime Flow
 
-1. `app.Main` starts the console application and creates a shared `Scanner`.
-2. `BootConfigService` displays startup messages and builds the controller objects.
-3. `FrontController` first routes into the configuration phase.
-4. `ConfigController` validates the `.env` file, builds the SQL connection values, initializes `DBManager`, and checks starter accounts.
-5. Missing starter accounts are created automatically with hashed passwords from `.env`.
-6. After configuration, the application routes into the authentication phase.
+1. `app.Main` creates a shared `Scanner`, prints the startup message, and starts `BootConfigService`.
+2. `BootConfigService` creates `AuthController`, `ConfigController`, `MenuController`, `ServiceController`, and `uiController`.
+3. `BootConfigService` creates a `FrontController` and routes first to `CONFIG`.
+4. `ConfigController` validates local configuration, builds the database connection values, initializes `DBManager`, and checks starter accounts.
+5. Missing starter accounts are created automatically and receive `waiting_for_password_change`.
+6. If configuration returns success, the application routes to `AUTH`.
 7. `AuthController` shows the authentication menu with registration, login, and exit.
 8. Registration collects username, email, phone number, and password, then creates a pending account.
-9. Login checks the username, verifies the password with BCrypt, checks the account status, and writes a login attempt log.
+9. Login checks whether the username exists, verifies the password with BCrypt, loads the account status, and writes a login attempt log.
 10. Pending users enter the first-login access request flow and select a department.
-11. Starter accounts with `waiting_for_password_change` must create a new password before becoming active.
+11. Starter accounts with `waiting_for_password_change` must create a new password before their status is changed to `active`.
 
-## Database And Setup
+## Current Access Request State
 
-The application uses MySQL through JDBC. Database setup is documented in `docs/setup/DB_SETUP.md`, and environment variables are documented in `docs/setup/ENV_SETUP.md`.
+Pending users can create an access request during first login. The current flow stores the requesting account and selected department. Requested job and requested role still use default values.
 
-The current database model includes:
+Approval, rejection, activation after approval, and admin-side request management are not implemented yet.
 
-- `roles`
-- `account_status`
-- `departments`
-- `accounts`
-- `login_attempts`
-- `access_management`
+## Current Security State
 
-Registered users are currently created as pending accounts with the default intern role and the unassigned department. Starter accounts are created as system accounts and must change their password on first login.
+The system uses BCrypt for password hashing and password verification. Login attempts are written to the database. Failed password attempts can be counted over a 24-hour window, but the status transition methods for locking, quarantine, and suspicious activity are currently placeholders and do not update account state yet.
+
+## Documentation Boundaries
+
+Environment configuration details are maintained only in `docs/setup/ENV_SETUP.md`.
+
+Database setup, schema details, seed data, required IDs, and verification queries are maintained only in `docs/setup/DB_SETUP.md`.
+
+This status file intentionally describes runtime behavior without duplicating setup instructions.
 
 ## Current Limitations
 
-- There is no connected main menu after a successful login yet.
-- Patient management is not implemented yet.
-- Appointment, billing, treatment, reporting, and hospital administration workflows are not implemented yet.
-- Job selection is not fully implemented; department job menus are placeholders.
-- Role selection and account approval workflows are not active yet.
-- Access requests are stored, but there is no approval or rejection workflow yet.
-- Failed login counters are handled during the login flow but are not persisted as a full locking system yet.
-- `MenuController`, `ServiceController`, `uiController`, `AccountPolicy`, and `SelectJob` are placeholders.
+- There is no connected main menu after a successful active login.
+- Patient management is not implemented.
+- Appointment, billing, treatment, reporting, and hospital administration workflows are not implemented.
+- Job selection is not implemented beyond displaying placeholder department job menus.
+- Role selection exists as a menu and validation class, but it is not connected to the active access request flow.
+- Access requests are stored, but there is no approval, rejection, or activation workflow.
+- `ExecutePWSDPolicy` contains empty status transition methods, so failed password policy thresholds do not yet change account status.
+- `SetNewStatus`, `MenuController`, `ServiceController`, `uiController`, `AccountPolicy`, and `SelectJob` are placeholders.
+- Some console input paths still need stronger fallback handling when `System.console()` is unavailable.
+- Startup validation prints errors in several places but does not always stop execution immediately after invalid configuration or failed database connection checks.
+- The registration correction path needs review to ensure changed data is reconfirmed and password creation still runs.
 - There are no automated tests yet.
-- The application is still console-based; JavaFX and REST API support are planned for later.
+- The application is still console-based; JavaFX, REST API support, Docker, CI, and production logging are planned for later stages.
 
-## Run The Project
+## Run Commands
 
 Build the project:
 
@@ -88,7 +112,3 @@ Start the console application:
 ```bash
 mvn exec:java
 ```
-
-## Notes
-
-The current focus is authentication, database-backed account handling, and the foundation for role-based access workflows. The project structure and documentation are already separated into setup, architecture, and project information files so the next development steps can build on a clearer base.

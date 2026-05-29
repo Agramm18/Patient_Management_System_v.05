@@ -1,6 +1,10 @@
 # Project Structure
 
-This file describes the current folder structure and runtime flow of Patient Management System V5.01. The project is still a console-based Java application, so the structure is focused on bootstrapping, configuration, authentication, database access, and the first access-management groundwork.
+Last synchronized: 2026-05-29.
+
+This file describes the current folder structure and runtime organization of Patient Management System V5.01. The project is currently a console-based Java application focused on bootstrapping, configuration, authentication, database-backed account handling, login attempt logging, and first-login access request groundwork.
+
+Environment setup details are documented only in `docs/setup/ENV_SETUP.md`. Database setup details are documented only in `docs/setup/DB_SETUP.md`.
 
 ## Root Structure
 
@@ -8,8 +12,21 @@ This file describes the current folder structure and runtime flow of Patient Man
 Patient_Management_System_v.05
 |-- docs
 |   |-- architecture
+|   |   |-- diagramms
+|   |   |   `-- patient-management-uml.mmd
+|   |   |-- PROJECT_STRUCTURE.md
+|   |   `-- TECHNICHAL.md
+|   |-- archive
+|   |   `-- ARCHIVE.md
 |   |-- project_info
+|   |   |-- ABOUT.md
+|   |   |-- CURRENT_STATUS.md
+|   |   |-- FUTURE_PLANS.md
+|   |   |-- MISSING_NOW.md
+|   |   `-- RECRUITER.md
 |   `-- setup
+|       |-- DB_SETUP.md
+|       `-- ENV_SETUP.md
 |-- src
 |   `-- main
 |       `-- java
@@ -19,16 +36,19 @@ Patient_Management_System_v.05
 |-- .gitignore
 |-- pom.xml
 |-- Query.sql
+|-- Query_1.sql
 `-- README.md
 ```
 
-Main root files:
+Main root files and folders:
 
-- `pom.xml` contains the Maven setup, Java 21 configuration, dependencies, and `exec-maven-plugin` entry point.
-- `.env` contains local database and starter account values.
-- `README.md` gives the general project overview.
-- `docs/` contains setup, architecture, and project status documentation.
-- `src/main/java/app` contains the application source code.
+- `pom.xml` contains the Maven setup, Java 21 target, dependencies, and `exec-maven-plugin` entry point.
+- `README.md` contains the general project overview.
+- `docs/` contains project information, setup documentation, architecture notes, and diagrams.
+- `src/main/java/app` contains the Java application source code.
+- `target/` contains generated Maven build output.
+- `Query.sql` and `Query_1.sql` are root-level SQL scratch files; maintained setup instructions belong in `docs/setup/DB_SETUP.md`.
+- `.env` is the local runtime configuration file; maintained setup instructions belong in `docs/setup/ENV_SETUP.md`.
 
 ## Source Package Structure
 
@@ -42,46 +62,97 @@ src/main/java/app
 |       |-- RegistrationFlow.java
 |       `-- Services
 |           |-- AuthSecurityService
+|           |   |-- AccountPolicy.java
+|           |   |-- CollectLogs.java
+|           |   |-- RoleValidation.java
+|           |   |-- SelectDepartment.java
+|           |   `-- SelectJob.java
 |           |-- LoginService
+|           |   |-- FirstLogin.java
+|           |   |-- LoginInputCollector.java
+|           |   `-- LoginVerification.java
 |           |-- PasswordService
+|           |   `-- PasswordService.java
 |           `-- RegistrationService
+|               `-- RegistrationService.java
 |-- Bootstrap
+|   `-- BootConfigService.java
 |-- CLIText
 |   |-- DisplayMessages
+|   |   |-- AuthMSG.java
+|   |   |-- ConfigMSG.java
+|   |   |-- DefaultAccountsMSG.java
+|   |   |-- LoaderMSG.java
+|   |   `-- StartMSG.java
 |   `-- Menus
 |       |-- DepartmentJobs
+|       |   |-- AdministrationJobsMenu.java
+|       |   |-- EmergencyJobsMenu.java
+|       |   |-- FinanceJobsMenu.java
+|       |   |-- itJobsMenu.java
+|       |   |-- LaboratoryJobsMenu.java
+|       |   |-- MedicalJobsMenu.java
+|       |   |-- OfficeJobsMenu.java
+|       |   |-- PharmacyJobsMenu.java
+|       |   |-- SecurityJobsMenu.java
+|       |   |-- SystemJobsMenu.java
+|       |   `-- TrainingJobsMenu.java
 |       |-- Departments
+|       |   `-- DepartmentMenu.java
 |       `-- Program
+|           |-- AuthMenu.java
+|           `-- roleMenu.java
 |-- Config
+|   |-- CheckForDefaultAccounts.java
+|   |-- DBManager.java
+|   |-- EnvValidationService.java
+|   `-- SQLValidationService.java
 |-- Controller
+|   |-- AuthController.java
+|   |-- ConfigController.java
+|   |-- FrontController.java
+|   |-- MenuController.java
+|   |-- ServiceController.java
+|   `-- uiController.java
 `-- Repository
     |-- AuthRepository
+    |   |-- CheckRoles.java
+    |   |-- CheckSystemAccounts.java
+    |   |-- CountFailedLoginAttempts.java
+    |   |-- ExecutePWSDPolicy.java
+    |   |-- HandleAccessManagement.java
+    |   |-- SetNewStatus.java
+    |   `-- UpdateUserPWSD.java
     |-- ConfigRepository
+    |   `-- CreateDefaultAccounts.java
     |-- LoginRepository
+    |   `-- CheckUserInDB.java
     |-- logsRepository
+    |   `-- CollectLogs.java
     `-- RegistrationRepository
+        `-- CreateAccount.java
 ```
 
 ## Package Responsibilities
 
 ### `app`
 
-Contains `Main.java`, the application entry point. It creates the shared `Scanner`, displays the startup message, starts the loader, and hands control to `BootConfigService`.
+Contains `Main.java`, the application entry point. It creates the shared `Scanner`, prints the startup message, displays the loader, and hands control to `BootConfigService`.
 
 ### `app.Bootstrap`
 
-Contains the boot process. `BootConfigService` creates the controller objects, builds the `FrontController`, starts the configuration phase, and only moves into authentication if configuration succeeds.
+Contains the boot process. `BootConfigService` creates all controller objects, builds the `FrontController`, runs the configuration phase, and starts the authentication phase only when configuration returns success.
 
 ### `app.Controller`
 
-Contains the central controller layer.
+Contains the controller layer.
 
 - `FrontController` routes requests to subcontrollers.
-- `ConfigController` runs environment and database startup logic.
+- `ConfigController` runs local configuration and database startup logic.
 - `AuthController` shows the authentication menu and routes to registration, login, or exit.
 - `MenuController`, `ServiceController`, and `uiController` currently exist as placeholders for later runtime phases.
 
-The intended high-level controller order is:
+The intended controller order is:
 
 ```text
 Config -> Auth -> Menu -> Service -> UI
@@ -91,51 +162,51 @@ Currently only `Config` and `Auth` are active.
 
 ### `app.Config`
 
-Contains configuration and database startup services.
+Contains startup services for local configuration and database connectivity.
 
-- `EnvValidationService` checks the `.env` file and required values.
-- `SQLValidationService` builds the JDBC URL and tests the database connection.
-- `DBManager` stores the runtime database connection configuration and provides new JDBC connections.
-- `CheckForDefaultAccounts` checks whether the starter admin accounts exist.
+- `EnvValidationService` checks the local runtime configuration file and required values.
+- `SQLValidationService` builds the JDBC connection values and tests the database connection.
+- `DBManager` stores the runtime database connection configuration and creates JDBC connections.
+- `CheckForDefaultAccounts` checks whether starter admin accounts exist and triggers creation when needed.
 
 ### `app.Auth.Flow`
 
-Contains the main authentication flow classes.
+Contains the top-level authentication flow classes.
 
 - `RegistrationFlow` coordinates account registration.
-- `LoginFlow` coordinates login and login attempt logging.
-- `PasswordFlow` routes into password creation and hashing.
+- `LoginFlow` coordinates credential collection, login verification, and login attempt logging.
+- `PasswordFlow` delegates password creation to `PasswordService`.
 
 ### `app.Auth.Flow.Services`
 
-Contains smaller services used by the authentication flows.
+Contains smaller services used by authentication and access request flows.
 
-- `RegistrationService` collects and validates username, email, and phone number.
+- `RegistrationService` collects username, email, and phone number.
 - `PasswordService` validates password rules and creates BCrypt hashes.
 - `LoginInputCollector` collects login credentials.
-- `LoginVerification` checks the login result and routes based on account status.
-- `FirstLogin` handles the first-login access request flow for pending users.
+- `LoginVerification` checks credentials and routes behavior based on account status.
+- `FirstLogin` handles first-login access request groundwork for pending accounts.
 - `SelectDepartment` validates department selection.
-- `SelectJob`, `AccountPolicy`, and parts of the role flow are still placeholders or not fully connected.
+- `RoleValidation`, `SelectJob`, and `AccountPolicy` are draft or placeholder classes.
 
 ### `app.CLIText`
 
-Contains console text output and menu classes.
+Contains console output text and menu classes.
 
-- `DisplayMessages` contains startup, config, auth, loader, and default-account messages.
+- `DisplayMessages` contains startup, configuration, authentication, loader, and starter-account messages.
 - `Menus.Program` contains the authentication and role menus.
 - `Menus.Departments` contains the department selection menu.
-- `Menus.DepartmentJobs` contains department-specific job menu classes. These are currently placeholder menus.
+- `Menus.DepartmentJobs` contains department-specific job menu placeholders.
 
 ### `app.Repository`
 
 Contains database access classes.
 
 - `ConfigRepository` creates missing starter accounts.
-- `RegistrationRepository` creates new registered user accounts.
-- `LoginRepository` checks users, passwords, and account status.
-- `logsRepository` stores login attempt logs.
-- `AuthRepository` contains access-management, password update, role, and system-account database operations.
+- `RegistrationRepository` creates registered user accounts.
+- `LoginRepository` checks usernames, password hashes, and account statuses.
+- `logsRepository` writes login attempt records.
+- `AuthRepository` contains access request, password update, failed login counting, role check, and status policy repository classes.
 
 ## Program Runtime Flow
 
@@ -147,23 +218,22 @@ Contains database access classes.
 4. `BootConfigService.SystemConfig(scanner)` creates the controllers.
 5. `FrontController` is created with `AuthController`, `ConfigController`, `MenuController`, `ServiceController`, and `uiController`.
 
-### 2. Config Phase
+### 2. Configuration Phase
 
-The config phase prepares the environment and database connection before the user can authenticate.
+The configuration phase prepares local runtime values and database access before users can authenticate.
 
 1. `FrontController` routes to `CONFIG`.
 2. `ConfigController.execute(scanner)` starts the configuration process.
-3. `EnvValidationService` checks whether `.env` exists and validates required values.
-4. `SQLValidationService` builds the MySQL JDBC URL from the `.env` values.
-5. `SQLValidationService` tries to connect to the database.
-6. `DBManager.initialize(...)` stores the runtime database connection values.
-7. `CheckForDefaultAccounts` checks for the `local_admin` and `admin` starter accounts.
-8. `CreateDefaultAccounts` creates missing starter accounts with BCrypt-hashed passwords.
-9. If the starter account check succeeds, the boot process continues into authentication.
+3. `EnvValidationService` validates required runtime values.
+4. `SQLValidationService` builds and tests the JDBC connection values.
+5. `DBManager.initialize(...)` stores the runtime database connection values.
+6. `CheckForDefaultAccounts` checks for starter admin accounts.
+7. `CreateDefaultAccounts` creates missing starter accounts.
+8. If the starter account check succeeds, boot continues into authentication.
 
-### 3. Auth Phase
+### 3. Authentication Phase
 
-The auth phase is the first interactive user phase.
+The authentication phase is the first interactive user phase.
 
 1. `FrontController` routes to `AUTH`.
 2. `AuthController` displays `AuthMenu`.
@@ -181,25 +251,18 @@ Registration creates a new pending account.
 3. The user confirms or changes the entered data.
 4. `PasswordFlow` starts `PasswordService`.
 5. `PasswordService` validates password rules and hashes the password with BCrypt.
-6. `CreateAccount` inserts the new account into the database.
-
-Current registration defaults:
-
-- Account status: `pending`
-- Role: `intern`
-- Department: `unassigned`
-- Permission: database default `read_only`
+6. `CreateAccount` inserts the new account through the repository layer.
 
 ## Login Flow
 
-Login verifies credentials and decides what happens based on account status.
+Login verifies credentials and decides the next action based on account status.
 
 1. `LoginFlow` starts `LoginInputCollector`.
 2. `LoginInputCollector` collects username and password.
 3. `LoginVerification` uses `CheckUserInDB` to check the username.
 4. `CheckUserInDB` verifies the password with BCrypt.
 5. `CheckUserInDB` loads the account status.
-6. `LoginVerification` decides the next action.
+6. `LoginVerification` routes based on status.
 7. `app.Repository.logsRepository.CollectLogs` stores the login attempt.
 
 Current account status behavior:
@@ -223,74 +286,47 @@ on_quarantine
 
 waiting_for_password_change
 - The user must create a new password.
-- The account is changed to active after the password update.
+- The account is changed to active after the password update succeeds.
 ```
 
 ## Pending User Access Flow
 
-Pending users can currently request access during first login.
+Pending users can currently create an access request during first login.
 
 1. `FirstLogin.firstSetup(username, scanner)` displays the department menu.
 2. `SelectDepartment` collects and validates a department number from `1` to `11`.
-3. `FirstLogin` displays the matching department job menu.
-4. `HandleAccessManagement` stores an access request in the database.
+3. `FirstLogin` displays the matching department job menu placeholder.
+4. `HandleAccessManagement` stores an access request.
 
 Current limitations:
 
 - Department selection is stored.
-- Job selection is not implemented yet.
-- Role selection is not fully connected yet.
-- Requested job currently uses the default value.
-- Requested role currently uses the default intern role.
-- Approval, rejection, and activation workflows are not implemented yet.
+- Job selection is not implemented.
+- Role selection is not connected.
+- Requested job uses a default value.
+- Requested role uses the default intern role.
+- Approval, rejection, and activation workflows are not implemented.
 
 ## Starter Account Flow
 
-During startup, the application checks whether `local_admin` and `admin` exist.
+During startup, the application checks whether starter admin accounts exist.
 
 If one or both are missing:
 
-1. `.env` starter account values are loaded.
+1. Starter account values are loaded by the repository.
 2. Passwords are hashed with BCrypt.
-3. Accounts are inserted into the `accounts` table.
-4. Both starter accounts receive `waiting_for_password_change`.
+3. Missing accounts are inserted through the repository layer.
+4. Starter accounts receive `waiting_for_password_change`.
 
-On first login, starter accounts must change their password. `UpdateUserPWSD` updates the password hash, changes the account status to `active`, and clears the password-change flag.
-
-## Documentation Structure
-
-```text
-docs
-|-- architecture
-|   |-- PROJECT_STRUCTURE.md
-|   |-- TECHNICHAL.md
-|   `-- diagramms
-|       `-- patient-management-uml.mmd
-|-- project_info
-|   |-- CURRENT_STATUS.md
-|   |-- FUTURE_PLANS.md
-|   |-- MISSING_NOW.md
-|   `-- RECRUITER.md
-`-- setup
-    |-- DB_SETUP.md
-    `-- ENV_SETUP.md
-```
-
-Documentation purpose:
-
-- `PROJECT_STRUCTURE.md` explains package structure and runtime flow.
-- `TECHNICHAL.md` explains tools, dependencies, and technical concepts.
-- `CURRENT_STATUS.md` describes what is currently implemented.
-- `MISSING_NOW.md` lists missing short-term and core production work.
-- `FUTURE_PLANS.md` contains later project roadmap ideas.
-- `ENV_SETUP.md` documents required `.env` values.
-- `DB_SETUP.md` documents database schema, seed data, and verification queries.
+On first login, starter accounts must change their password. `UpdateUserPWSD` updates the password hash, changes account status to `active`, and clears the password-change flag.
 
 ## Current Structure Notes
 
 - The application is still console-based.
 - The active runtime currently stops after authentication-related flows.
-- `MenuController`, `ServiceController`, and `uiController` are part of the intended architecture but are not implemented yet.
+- `MenuController`, `ServiceController`, and `uiController` are placeholders.
+- `AccountPolicy`, `SelectJob`, `SetNewStatus`, and parts of the role flow are placeholders or drafts.
 - Repository classes access the database through `DBManager`.
-- CLI text is separated from flow and repository logic to keep console output easier to maintain.
-- Some class names and folder names still contain inconsistent casing or spelling and should be cleaned up later.
+- CLI text is separated from flow and repository logic.
+- Generated `target/` files are not source files.
+- Some class and folder names still contain inconsistent casing or spelling and should be cleaned up later.

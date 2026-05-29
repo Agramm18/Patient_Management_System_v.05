@@ -1,8 +1,8 @@
 classDiagram
-  %% Patient Management V5.01 - current Java class diagram
-  %% Last synchronized: 2026-05-28
-  %% SQL schema details are intentionally documented in sqlDESCRIPTION.md.
-  %% Copy into Mermaid Live Editor or draw.io: Insert -> Advanced -> Mermaid
+  %% Patient Management System V5.01 - current Java class diagram
+  %% Last synchronized: 2026-05-29
+  %% Environment setup is documented in docs/setup/ENV_SETUP.md.
+  %% Database setup and schema details are documented in docs/setup/DB_SETUP.md.
 
   direction LR
 
@@ -181,6 +181,8 @@ classDiagram
     class LoginVerification {
       -int RETRYS
       -int RETRYS_MAX
+      -int RETRYS_FOR_SUSPICOUS
+      -int RETRYS_FOR_QUARANTINE
       -CheckUserInDB repository
       -String AccountStatus
       +loggedUser(Username, PWSD, scanner) AuthLogResult
@@ -239,6 +241,22 @@ classDiagram
       +checkUserStatus(Username) boolean
     }
 
+    class CountFailedLoginAttempts {
+      +int RETRY_COUNT_24_H
+      -int id
+      +Logs(Username) void
+      -CollectID(Username) void
+      -CountUser() void
+      +getRETRY_COUNT_24_H() int
+    }
+
+    class ExecutePWSDPolicy {
+      <<placeholder>>
+      +locked(Username) void
+      +quarantine(Username) void
+      +suspicious(Username) void
+    }
+
     class HandleAccessManagement {
       -String DEFAULT_REQUESTED_JOB
       -int DEFAULT_REQUESTED_ROLE
@@ -247,6 +265,10 @@ classDiagram
       +accessManagement(Username, Department) void
       -collectUser(username) void
       -insertData() void
+    }
+
+    class SetNewStatus {
+      <<placeholder>>
     }
 
     class UpdateUserPWSD {
@@ -416,8 +438,8 @@ classDiagram
       +checkpw(password, hash) boolean
     }
 
-    class MySQLSchema {
-      <<database_schema_reference>>
+    class DatabaseSchema {
+      <<reference>>
     }
   }
 
@@ -445,16 +467,16 @@ classDiagram
   FrontController ..> AuthController : AUTH route
   FrontController ..> Scanner : passes input
 
-  ConfigController ..> EnvValidationService : validates environment
+  ConfigController ..> EnvValidationService : validates local config
   ConfigController ..> SQLValidationService : validates connection config
   ConfigController ..> DBManager : initialize runtime config
   ConfigController ..> CheckForDefaultAccounts : checks starter accounts
 
   EnvValidationService ..> ConfigMSG : prints config header
-  EnvValidationService ..> File : checks .env
+  EnvValidationService ..> File : checks local config file
   EnvValidationService ..> Dotenv : loads values
 
-  SQLValidationService --> EnvValidationService : reads environment values
+  SQLValidationService --> EnvValidationService : reads values
   SQLValidationService ..> DriverManager : tests connection
   SQLValidationService ..> Connection : opens test connection
   SQLValidationService ..> SQLException : handles connection errors
@@ -468,13 +490,13 @@ classDiagram
   CheckForDefaultAccounts ..> PreparedStatement : checks starter accounts
   CheckForDefaultAccounts ..> ResultSet : reads results
   CheckForDefaultAccounts ..> CreateDefaultAccounts : creates missing accounts
-  CheckForDefaultAccounts ..> MySQLSchema : reads accounts and roles
+  CheckForDefaultAccounts ..> DatabaseSchema : reads account references
 
   CreateDefaultAccounts ..> Dotenv : reads starter values
   CreateDefaultAccounts ..> BCrypt : hashes starter passwords
   CreateDefaultAccounts ..> DBManager : getConnection()
   CreateDefaultAccounts ..> PreparedStatement : inserts accounts
-  CreateDefaultAccounts ..> MySQLSchema : writes starter accounts
+  CreateDefaultAccounts ..> DatabaseSchema : writes starter accounts
 
   AuthController ..> AuthMenu : displays auth menu
   AuthController ..> RegistrationFlow : option 1
@@ -492,7 +514,7 @@ classDiagram
 
   CreateAccount ..> DBManager : getConnection()
   CreateAccount ..> PreparedStatement : inserts account
-  CreateAccount ..> MySQLSchema : writes registered account
+  CreateAccount ..> DatabaseSchema : writes registered account
 
   LoginFlow ..> LoginInputCollector : collects credentials
   LoginFlow ..> LoginVerification : verifies credentials
@@ -507,6 +529,8 @@ classDiagram
   LoginVerification ..> FirstLogin : pending account setup
   LoginVerification ..> PasswordService : password-change accounts
   LoginVerification ..> UpdateUserPWSD : persists changed password
+  LoginVerification ..> CountFailedLoginAttempts : counts recent failures
+  LoginVerification ..> ExecutePWSDPolicy : calls threshold actions
   LoginVerification ..> SQLException : handles login errors
   LoginVerification ..> Scanner : passes to subflows
 
@@ -514,12 +538,19 @@ classDiagram
   CheckUserInDB ..> PreparedStatement : selects account data
   CheckUserInDB ..> ResultSet : reads account data
   CheckUserInDB ..> BCrypt : checkpw()
-  CheckUserInDB ..> MySQLSchema : reads accounts and status
+  CheckUserInDB ..> DatabaseSchema : reads accounts and status
+
+  CountFailedLoginAttempts ..> DBManager : getConnection()
+  CountFailedLoginAttempts ..> PreparedStatement : selects account and counts failures
+  CountFailedLoginAttempts ..> ResultSet : reads account and count
+  CountFailedLoginAttempts ..> DatabaseSchema : reads login attempts
+
+  ExecutePWSDPolicy ..> SetNewStatus : intended status update path
 
   LoginAttemptRepository ..> DBManager : getConnection()
   LoginAttemptRepository ..> PreparedStatement : selects account and inserts log
   LoginAttemptRepository ..> ResultSet : reads account id
-  LoginAttemptRepository ..> MySQLSchema : writes login attempt
+  LoginAttemptRepository ..> DatabaseSchema : writes login attempt
 
   FirstLogin ..> DepartmentMenu : shows department choices
   FirstLogin ..> SelectDepartment : validates selected department
@@ -543,27 +574,29 @@ classDiagram
   HandleAccessManagement ..> DBManager : getConnection()
   HandleAccessManagement ..> PreparedStatement : selects account and inserts request
   HandleAccessManagement ..> ResultSet : reads account id
-  HandleAccessManagement ..> MySQLSchema : writes access request
+  HandleAccessManagement ..> DatabaseSchema : writes access request
 
   UpdateUserPWSD ..> DBManager : getConnection()
   UpdateUserPWSD ..> PreparedStatement : updates password and status
-  UpdateUserPWSD ..> MySQLSchema : writes account update
+  UpdateUserPWSD ..> DatabaseSchema : writes account update
 
   CheckSystemAccounts ..> DBManager : getConnection()
-  CheckSystemAccounts ..> PreparedStatement : reads account password-change flag
+  CheckSystemAccounts ..> PreparedStatement : reads password-change flag
   CheckSystemAccounts ..> ResultSet : reads account
-  CheckSystemAccounts ..> MySQLSchema : reads accounts
+  CheckSystemAccounts ..> DatabaseSchema : reads account data
 
   CheckRoles ..> DBManager : getConnection()
   CheckRoles ..> PreparedStatement : reads assigned role
   CheckRoles ..> ResultSet : reads account
-  CheckRoles ..> MySQLSchema : reads accounts and roles
+  CheckRoles ..> DatabaseSchema : reads accounts and roles
 
   note for AuthLogResult "Source class: app.Auth.Flow.Services.AuthSecurityService.CollectLogs. Renamed in this diagram to avoid collision."
   note for LoginAttemptRepository "Source class: app.Repository.logsRepository.CollectLogs. Renamed in this diagram to avoid collision."
-  note for MySQLSchema "Table definitions, required IDs, seed data, default account values, and setup SQL are documented in sqlDESCRIPTION.md."
+  note for DatabaseSchema "Schema, required IDs, seed data, and setup SQL are documented only in docs/setup/DB_SETUP.md."
   note for FrontController "Current switch routes CONFIG and AUTH. MENU, SERVICE, UI, and EXIT exist in RequestType but are not routed yet."
-  note for CheckSystemAccounts "Repository helper exists, but the current LoginVerification password-change path uses account status and UpdateUserPWSD directly."
+  note for ExecutePWSDPolicy "Threshold methods are currently empty and do not persist status changes yet."
+  note for SetNewStatus "Currently empty placeholder for future account status updates."
+  note for CheckSystemAccounts "Repository helper exists, but the active password-change path uses account status and UpdateUserPWSD directly."
   note for MenuController "Currently empty placeholder."
   note for ServiceController "Currently empty placeholder."
   note for uiController "Currently empty placeholder."
