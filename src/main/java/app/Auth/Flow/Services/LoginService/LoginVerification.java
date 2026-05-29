@@ -3,10 +3,10 @@ package app.Auth.Flow.Services.LoginService;
 import java.sql.SQLException;
 import java.util.Scanner;
 
-import app.Auth.Flow.PasswordFlow;
 import app.Auth.Flow.Services.AuthSecurityService.CollectLogs;
 import app.Auth.Flow.Services.PasswordService.PasswordService;
-import app.Repository.AuthRepository.CheckSystemAccounts;
+import app.Repository.AuthRepository.CountFailedLoginAttempts;
+import app.Repository.AuthRepository.ExecutePWSDPolicy;
 import app.Repository.AuthRepository.UpdateUserPWSD;
 import app.Repository.LoginRepository.CheckUserInDB;
 
@@ -23,6 +23,9 @@ import app.Repository.LoginRepository.CheckUserInDB;
 public class LoginVerification {
     private int RETRYS = 0;
     private int RETRYS_MAX = 5;
+    private int RETRYS_FOR_SUSPICOUS = 6;
+    private int RETRYS_FOR_QUARANTINE = 25;
+
 
     private final CheckUserInDB repository = new CheckUserInDB();
 
@@ -49,17 +52,38 @@ public class LoginVerification {
                 return new CollectLogs(false, "USERNAME_NOT_FOUND");
             }
 
-            System.out.println("\n[INFO] Continue with PWSD check");
+            System.out.println("\n[INFO] Continue with PWSD check\n");
+
+            System.out.println("\n[WARNING] Invalid Password detected");
+            System.out.println("[INFO] Please Notice if retry >=5 your account will be locked");
+            System.out.println("[INFO] If you have 25 Failed Passwords the Accounts will be set to quarantine");
 
             if (!passwordOK) {
                 this.RETRYS++;
-                System.out.println("[WARNING] Invalid Password detected");
-                System.out.println("[INFO] Please Notice if retrys >=5 your account will be locked");
-                System.out.println("[INFO] Failed Passwords: " + this.RETRYS);
 
-                if (this.RETRYS >= this.RETRYS_MAX) {
-                    return new CollectLogs(false, "TO_MANY_INVALID_PASSWORDS");
+                System.out.println("[INFO] Failed Passwords: " + this.RETRYS + "\n");
 
+                CountFailedLoginAttempts count = new CountFailedLoginAttempts();
+                count.Logs(Username);
+
+                int retryValue = count.getRETRY_COUNT_24_H();
+
+                System.out.println("\n[INFO] FAILED PWSD Im 24 Hours: " + retryValue + "\n");
+
+                ExecutePWSDPolicy changeStatusTo = new ExecutePWSDPolicy();
+
+                if (retryValue >= this.RETRYS_FOR_QUARANTINE) {
+                    System.out.println("\n[WARNING] Malicious Activities Recognized you Account will be set to quarantine\n");
+                    changeStatusTo.quarantine(Username);
+                    return new CollectLogs(false, "Account is on Quarantine");
+                } else if (retryValue >= this.RETRYS_FOR_SUSPICOUS) {
+                    System.out.println("\n[INFO] Due to your current activities your account will be set to suspicious\n");
+                    changeStatusTo.suspicious(Username);
+                    return new CollectLogs(false, "To many Login Attempts");
+                } else if (retryValue >= this.RETRYS_MAX) {
+                    changeStatusTo.locked(Username);
+                    System.out.println("\n[WARNING] To many requests you account will be locked\n");
+                    return new CollectLogs(false, "To Many Login Attempts");
                 }
 
                 return new CollectLogs(false, "INVALID_PASSWORD");
@@ -101,9 +125,9 @@ public class LoginVerification {
                     System.out.println("[INFO] Updating User PWSD");
 
                     UpdateUserPWSD change = new UpdateUserPWSD();
-                    boolean changeSuccsess = change.dbValues(Username, hashedPWSD);
+                    boolean changeSuccess = change.dbValues(Username, hashedPWSD);
 
-                    if (changeSuccsess) {
+                    if (changeSuccess) {
                         return new CollectLogs(true, "First Login for System account");
                     } else {
                         return new CollectLogs(false, "Password need to change");
