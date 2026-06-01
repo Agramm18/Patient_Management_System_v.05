@@ -120,6 +120,7 @@ CREATE TABLE accounts (
     user_role INT NOT NULL DEFAULT 10,
     account_status INT NOT NULL DEFAULT 2,
     permission VARCHAR(50) NOT NULL DEFAULT 'read_only',
+    has_access_to_menu BOOLEAN NOT NULL DEFAULT false,
     password_hash VARCHAR(255) NOT NULL,
     requires_password_change BOOLEAN NOT NULL DEFAULT FALSE,
     failed_password_attempts INT NOT NULL DEFAULT 0,
