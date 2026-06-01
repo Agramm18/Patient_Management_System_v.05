@@ -70,6 +70,7 @@ public class EnvValidationService {
             String adminEmail = dotenv.get("ADMIN_EMAIL_DEFAULT");
 
             String bootstrapKey = dotenv.get("BOOTSTRAP_KEY");
+            String recoveryKey = dotenv.get("RECOVERY_KEY");
 
 
             //Check if env exsist if not throw error msg
@@ -127,8 +128,12 @@ public class EnvValidationService {
                 throw new IllegalArgumentException("[ERROR] It seems that your BOOTSTRAP_KEY for the bootstrap authentication is empty");
             }
 
+            if (recoveryKey == null || recoveryKey.isBlank()) {
+                throw new IllegalArgumentException("[ERROR] It seems that the Recovery Key is missing");
+            }
+
             System.out.println("\n[OK] The .env values are all valid");
-            System.out.println("[INFO] The values will be setted now\n");
+            System.out.println("[INFO] The values will be set now\n");
 
             setEnvValues(host, port, name, user, pwsd);
 
@@ -146,7 +151,7 @@ public class EnvValidationService {
         this.dbUser = User;
         this.dbPWSD = PWSD;
 
-        System.out.println("\n[OK] The .env values are setted sucsessfully\n");
+        System.out.println("\n[OK] The .env values are set successfully\n");
     }
 
     //Getter Methods to collect values

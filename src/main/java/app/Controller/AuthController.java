@@ -1,8 +1,14 @@
 package app.Controller;
 
 import app.Auth.Flow.LoginFlow;
+import app.Auth.Flow.PasswordFlow;
+import app.Auth.Flow.RecoveryFlow;
 import app.Auth.Flow.RegistrationFlow;
+import app.Auth.Flow.Services.AuthSecurityService.CheckKeyStatus;
+import app.Auth.Flow.Services.AuthSecurityService.RecoveryCheck;
+import app.Auth.Flow.Services.PasswordService.PasswordService;
 import app.CLIText.Menus.Program.AuthMenu;
+import app.Repository.AuthRepository.CollectRecoveryKey;
 
 import java.util.Scanner;
 
@@ -34,7 +40,7 @@ public class AuthController {
                 } else {
                     int userValue = Integer.parseInt(accountStatusSTR);
 
-                    if (userValue < 1 || userValue > 3) {
+                    if (userValue < 1 || userValue > 4) {
                         throw new IllegalArgumentException("[ERROR] The value can't be less than 1 or higher than 4");
                     } else if (userValue == 1) {
                         RegistrationFlow register = new RegistrationFlow();
@@ -44,6 +50,9 @@ public class AuthController {
                         LoginFlow login = new LoginFlow();
                         login.user(scanner);
 
+                    } else if (userValue == 3) {
+                        RecoveryFlow recover = new RecoveryFlow();
+                        recover.SystemAccounts(scanner);
                     } else {
                         System.out.println("\n[INFO] You have chosen to end this program");
                         System.out.println("[INFO] Have a nice day and Good Bye!!\n");

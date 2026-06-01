@@ -61,13 +61,14 @@ public class CreateDefaultAccounts {
         boolean needs_change = true;
         int department = 11;
         boolean has_access_to_menu = false;
+        int recovery_id = 1;
 
 
         System.out.println("[INFO] Hashing Password");
         HashedLocalPWSD = BCrypt.hashpw(LocalAdminPWSD, BCrypt.gensalt(12));
         System.out.println("[OK] Local Admin Password is sucsessfully Hashed");
 
-        String sql = "INSERT INTO accounts (account_name, email, user_role, password_hash, bootstrap_key, account_status, user_job, permission, requires_password_change, department, has_access_to_menu) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO accounts (account_name, email, user_role, password_hash, bootstrap_key, account_status, user_job, permission, requires_password_change, department, has_access_to_menu, recovery_key_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (
             Connection connection = DBManager.getConnection();
@@ -84,6 +85,7 @@ public class CreateDefaultAccounts {
             statement.setBoolean(9, needs_change);
             statement.setInt(10, department);
             statement.setBoolean(11, has_access_to_menu);
+            statement.setInt(12, recovery_id);
 
             int rows = statement.executeUpdate();
 
@@ -118,13 +120,14 @@ public class CreateDefaultAccounts {
         boolean needs_change = true;
         int department = 5;
         boolean has_access_to_menu = false;
+        int recovery_id = 1;
 
         System.out.println("[INFO] Hashing Password");
         HashedPWSD = BCrypt.hashpw(AdminPWSD, BCrypt.gensalt(12));
         System.out.println("[OK] Admin Password is sucsessfully hashed");
 
 
-        String sql = "INSERT INTO accounts (account_name, email, user_role, password_hash, bootstrap_key, account_status, user_job, permission, requires_password_change, department, has_access_to_menu) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO accounts (account_name, email, user_role, password_hash, bootstrap_key, account_status, user_job, permission, requires_password_change, department, has_access_to_menu, recovery_key_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (
             Connection connection = DBManager.getConnection();
@@ -141,6 +144,7 @@ public class CreateDefaultAccounts {
             statement.setBoolean(9, needs_change);
             statement.setInt(10, department);
             statement.setBoolean(11, has_access_to_menu);
+            statement.setInt(12, recovery_id);
 
             int rows = statement.executeUpdate();
 

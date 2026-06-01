@@ -107,6 +107,19 @@ VALUES
     (12, 'unassigned', 'Default department for new accounts');
 ```
 
+## Recovery Keys
+
+```mysql
+CREATE TABLE recovery_keys (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    recovery_key_hash VARCHAR(255) NOT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    key_scope VARCHAR(255) NOT NULL DEFAULT 'resetting system accounts',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+```
+
 ## Accounts
 
 ```mysql
@@ -125,12 +138,15 @@ CREATE TABLE accounts (
     requires_password_change BOOLEAN NOT NULL DEFAULT FALSE,
     failed_password_attempts INT NOT NULL DEFAULT 0,
     bootstrap_key VARCHAR(255) DEFAULT NULL,
+    recovery_key_id INT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
     FOREIGN KEY (user_role) REFERENCES roles(id),
     FOREIGN KEY (account_status) REFERENCES account_status(id),
-    FOREIGN KEY (department) REFERENCES departments(id)
+    FOREIGN KEY (department) REFERENCES departments(id),
+    CONSTRAINT fk_accounts_recovery_key
+        FOREIGN KEY (recovery_key_id) REFERENCES recovery_keys(id)
 );
 ```
 
@@ -185,11 +201,12 @@ CREATE TABLE access_management (
 - `department`: `12` (`unassigned`)
 - `user_job`: database default `unassigned`
 - `permission`: database default `read_only`
+- `has_access_to_menu`: `false`
 
 `CreateDefaultAccounts` creates missing starter accounts with:
 
-- `local_admin`: role `1`, status `6`, department `11`, job `system_administrator`, permission `root_access`, `requires_password_change = true`
-- `admin`: role `2`, status `6`, department `5`, job `application_administrator`, permission `admin_rights`, `requires_password_change = true`
+- `local_admin`: role `1`, status `6`, department `11`, job `system_administrator`, permission `root_access`, `requires_password_change = true`, `has_access_to_menu = false`
+- `admin`: role `2`, status `6`, department `5`, job `application_administrator`, permission `admin_rights`, `requires_password_change = true`, `has_access_to_menu = false`
 
 Both starter accounts use password hashes generated from `.env` password values and store the `.env` `BOOTSTRAP_KEY`.
 
@@ -206,8 +223,49 @@ Both starter accounts use password hashes generated from `.env` password values 
 - Updates `password_hash`
 - Sets `account_status = 1`
 - Sets `requires_password_change = FALSE`
+- Sets `has_access_to_menu = TRUE`
 
 `app.Repository.logsRepository.CollectLogs` writes each login attempt to `login_attempts`. If the username is unknown, `account_id` remains `NULL`.
+
+## Existing Database Migration
+
+Use this migration when the database already exists and the new recovery key structure must be added.
+
+```mysql
+USE patient_management_v5;
+
+ALTER TABLE accounts
+    MODIFY COLUMN has_access_to_menu BOOLEAN NOT NULL DEFAULT FALSE
+    AFTER permission;
+
+CREATE TABLE IF NOT EXISTS recovery_keys (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    recovery_key_hash VARCHAR(255) NOT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    key_scope VARCHAR(255) NOT NULL DEFAULT 'resetting system accounts',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+ALTER TABLE accounts
+    ADD COLUMN recovery_key_id INT DEFAULT NULL
+    AFTER bootstrap_key;
+
+ALTER TABLE accounts
+    ADD CONSTRAINT fk_accounts_recovery_key
+    FOREIGN KEY (recovery_key_id) REFERENCES recovery_keys(id);
+```
+
+Use `has_access_to_menu` with underscores. `has-access_to_menu` is not valid as an unquoted MySQL column name.
+
+For a local development reset, `accounts` cannot be truncated while referenced by `login_attempts` unless foreign key checks are disabled for the reset.
+
+```mysql
+SET FOREIGN_KEY_CHECKS = 0;
+TRUNCATE TABLE login_attempts;
+TRUNCATE TABLE accounts;
+SET FOREIGN_KEY_CHECKS = 1;
+```
 
 ## Query.sql
 
@@ -220,6 +278,7 @@ SHOW TABLES;
 SHOW COLUMNS FROM roles;
 SHOW COLUMNS FROM account_status;
 SHOW COLUMNS FROM departments;
+SHOW COLUMNS FROM recovery_keys;
 SHOW COLUMNS FROM accounts;
 SHOW COLUMNS FROM login_attempts;
 SHOW COLUMNS FROM access_management;
@@ -227,7 +286,11 @@ SHOW COLUMNS FROM access_management;
 SELECT id, role_name FROM roles ORDER BY id;
 SELECT id, status FROM account_status ORDER BY id;
 SELECT id, department_name FROM departments ORDER BY id;
-SELECT id, account_name, user_role, account_status, department, user_job, permission, requires_password_change
+SELECT id, is_active, key_scope, created_at, updated_at
+FROM recovery_keys
+ORDER BY id;
+SELECT id, account_name, user_role, account_status, department, user_job, permission,
+       has_access_to_menu, requires_password_change, bootstrap_key, recovery_key_id
 FROM accounts
 ORDER BY id;
 ```

@@ -6,6 +6,7 @@ public class AuthMenu {
         System.out.println("\n[INFO] Please select one of the following Options\n");
         System.out.println("[1] Registration");
         System.out.println("[2] Login");
-        System.out.println("[3] Exit the Program\n");
+        System.out.println("[3] Recover System Accounts");
+        System.out.println("[4] Exit the Program\n");
     }
 }

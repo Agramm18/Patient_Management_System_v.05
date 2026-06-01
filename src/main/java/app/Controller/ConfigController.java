@@ -1,5 +1,8 @@
 package app.Controller;
 import java.util.Scanner;
+
+import app.Repository.ConfigRepository.SetRecoveryKey;
+import io.github.cdimascio.dotenv.Dotenv;
 import app.Config.*;
 
 /*
@@ -30,7 +33,18 @@ public class ConfigController {
                 configurate.getSqlURL()
         );
 
+        Dotenv dotenv = Dotenv.load();
+        HandleRecoveryKey collect = new HandleRecoveryKey(dotenv);
+        collect.plainKey();
+        collect.hashedKey();
+
+        String recoveryKey = collect.getRecoveryKeyHashed();
+
+        SetRecoveryKey insert = new SetRecoveryKey();
+        insert.keyValue(recoveryKey);
+
         CheckForDefaultAccounts CheckStatus = new CheckForDefaultAccounts();
         return CheckStatus.dbAccounts();
+
     }
 }
