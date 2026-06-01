@@ -46,8 +46,9 @@ public class CreateAccount {
         int UserStatus = 3;
         int UserRole = 9;
         int Department = 12;
+        boolean has_access_to_menu = false;
 
-        String sql = "INSERT INTO accounts (account_name, email, phone_number, password_hash, account_status, user_role, department) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO accounts (account_name, email, phone_number, password_hash, account_status, user_role, department, has_access_to_menu) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection connection = DBManager.getConnection();
             PreparedStatement statement = connection.prepareStatement(sql);
@@ -59,6 +60,7 @@ public class CreateAccount {
             statement.setInt(5, UserStatus);
             statement.setInt(6, UserRole);
             statement.setInt(7, Department);
+            statement.setBoolean(8, has_access_to_menu);
 
             int rows = statement.executeUpdate();
 
