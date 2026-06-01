@@ -22,8 +22,8 @@ Patient_Management_System_v.05
 |   |   |-- ABOUT.md
 |   |   |-- CURRENT_STATUS.md
 |   |   |-- FUTURE_PLANS.md
-|   |   |-- MISSING_NOW.md
-|   |   `-- RECRUITER.md
+|   |   |-- RECRUITER.md
+|   |   `-- ToDo.md
 |   `-- setup
 |       |-- DB_SETUP.md
 |       `-- ENV_SETUP.md
