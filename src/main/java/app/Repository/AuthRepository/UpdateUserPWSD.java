@@ -38,7 +38,7 @@ public class UpdateUserPWSD {
 
     private void changePWSDStatus(String Username) {
 
-        String sql = "UPDATE accounts SET account_status = 1, requires_password_change = FALSE WHERE account_name = ?";
+        String sql = "UPDATE accounts SET account_status = 1, requires_password_change = FALSE, has_access_to_menu=TRUE WHERE account_name = ?";
 
         try (Connection connection = DBManager.getConnection();
             PreparedStatement stmt = connection.prepareStatement(sql);
