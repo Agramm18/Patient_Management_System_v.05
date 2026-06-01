@@ -20,7 +20,7 @@ public class CollectRecoveryKey {
                 ResultSet rs = stmt.executeQuery();
 
                 if (rs.next()) {
-                    this.dbValue = rs.getString("recover_key_hash");
+                    this.dbValue = rs.getString("recovery_key_hash");
                 }
             } catch (SQLException error) {
             System.out.println(error.getMessage());

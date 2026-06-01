@@ -30,7 +30,7 @@ public class RecoveryCheck {
                         this.passwordStringValue = convertedPassword;
                     }
 
-                    this.enteredHashByUser = BCrypt.hashpw(this.passwordStringValue, BCrypt.gensalt(12));
+                    this.enteredHashByUser = this.passwordStringValue;
                     break;
 
                 }
