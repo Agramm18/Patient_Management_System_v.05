@@ -5,6 +5,7 @@ import java.util.Scanner;
 import app.Auth.Flow.Services.AuthSecurityService.SelectDepartment;
 import app.CLIText.Menus.Departments.DepartmentMenu;
 import app.CLIText.Menus.DepartmentJobs.*;
+import app.Repository.AuthRepository.CheckStatusForDepartment;
 import app.Repository.AuthRepository.HandleAccessManagement;
 
 /*
@@ -83,10 +84,18 @@ public class FirstLogin {
                 break;
             case 11:
                 SystemJobsMenu showSystem = new SystemJobsMenu();
-                showSystem.jobsMenu();
+
+                CheckStatusForDepartment validate = new CheckStatusForDepartment();
+                boolean hasAccess = validate.status(Username);
+
+                if (hasAccess) {
+                    showSystem.jobsMenu();
+                } else {
+                    System.out.println("[ERROR] You don't have the rights to see these Jobs please apply for another job");
+                    break;
+                }
                 break;
         }
-
 
         HandleAccessManagement run = new HandleAccessManagement();
         run.accessManagement(Username, department);
