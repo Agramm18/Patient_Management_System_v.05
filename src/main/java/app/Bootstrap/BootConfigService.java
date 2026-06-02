@@ -28,18 +28,21 @@ public class BootConfigService {
         try {
             boolean configOK = dispatcher.navigateSubController(FrontController.RequestType.CONFIG, scanner);
 
-            if (configOK) {
-                System.out.println("\n[OK] System Config where a success");
-                System.out.println("[INFO] Starting Authentication phase\n");
-
-                AuthMSG show = new AuthMSG();
-                show.msg();
-
-                dispatcher.navigateSubController(FrontController.RequestType.AUTH, scanner);
+            if (!configOK) {
+                throw new RuntimeException("\n[FATAL] System config failed");
             }
-        } catch (Exception error) {
-            System.out.println("[FATAL] Boot failed " + error.getMessage());
-            System.out.println("[INFO] System won't load and will be shut down right now");
+
+            System.out.println("\n[OK] System Config where a success");
+            System.out.println("[INFO] Starting Authentication phase\n");
+
+            AuthMSG show = new AuthMSG();
+            show.msg();
+
+            dispatcher.navigateSubController(FrontController.RequestType.AUTH, scanner);
+
+        } catch (RuntimeException error) {
+            System.out.println(error.getMessage());
+            System.out.println("[WARNING] System won't load and will be shut down right now");
             System.exit(1);
         }
     }
