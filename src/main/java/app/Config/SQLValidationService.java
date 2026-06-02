@@ -16,7 +16,7 @@ public class SQLValidationService {
         this.env = env;
     }
 
-    public void DBConnection() {
+    public boolean DBConnection() {
         String host = env.getHost();
         int port = env.getPort();
         String DBName = env.getDBName();
@@ -33,12 +33,13 @@ public class SQLValidationService {
         this.sqlPWSD = PWSD;
         this.sqlURL = URL;
 
-        try {
-            Connection connection = DriverManager.getConnection(URL, DBUser, PWSD);
-            System.out.println("[OK] The Database connection established sucsessfully ");
+        try (Connection connection = DriverManager.getConnection(URL, DBUser, PWSD)) {
+            System.out.println("[OK] The Database connection established successfully ");
+            return true;
         } catch (SQLException error) {
             System.out.println("[ERROR] Failed to connect to Database");
             System.out.println(error.getMessage());
+            return false;
         }
     }
 
