@@ -27,7 +27,34 @@ public class EnvValidationService {
     private String dbUser;
     private String dbPWSD;
 
-    public void checkFileStatus() {
+
+    public boolean envStatus() {
+        try {
+            boolean fileExsists = checkFileStatus();
+
+            if (!fileExsists) {
+                return false;
+            }
+
+            System.out.println("\n[OK] It seems that the .env file exists\n");
+            System.out.println("[INFO] Continue with the value check");
+
+            boolean paramValid = checkENVParam();
+
+            if (!paramValid) {
+                return false;
+            }
+
+            System.out.println("\n[OK] The .env values are all valid");
+            return true;
+
+        } catch (IllegalStateException error) {
+            System.out.println(error.getMessage());
+            return false;
+        }
+    }
+
+    private boolean checkFileStatus() {
 
         ConfigMSG show = new ConfigMSG();
         show.configMSG();
@@ -38,17 +65,18 @@ public class EnvValidationService {
         try {
             if (!envFile.exists()) {
                 throw new FileNotFoundException("[ERROR] It seems that the .env file do not exist in this project");
+            } else {
+                return true;
             }
 
-            System.out.println("\n[OK] It seems that the .env file exists\n");
-            checkENVParam();
 
         } catch (FileNotFoundException error) {
             System.out.println(error.getMessage());
+            return false;
         }
     }
 
-    public void checkENVParam() {
+    private boolean checkENVParam() {
         try {
             int port;
 
@@ -75,71 +103,73 @@ public class EnvValidationService {
 
             //Check if env exsist if not throw error msg
             if (host == null || host.isBlank()) {
-                throw new IllegalArgumentException("[ERROR] It seems that your DB_HOST for the db host seems to be empty");
+                throw new IllegalStateException("[ERROR] It seems that your DB_HOST for the db host seems to be empty");
             }
 
             if (portSTR == null || portSTR.isBlank()) {
-                throw new IllegalArgumentException("[ERROR] It seems that your DB_PORT in the .env for the DB Port seems to be empty/0");
+                throw new IllegalStateException("[ERROR] It seems that your DB_PORT in the .env for the DB Port seems to be empty/0");
             }
 
             try {
                 port = Integer.parseInt(portSTR);
             } catch (NumberFormatException error) {
-                throw new IllegalArgumentException("[ERROR] DB_PORT must be a valid number");
+                throw new IllegalStateException("[ERROR] DB_PORT must be a valid number");
             }
 
             if (name == null || name.isBlank()) {
-                throw new IllegalArgumentException("[ERROR] It seems that your DB_NAME in the .env for the db name seems to be empty");
+                throw new IllegalStateException("[ERROR] It seems that your DB_NAME in the .env for the db name seems to be empty");
             }
 
             if (user == null || user.isBlank()) {
-                throw new IllegalArgumentException("[ERROR] It seems that your the DB_USER in your .env seems to be empty");
+                throw new IllegalStateException("[ERROR] It seems that your the DB_USER in your .env seems to be empty");
             }
 
             if (pwsd == null || pwsd.isBlank()) {
-                throw new IllegalArgumentException("[ERROR] It seems that the DB_PWSD in your .env seems to be empty");
+                throw new IllegalStateException("[ERROR] It seems that the DB_PWSD in your .env seems to be empty");
             }
 
             if (localAdminName == null || localAdminName.isBlank()) {
-                throw new IllegalArgumentException ("[ERROR] It seems that your LOCAL_ADMIN_NAME for the default local admin account is empty" );
+                throw new IllegalStateException ("[ERROR] It seems that your LOCAL_ADMIN_NAME for the default local admin account is empty" );
             }
 
             if (localAdminPwsd == null || localAdminPwsd.isBlank()) {
-                throw new IllegalArgumentException("[ERROR] It seems that your LOCAL_ADMIN_PWSD for the default local admin password is empty" );
+                throw new IllegalStateException("[ERROR] It seems that your LOCAL_ADMIN_PWSD for the default local admin password is empty" );
             }
 
             if (localAdminEmail == null || localAdminEmail.isBlank()) {
-                throw new IllegalArgumentException("[ERROR] It seems that your LOCAL_ADMIN_EMAIL for the default local admin email is empty");
+                throw new IllegalStateException("[ERROR] It seems that your LOCAL_ADMIN_EMAIL for the default local admin email is empty");
             }
 
             if (adminName == null || adminName.isBlank()) {
-                throw new IllegalArgumentException("[ERROR] It seems that your ADMIN_NAME for the default admin account is empty");
+                throw new IllegalStateException("[ERROR] It seems that your ADMIN_NAME for the default admin account is empty");
             }
 
             if (adminPWSD == null || adminPWSD.isBlank()) {
-                throw new IllegalArgumentException("[ERROR] It seems that your ADMIN_PWSD_DEFAULT for the default admin password is empty");
+                throw new IllegalStateException("[ERROR] It seems that your ADMIN_PWSD_DEFAULT for the default admin password is empty");
             }
 
             if (adminEmail == null || adminEmail.isBlank()) {
-                throw new IllegalArgumentException("[ERROR] It seems that your ADMIN_EMAIL_DEFAULT for the default admin email is empty");
+                throw new IllegalStateException("[ERROR] It seems that your ADMIN_EMAIL_DEFAULT for the default admin email is empty");
             }
 
             if (bootstrapKey == null || bootstrapKey.isBlank()) {
-                throw new IllegalArgumentException("[ERROR] It seems that your BOOTSTRAP_KEY for the bootstrap authentication is empty");
+                throw new IllegalStateException("[ERROR] It seems that your BOOTSTRAP_KEY for the bootstrap authentication is empty");
             }
 
             if (recoveryKey == null || recoveryKey.isBlank()) {
-                throw new IllegalArgumentException("[ERROR] It seems that the Recovery Key is missing");
+                throw new IllegalStateException("[ERROR] It seems that the Recovery Key is missing");
             }
 
-            System.out.println("\n[OK] The .env values are all valid");
-            System.out.println("[INFO] The values will be set now\n");
-
             setEnvValues(host, port, name, user, pwsd);
+            return true;
 
         } catch (IllegalArgumentException error) {
             System.out.println("\n[ERROR] Something in your .env file is wrong or corrupted");
             System.out.println(error.getMessage() +  "\n");
+            return false;
+        } catch (IllegalStateException error) {
+            System.out.println(error.getMessage());
+            return false;
         }
     }
 
