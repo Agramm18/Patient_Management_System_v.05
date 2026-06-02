@@ -80,7 +80,7 @@ Runtime and input stability is required so that authentication, registration, re
 | Priority | Task | Done | Files |
 | --- | --- | --- | --- |
 | high | Enforce terminal-only password input when `System.console()` is null. `LoginInputCollector`, `PasswordService`, and `RecoveryCheck` should fail fast instead of using an IDE/Scanner fallback. | [x] | `LoginInputCollector.java`, `PasswordService.java`, `RecoveryCheck.java` |
-| high | Make startup fail fast. Invalid `.env` values or failed DB connection checks should stop boot instead of allowing later startup steps to continue with invalid runtime state. |  | `ConfigController.java`, `EnvValidationService.java`, `SQLValidationService.java`, `DBManager.java` |
+| high | Make startup fail fast. Invalid `.env` values or failed DB connection checks should stop boot instead of allowing later startup steps to continue with invalid runtime state. | [x] | `ConfigController.java`, `EnvValidationService.java`, `SQLValidationService.java`, `DBManager.java` |
 | mid | Replace print-only error handling with clear success/failure results or exceptions where controller decisions depend on repository success. |  | `Repository/**/*`, `ConfigController.java`, `LoginVerification.java` |
 
 ### Enables
