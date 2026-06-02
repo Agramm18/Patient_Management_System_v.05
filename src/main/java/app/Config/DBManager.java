@@ -22,7 +22,7 @@ public final class DBManager {
 
     }
 
-    public static void initialize(
+    public static boolean initialize(
             String user,
             String password,
             String url
@@ -34,7 +34,15 @@ public final class DBManager {
         sqlUser = user;
         sqlPWSD = password;
         sqlURL = url;
+
+        if (user == null || user.isBlank() || password == null || password.isBlank() || sqlURL == null || sqlURL.isBlank()) {
+            return false;
+        } else {
+            return true;
+        }
+
     }
+
 
     public static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(
