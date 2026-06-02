@@ -21,17 +21,31 @@ public class ConfigController {
         System.out.println("[INFO] Running Config Env & Build SQL Connection as Entrypoint for the System");
         System.out.println("[INFO] Please note if anything is invalid in the .env config or SQL config the whole System will crash");
 
-        EnvValidationService check = new EnvValidationService();
-        check.checkFileStatus();
+        EnvValidationService configurate = new EnvValidationService();
+        boolean isValid = configurate.envStatus();
 
-        SQLValidationService configurate = new SQLValidationService(check);
-        configurate.DBConnection();
+        if (isValid) {
+            SQLValidationService build = new SQLValidationService(configurate);
+            boolean connectionIsValid = build.DBConnection();
 
-        DBManager.initialize(
-                configurate.getSQLUser(),
-                configurate.getSqlPWSD(),
-                configurate.getSqlURL()
-        );
+            if (connectionIsValid) {
+                boolean globalConnectionIsValid = DBManager.initialize(
+                        build.getSQLUser(),
+                        build.getSqlPWSD(),
+                        build.getSqlURL()
+                );
+
+                if (!globalConnectionIsValid) {
+                    return false;
+                }
+
+            } else {
+                return false;
+            }
+
+        } else {
+            return false;
+        }
 
         Dotenv dotenv = Dotenv.load();
         HandleRecoveryKey collect = new HandleRecoveryKey(dotenv);
