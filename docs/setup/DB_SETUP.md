@@ -133,6 +133,7 @@ CREATE TABLE accounts (
     user_role INT NOT NULL DEFAULT 10,
     account_status INT NOT NULL DEFAULT 2,
     permission VARCHAR(50) NOT NULL DEFAULT 'read_only',
+    is_system_account BOOLEAN NOT NULL DEFAULT FALSE,
     has_access_to_menu BOOLEAN NOT NULL DEFAULT false,
     password_hash VARCHAR(255) NOT NULL,
     requires_password_change BOOLEAN NOT NULL DEFAULT FALSE,
@@ -201,6 +202,7 @@ CREATE TABLE access_management (
 - `department`: `12` (`unassigned`)
 - `user_job`: database default `unassigned`
 - `permission`: database default `read_only`
+- `is_system_account`: `false`
 - `has_access_to_menu`: `false`
 
 `CreateDefaultAccounts` creates missing starter accounts with:
@@ -237,6 +239,14 @@ USE patient_management_v5;
 ALTER TABLE accounts
     MODIFY COLUMN has_access_to_menu BOOLEAN NOT NULL DEFAULT FALSE
     AFTER permission;
+
+ALTER TABLE accounts
+    ADD COLUMN is_system_account BOOLEAN NOT NULL DEFAULT FALSE
+    AFTER permission;
+
+UPDATE accounts
+SET accounts.is_system_account = TRUE
+WHERE account_name IN ('local_admin', 'admin');
 
 CREATE TABLE IF NOT EXISTS recovery_keys (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -290,7 +300,7 @@ SELECT id, is_active, key_scope, created_at, updated_at
 FROM recovery_keys
 ORDER BY id;
 SELECT id, account_name, user_role, account_status, department, user_job, permission,
-       has_access_to_menu, requires_password_change, bootstrap_key, recovery_key_id
+       is_system_account, has_access_to_menu, requires_password_change, bootstrap_key, recovery_key_id
 FROM accounts
 ORDER BY id;
 ```
