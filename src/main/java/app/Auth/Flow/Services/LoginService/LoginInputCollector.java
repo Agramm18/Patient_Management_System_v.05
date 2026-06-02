@@ -2,7 +2,7 @@ package app.Auth.Flow.Services.LoginService;
 
 import java.util.Scanner;
 import java.io.Console;
-
+import java.util.Arrays;
 
 /*
     In this Section The User and PWSD will be collected and Stored via the getter
@@ -39,27 +39,28 @@ public class LoginInputCollector {
     }
 
     private void enterPWSD() {
+        Console console = System.console();
+
+        if (console == null) {
+            throw new IllegalStateException("[WARNING] Please run the program only in the Terminal");
+        }
 
         while (true) {
             try {
-                Console console = System.console();
+                char[] pwsdCHAR = console.readPassword("\n[INFO] Please enter your Password: ");
 
-                if (console != null) {
-                    char[] pwsdCHAR = console.readPassword("\n[INFO] Please enter your Password: ");
+                if (pwsdCHAR == null || pwsdCHAR.length == 0) {
+                    throw new IllegalArgumentException("[ERROR] The password can't be 0 or empty");
+                } else {
+                    String convertedPWSD = new String(pwsdCHAR);
+                    Arrays.fill(pwsdCHAR, '\0');
 
-                    if (pwsdCHAR == null || pwsdCHAR.length == 0) {
-                        throw new IllegalArgumentException("[ERROR] The password can't be 0 or empty");
+                    if (convertedPWSD.trim().isEmpty()) {
+                        throw new IllegalArgumentException("[ERROR] The Password can't contain only empty spaces");
                     } else {
-                        System.out.println("[INFO] Char will be converted");
-                        String convertedPWSD = new String(pwsdCHAR);
-
-                        if (convertedPWSD.trim().isEmpty()) {
-                            throw new IllegalArgumentException("[ERROR] The Password can't contain only empty spaces");
-                        } else {
-                            System.out.println("[OK] Entered password is valid\n");
-                            this.enteredPWSD = convertedPWSD;
-                            break;
-                        }
+                        System.out.println("[OK] Entered password is valid\n");
+                        this.enteredPWSD = convertedPWSD;
+                        break;
                     }
                 }
             } catch (IllegalArgumentException error) {

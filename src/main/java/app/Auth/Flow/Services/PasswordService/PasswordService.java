@@ -48,7 +48,7 @@ public class PasswordService {
         System.out.println("[INFO] Creating plain text PWSD");
 
         while (true) {
-            plainPWSD(scanner);
+            plainPWSD();
             try {
                 System.out.println("[INFO] Running through validation process and validate if the password is valid");
                 validatePWSD();
@@ -74,22 +74,21 @@ public class PasswordService {
     }
 
     //Collect the Plain Password with invisible Console input
-    public void plainPWSD(Scanner scanner) {
+    public void plainPWSD() {
+        Console console = System.console();
+
+        if (console == null) {
+            throw new IllegalStateException("[WARNING] Please run the program only in the Terminal");
+        }
 
         while (true) {
             try {
-                Console console = System.console();
 
-                if (console != null) {
 
-                    //Create pwsd with inivisible user input
-                    pwsdCHAR = console.readPassword("[INFO] Please set a password for your account: ");
-                    break;
-                } else {
-                    System.out.println("[INFO] Please set a password for your account");
-                    pwsdCHAR = scanner.nextLine().toCharArray();
-                    break;
-                }
+                //Create pwsd with invisible user input
+                pwsdCHAR = console.readPassword("[INFO] Please set a password for your account: ");
+                break;
+
             } catch (Exception error) {
                 System.out.println(error.getMessage());
             }
@@ -107,7 +106,7 @@ public class PasswordService {
         boolean fitLength = false;
         int failedAttempts = 0;
 
-        //Check if the password fit to the credentaisl
+        //Check if the password fit to the credential
         if (this.pwsdCHAR.length == 0) {
             throw new IllegalStateException("[ERROR] Your Password can't be empty!");
         } else if (this.pwsdCHAR.length < 10) {
@@ -151,20 +150,26 @@ public class PasswordService {
     private void retypePWSD(Scanner scanner) {
         Console console = System.console();
 
+        if (console == null) {
+            throw new IllegalStateException("[WARNING] Please run the program only in the Terminal");
+        }
+
         this.verifyPWSD = console.readPassword("[INFO] Please retype your password from before: ");
 
         //Check if the Passwords are match if not the user must retype the password then
         if (this.verifyPWSD.length == 0 || !Arrays.equals(this.pwsdCHAR, this.verifyPWSD)) {
             throw new IllegalArgumentException("[ERROR] The verification password can't be empty and must be equal to the password from before");
-        } else {
-            System.out.println("[OK] Your password is correct an fit to all the credentials");
         }
+
+        Arrays.fill(verifyPWSD, '\0');
+        System.out.println("[OK] Your password is correct an fit to all the credentials");
     }
 
     //Convert the Char back to string to get the Value of it
     private void convertCHARtoString() {
         this.plainPWSD = String.valueOf(pwsdCHAR);
         System.out.println("[OK] Passwords are converted");
+        Arrays.fill(pwsdCHAR, '\0');
     }
 
     //Hash the password with bcrypt and the string value
