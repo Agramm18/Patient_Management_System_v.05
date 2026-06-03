@@ -5,7 +5,10 @@ import java.util.Scanner;
 import app.Auth.Flow.Services.AuthSecurityService.CheckKeyStatus;
 import app.Auth.Flow.Services.AuthSecurityService.RecoveryCheck;
 import app.Auth.Flow.Services.AuthSecurityService.SelectUserForRecovery;
+import app.Auth.Flow.Services.PasswordService.PasswordService;
 import app.Repository.AuthRepository.CollectRecoveryKey;
+import app.Repository.AuthRepository.SelectUserForRecover;
+import app.Repository.AuthRepository.UpdateSystemAccount;
 
 public class RecoveryFlow {
 
@@ -27,11 +30,21 @@ public class RecoveryFlow {
         SelectUserForRecovery get = new SelectUserForRecovery();
         get.username(scanner);
 
-        String recoverUsername = get.getgetRecoverUsername();
+        String Username = get.getRecoverUsername();
 
-        if (canChangePassword) {
-            PasswordFlow run = new PasswordFlow();
-            run.policy(scanner);
+        SelectUserForRecover checkUser = new SelectUserForRecover();
+
+        boolean userExsist = checkUser.inDB(Username);
+
+        if (userExsist) {
+            PasswordService update = new PasswordService();
+            update.userPWSD(scanner);
+
+            String password = update.getHashedPWSD();
+
+            UpdateSystemAccount run = new UpdateSystemAccount();
+            run.sqlQuerry(Username, password);
+
         }
     }
 
