@@ -1,4 +1,24 @@
-classDiagram
+# Patient Management UML
+
+Last synchronized: 2026-06-03.
+
+This Markdown file contains the current Mermaid class diagram for Patient Management System V5.01. It mirrors `patient-management-uml.mmd` and is intended for GitHub Markdown rendering.
+
+## Scope
+
+The diagram reflects the current Java console application state:
+
+- Startup flow through `Main`, `BootConfigService`, `FrontController`, and `ConfigController`
+- Active authentication route through `AuthController`
+- Registration, login, password-change, and recovery flows
+- Recovery-key hashing, storage, validation, and password-hash reset baseline
+- Pending-user first-login access request groundwork
+- Repository classes for accounts, login attempts, recovery keys, and access requests
+- Placeholder areas for menu routing, service/UI layers, job selection, role integration, and account status policy persistence
+
+## Current Diagram
+
+```mermaidclassDiagram
   %% Patient Management System V5.01 - current Java class diagram
   %% Last synchronized: 2026-06-03
   %% Environment setup: docs/setup/ENV_SETUP.md
@@ -369,3 +389,12 @@ classDiagram
   note for ExecutePWSDPolicy "Threshold methods are placeholders and do not persist status changes yet."
   note for AuthLogResult "Source class: app.Auth.Flow.Services.AuthSecurityService.CollectLogs. Renamed in this diagram to avoid collision."
   note for LoginAttemptRepository "Source class: app.Repository.logsRepository.CollectLogs. Renamed in this diagram to avoid collision."
+```
+
+## Notes
+
+- `CONFIG` and `AUTH` are the active controller routes.
+- `MENU`, `SERVICE`, `UI`, and `EXIT` are reserved controller phases.
+- Recovery baseline is implemented for the current stage, but currently updates only `accounts.password_hash`.
+- Access requests currently store selected department plus default job and role values.
+- Failed-login status policy methods are placeholders and do not persist status changes yet.

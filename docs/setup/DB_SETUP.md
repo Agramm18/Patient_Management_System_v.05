@@ -1,5 +1,7 @@
 # Database Setup
 
+Last synchronized: 2026-06-03.
+
 This file contains the database-related documentation for the Patient Management System V5.01 project. Keep SQL setup, schema details, seed data, required IDs, default account database values, and database checks in this file.
 
 ## Environment Configuration
@@ -195,6 +197,13 @@ CREATE TABLE access_management (
 
 ## Current Java Database Defaults
 
+`ConfigController` stores the recovery key during startup after DB initialization:
+
+- `HandleRecoveryKey` reads `RECOVERY_KEY` from `.env`.
+- The plain recovery key is hashed with BCrypt.
+- `SetRecoveryKey` inserts or updates `recovery_keys.id = 1`.
+- The recovery key scope uses the database default `resetting system accounts`.
+
 `CreateAccount` creates registered user accounts with:
 
 - `account_status`: `3` (`pending`)
@@ -226,6 +235,17 @@ Both starter accounts use password hashes generated from `.env` password values 
 - Sets `account_status = 1`
 - Sets `requires_password_change = FALSE`
 - Sets `has_access_to_menu = TRUE`
+
+`RecoveryFlow` resets a selected existing account password after recovery-key validation:
+
+- Loads `recovery_keys.id = 1` through `CollectRecoveryKey`
+- Checks the entered recovery key with BCrypt through `CheckKeyStatus`
+- Selects a target account by account name
+- Verifies that the account exists through `SelectUserForRecover`
+- Creates a new password hash through `PasswordService`
+- Updates `accounts.password_hash` through `UpdateSystemAccount`
+
+The current recovery flow updates only the password hash. It does not currently change `account_status`, `requires_password_change`, `has_access_to_menu`, or `recovery_key_id`.
 
 `app.Repository.logsRepository.CollectLogs` writes each login attempt to `login_attempts`. If the username is unknown, `account_id` remains `NULL`.
 
@@ -299,6 +319,9 @@ SELECT id, department_name FROM departments ORDER BY id;
 SELECT id, is_active, key_scope, created_at, updated_at
 FROM recovery_keys
 ORDER BY id;
+SELECT id, LEFT(recovery_key_hash, 7) AS hash_prefix, is_active, key_scope
+FROM recovery_keys
+WHERE id = 1;
 SELECT id, account_name, user_role, account_status, department, user_job, permission,
        is_system_account, has_access_to_menu, requires_password_change, bootstrap_key, recovery_key_id
 FROM accounts

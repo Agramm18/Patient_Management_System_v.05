@@ -1,6 +1,6 @@
 # ToDo
 
-Status date: 2026-06-01
+Status date: 2026-06-03
 
 This file is the central GitHub-facing task overview for the current implementation stage. It focuses on implementation dependencies: what is required, what it enables, and which concrete tasks should be handled next.
 
@@ -8,17 +8,18 @@ This file is the central GitHub-facing task overview for the current implementat
 
 ## Current Implementation Chain
 
-The next development milestone is a complete pending-user access request flow:
+The current authentication foundation is now in place for startup, configuration, registration, login, starter account password change, recovery-key handling, and pending-user access request groundwork.
+
+The next development milestone is a complete pending-user access request and approval flow:
 
 ```text
-stable input/runtime
--> valid pending account
+valid pending account
 -> department selection
 -> job selection
 -> role selection
 -> stored access request
--> admin approval
--> active account
+-> admin approval or rejection
+-> account activation
 -> routed main menu
 ```
 
@@ -29,65 +30,58 @@ Patient records, appointments, billing, JavaFX, REST APIs, and deployment work s
 Recommended implementation order for the current stage:
 
 ```text
-1. Runtime/input stability
-2. Registration data integrity
-3. Jobs
-4. Roles
-5. Permissions
-6. Access request persistence
-7. Admin approval/rejection
-8. Account activation
-9. Menu logic
-10. Tests and documentation updates
+1. Registration data integrity
+2. Job selection
+3. Role selection
+4. Complete access request persistence
+5. Admin approval and rejection
+6. Account activation
+7. Main menu routing
+8. Account status policy persistence
+9. Tests
+10. Naming and documentation cleanup
 ```
 
 ### Roadmap Notes
 
 | Step | Required outcome |
 | --- | --- |
-| Runtime/input stability | Login, registration, password creation, and recovery input work reliably in supported terminal runs. |
 | Registration data integrity | New accounts are always valid pending accounts with complete required data. |
-| Jobs | Pending users can select a real job and the selected job is stored in the access request. |
-| Roles | Pending users can request a role and the selected role is stored in the access request. |
-| Permissions | Approved role/job/department combinations can be mapped to permissions and menu access. |
+| Job selection | Pending users can select a real job and the selected job is stored in the access request. |
+| Role selection | Pending users can request a role and the selected role is stored in the access request. |
 | Access request persistence | Department, job, role, and optional request context are stored consistently. |
-| Admin approval/rejection | Admins can review pending requests and approve or reject them. |
+| Admin approval and rejection | Admins can review pending requests and approve or reject them. |
 | Account activation | Approved accounts are updated from pending to active with department, job, role, permission, and menu access. |
-| Menu logic | Active users are routed into the correct menu based on approved access data. |
-| Tests and documentation updates | The finished access flow is covered by tests and reflected in project documentation. |
+| Main menu routing | Active users are routed into the correct menu based on approved access data. |
+| Account status policy persistence | Failed-login thresholds update real account state instead of only printing policy messages. |
+| Tests | Core auth, registration, recovery, and access flows can be changed without silent regressions. |
+| Naming and documentation cleanup | The codebase and GitHub documentation remain understandable as the project grows. |
 
 ## Priority Overview
 
 | Priority | Area | Required so that |
 | --- | --- | --- |
-| high | Runtime and input stability | authentication, registration, password creation, and first-login flows can be tested reliably |
 | high | Registration data integrity | valid pending accounts exist before access requests are created |
 | high | Job selection | access requests contain the actual requested job instead of `unassigned` |
 | high | Role selection | access requests contain the intended role instead of always using the intern role |
 | high | Access approval | pending users can become active users through a controlled admin workflow |
 | high | Account status policy | failed-login thresholds affect real account status |
 | high | Main menu routing | active users can continue into the application after login |
-| mid | Tests | the core access flow can be changed without breaking existing behavior unnoticed |
+| mid | Tests | the core flows can be changed without breaking existing behavior unnoticed |
 | mid | Naming and cleanup | the codebase stays maintainable while the feature set grows |
 | low | Future product features | patient management and UI work can start after the access foundation is stable |
 
-## Runtime And Input Stability
+## Done Baseline
 
-Runtime and input stability is required so that authentication, registration, recovery, and first-login flows can run reliably in supported terminal contexts. IDE runs are intentionally not supported for password entry because `System.console()` can be unavailable or inconsistent there.
+The following foundation is considered complete enough for the current stage:
 
-### Work To Do Now
-
-| Priority | Task | Done | Files |
-| --- | --- | --- | --- |
-| high | Enforce terminal-only password input when `System.console()` is null. `LoginInputCollector`, `PasswordService`, and `RecoveryCheck` should fail fast instead of using an IDE/Scanner fallback. | [x] | `LoginInputCollector.java`, `PasswordService.java`, `RecoveryCheck.java` |
-| high | Make startup fail fast. Invalid `.env` values or failed DB connection checks should stop boot instead of allowing later startup steps to continue with invalid runtime state. | [x] | `ConfigController.java`, `EnvValidationService.java`, `SQLValidationService.java`, `DBManager.java` |
-| mid | Replace print-only error handling with clear success/failure results or exceptions where controller decisions depend on repository success. |  | `Repository/**/*`, `ConfigController.java`, `LoginVerification.java` |
-
-### Enables
-
-- Reliable manual testing of login, registration, recovery, and pending-user setup.
-- Safer continuation into job and role selection.
-- Cleaner failure behavior before database-backed flows run.
+| Area | Status | Notes |
+| --- | --- | --- |
+| Runtime password input | done | Login, password creation, and recovery require terminal-backed `System.console()` input. |
+| Startup fail-fast behavior | done | Invalid `.env`, invalid database connection, or invalid DB runtime config stop boot before authentication. |
+| Recovery baseline | done | `RECOVERY_KEY` is required, hashed into `recovery_keys`, checked with BCrypt, and used to reset a selected account password hash. |
+| Starter account password change | done | Starter accounts in `waiting_for_password_change` can set a new password and become active. |
+| Pending access request groundwork | partial | Pending users can select a department and create an access request with default job and role values. |
 
 ## Registration Data Integrity
 
@@ -99,7 +93,7 @@ Registration data integrity is required so that every newly registered account i
 | --- | --- | --- | --- |
 | high | Fix the registration correction path. If entered data is changed, the data should be shown again, reconfirmed, and only then should password creation run. |  | `RegistrationService.java`, `RegistrationFlow.java` |
 | high | Prevent account creation when the password hash is null or blank. `CreateAccount` should reject invalid required values before the DB insert. |  | `CreateAccount.java` |
-| high | Add username and email uniqueness checks before account creation, with clear user-facing messages. |  | `CreateAccount.java`, `CheckUserInDB.java`, optional new validation helper |
+| high | Add username and email uniqueness checks before account creation, with clear user-facing messages. |  | `CreateAccount.java`, `CheckUserInDB.java`, optional validation helper |
 | mid | Improve email and phone validation beyond basic `@`, `+`, and length checks. |  | `RegistrationService.java` |
 
 ### Enables
@@ -197,13 +191,14 @@ Account status persistence is required so that security decisions made during lo
 | high | Persist failed-login threshold status changes to `accounts.account_status`. |  | `LoginVerification.java`, `CountFailedLoginAttempts.java`, `ExecutePWSDPolicy.java` |
 | high | Define reset behavior after successful login or admin action. Decide whether `login_attempts`, `accounts.failed_password_attempts`, or both are the source of truth. |  | `LoginVerification.java`, `CountFailedLoginAttempts.java`, `DB_SETUP.md` |
 | mid | Review whether pending access-request creation should be logged as success, partial success, or blocked login. |  | `LoginVerification.java`, `CollectLogs.java` |
+| mid | Review recovery control flow so failed key validation cannot continue into password reset. |  | `RecoveryFlow.java`, `CheckKeyStatus.java` |
 | mid | Make account status messages consistent for `disabled`, `locked`, `on_quarantine`, and `pending`. |  | `LoginVerification.java`, CLI text |
 
 ### Enables
 
 - Brute-force protection becomes functional instead of only informational.
 - Admin approval and account management can handle locked or quarantined accounts.
-- Login behavior remains consistent after repeated failures.
+- Login and recovery behavior remains consistent after repeated failures or invalid recovery attempts.
 
 ## Main Menu And Runtime Routing
 
@@ -217,32 +212,13 @@ Main-menu routing is required so that active users can continue into the applica
 | high | Implement `FrontController.RequestType.MENU` routing. |  | `FrontController.java`, `MenuController.java` |
 | high | Route active users into a menu based on account role, department, job, permission, or `has_access_to_menu`. |  | `AuthController.java`, `MenuController.java`, repository helpers |
 | mid | Decide whether `ServiceController` and `uiController` are needed in the console version or should remain reserved for later layers. |  | `ServiceController.java`, `uiController.java`, `BootConfigService.java` |
-| mid | Add clean return paths for registration, failed login, successful access-request creation, and normal exits. |  | `AuthController.java`, `RegistrationFlow.java`, `LoginFlow.java`, `BootConfigService.java` |
+| mid | Add clean return paths for registration, failed login, successful access-request creation, recovery, and normal exits. |  | `AuthController.java`, `RegistrationFlow.java`, `LoginFlow.java`, `RecoveryFlow.java`, `BootConfigService.java` |
 
 ### Enables
 
 - Active users can reach application features after login.
 - Department/job/role approval data can control runtime access.
 - Future patient-management features have a real entry point.
-
-## Recovery Flow
-
-Recovery completion is required so that recovery-key validation results in an actual password reset instead of only creating an unused password hash.
-
-### Work To Do Now
-
-| Priority | Task | Done | Files |
-| --- | --- | --- | --- |
-| high | Select or identify the target account for recovery. |  | `RecoveryFlow.java` |
-| high | Save the new password hash to the selected account after recovery-key validation succeeds. |  | `RecoveryFlow.java`, `UpdateUserPWSD.java`, optional new repository method |
-| mid | Decide whether recovery applies only to system accounts or also to normal users. |  | `RecoveryFlow.java`, docs |
-| mid | Add `RECOVERY_KEY` to the `.env` template because the code already requires it. |  | `ENV_SETUP.md`, `EnvValidationService.java` |
-
-### Enables
-
-- Recovery becomes a functional account-management flow.
-- System account recovery can be tested without direct database edits.
-- Environment setup documentation matches runtime validation.
 
 ## Tests And Verification
 
@@ -255,13 +231,14 @@ Tests are required so that the access-request foundation can evolve without sile
 | mid | Add JUnit dependencies and create `src/test/java`. |  | `pom.xml`, `src/test/java` |
 | mid | Test password validation and terminal-only console behavior where possible. |  | `PasswordService.java`, test files |
 | mid | Test registration validation and correction flow. |  | `RegistrationService.java`, test files |
+| mid | Test recovery-key validation and password-reset behavior. |  | `RecoveryFlow.java`, `RecoveryCheck.java`, repository test files |
 | mid | Test job and role selection after these services return values. |  | `SelectJob.java`, `RoleValidation.java`, test files |
 | mid | Add database-backed integration tests later for repositories. |  | `Repository/**/*`, test files |
 | low | Add GitHub Actions after basic tests exist. |  | `.github/workflows/*` |
 
 ### Enables
 
-- Safer refactoring of auth, job, role, and access-request code.
+- Safer refactoring of auth, job, role, recovery, and access-request code.
 - Faster verification before pushing to GitHub.
 - Clear proof that core flows work.
 
@@ -275,7 +252,7 @@ Naming and cleanup are required so that the codebase remains maintainable, but m
 | --- | --- | --- | --- |
 | mid | Clean up inconsistent class, method, package, and folder names such as `uiController`, `itJobsMenu`, `userAccunt`, `logsRepository`, `TECHNICHAL.md`, and `diagramms`. |  | multiple Java and docs files |
 | mid | Replace magic numbers for role, department, and status IDs with named constants or enum-like helpers. |  | `CreateAccount.java`, `CreateDefaultAccounts.java`, `LoginVerification.java`, `DB_SETUP.md` |
-| low | Fix spelling in console messages such as `sucsessfully`, `WARING`, `Adress`, `emtpy`, `wsa`, and `where saved`. |  | multiple CLI/service/repository classes |
+| low | Fix spelling in console messages such as `sucsessfully`, `WARING`, `Adress`, `emtpy`, `exsit`, `querry`, and `where saved`. |  | multiple CLI/service/repository classes |
 | low | Remove unused imports and placeholder variables when touching files for functional changes. |  | multiple Java files |
 
 ### Enables
@@ -292,7 +269,7 @@ Documentation updates are required so that GitHub reflects the actual runtime be
 
 | Priority | Task | Done | Files |
 | --- | --- | --- | --- |
-| mid | Keep `CURRENT_STATUS.md`, `ToDo.md`, and UML aligned with implemented behavior after job/access changes. |  | `docs/project_info/*`, `docs/architecture/diagramms/patient-management-uml.mmd` |
+| mid | Keep `CURRENT_STATUS.md`, `ToDo.md`, setup docs, project structure docs, and UML aligned after auth/access changes. | [x] | `docs/project_info/*`, `docs/setup/*`, `docs/architecture/*` |
 | mid | Decide whether SQL setup belongs only in Markdown docs or should also be versioned as SQL files. `PROJECT_STRUCTURE.md` and `DB_SETUP.md` still reference `Query.sql` and `Query_1.sql`, while `.gitignore` ignores `*.sql`. |  | `PROJECT_STRUCTURE.md`, `DB_SETUP.md`, `.gitignore` |
 | low | Add Maven Wrapper, formatter/linter, and logging framework later. |  | `pom.xml`, new config files |
 
@@ -319,20 +296,20 @@ These features require the authentication and access-management foundation to be
 
 ## Recommended Next Work
 
-1. Make startup fail fast for invalid runtime state.
-2. Fix the registration correction path and block account creation with missing password hashes.
-3. Implement `SelectJob` and connect selected jobs to `HandleAccessManagement`.
-4. Change `RoleValidation` to return a role ID and store it in access requests.
-5. Complete access request persistence with department, job, and role from user input.
-6. Add admin approval and rejection behavior.
-7. Persist failed-login account status changes.
-8. Connect active users to a real main menu.
-9. Add tests once job and role selection have stable return values.
+1. Fix the registration correction path and block account creation with missing password hashes.
+2. Implement `SelectJob` and connect selected jobs to `HandleAccessManagement`.
+3. Change `RoleValidation` to return a role ID and store it in access requests.
+4. Complete access request persistence with department, job, and role from user input.
+5. Add admin approval and rejection behavior.
+6. Persist failed-login account status changes.
+7. Connect active users to a real main menu.
+8. Add tests once registration, recovery, job, and role behavior have stable return values.
 
 ## Open Decisions
 
 - Should creating an access request count as successful login, partial login, or blocked login?
 - Which roles are allowed to approve access requests?
 - Should jobs stay as strings or move into a dedicated database table?
-- Should recovery reset only system accounts or also normal user accounts?
+- Should recovery remain limited to system accounts or be generalized to normal user accounts?
+- Should recovery reset only the password hash or also reset account status and menu access flags?
 - Should `DBManager` stay as global runtime configuration or later be replaced with dependency injection?

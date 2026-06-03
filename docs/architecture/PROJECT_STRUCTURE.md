@@ -1,8 +1,8 @@
 # Project Structure
 
-Last synchronized: 2026-05-29.
+Last synchronized: 2026-06-03.
 
-This file describes the current folder structure and runtime organization of Patient Management System V5.01. The project is currently a console-based Java application focused on bootstrapping, configuration, authentication, database-backed account handling, login attempt logging, and first-login access request groundwork.
+This file describes the current folder structure and runtime organization of Patient Management System V5.01. The project is currently a console-based Java application focused on bootstrapping, configuration, authentication, database-backed account handling, recovery-key based system-account password reset, login attempt logging, and first-login access request groundwork.
 
 Environment setup details are documented only in `docs/setup/ENV_SETUP.md`. Database setup details are documented only in `docs/setup/DB_SETUP.md`.
 
@@ -13,6 +13,7 @@ Patient_Management_System_v.05
 |-- docs
 |   |-- architecture
 |   |   |-- diagramms
+|   |   |   |-- patient-management-uml.md
 |   |   |   `-- patient-management-uml.mmd
 |   |   |-- PROJECT_STRUCTURE.md
 |   |   `-- TECHNICHAL.md
@@ -59,14 +60,18 @@ src/main/java/app
 |   `-- Flow
 |       |-- LoginFlow.java
 |       |-- PasswordFlow.java
+|       |-- RecoveryFlow.java
 |       |-- RegistrationFlow.java
 |       `-- Services
 |           |-- AuthSecurityService
 |           |   |-- AccountPolicy.java
+|           |   |-- CheckKeyStatus.java
 |           |   |-- CollectLogs.java
+|           |   |-- RecoveryCheck.java
 |           |   |-- RoleValidation.java
 |           |   |-- SelectDepartment.java
-|           |   `-- SelectJob.java
+|           |   |-- SelectJob.java
+|           |   `-- SelectUserForRecovery.java
 |           |-- LoginService
 |           |   |-- FirstLogin.java
 |           |   |-- LoginInputCollector.java
@@ -106,6 +111,7 @@ src/main/java/app
 |   |-- CheckForDefaultAccounts.java
 |   |-- DBManager.java
 |   |-- EnvValidationService.java
+|   |-- HandleRecoveryKey.java
 |   `-- SQLValidationService.java
 |-- Controller
 |   |-- AuthController.java
@@ -117,14 +123,20 @@ src/main/java/app
 `-- Repository
     |-- AuthRepository
     |   |-- CheckRoles.java
+    |   |-- CheckStatusForDepartment.java
     |   |-- CheckSystemAccounts.java
+    |   |-- CollectRecoveryKey.java
     |   |-- CountFailedLoginAttempts.java
     |   |-- ExecutePWSDPolicy.java
     |   |-- HandleAccessManagement.java
+    |   |-- SelectUserForRecover.java
     |   |-- SetNewStatus.java
+    |   |-- ShowSystemAccounts.java
+    |   |-- UpdateSystemAccount.java
     |   `-- UpdateUserPWSD.java
     |-- ConfigRepository
-    |   `-- CreateDefaultAccounts.java
+    |   |-- CreateDefaultAccounts.java
+    |   `-- SetRecoveryKey.java
     |-- LoginRepository
     |   `-- CheckUserInDB.java
     |-- logsRepository
@@ -148,8 +160,8 @@ Contains the boot process. `BootConfigService` creates all controller objects, b
 Contains the controller layer.
 
 - `FrontController` routes requests to subcontrollers.
-- `ConfigController` runs local configuration and database startup logic.
-- `AuthController` shows the authentication menu and routes to registration, login, or exit.
+- `ConfigController` runs local configuration, database startup logic, recovery-key storage, and starter account checks.
+- `AuthController` shows the authentication menu and routes to registration, login, recovery, or exit.
 - `MenuController`, `ServiceController`, and `uiController` currently exist as placeholders for later runtime phases.
 
 The intended controller order is:
@@ -164,9 +176,10 @@ Currently only `Config` and `Auth` are active.
 
 Contains startup services for local configuration and database connectivity.
 
-- `EnvValidationService` checks the local runtime configuration file and required values.
+- `EnvValidationService` checks the local runtime configuration file and required values, including `RECOVERY_KEY`.
 - `SQLValidationService` builds the JDBC connection values and tests the database connection.
 - `DBManager` stores the runtime database connection configuration and creates JDBC connections.
+- `HandleRecoveryKey` reads `RECOVERY_KEY` and hashes it with BCrypt.
 - `CheckForDefaultAccounts` checks whether starter admin accounts exist and triggers creation when needed.
 
 ### `app.Auth.Flow`
@@ -176,16 +189,20 @@ Contains the top-level authentication flow classes.
 - `RegistrationFlow` coordinates account registration.
 - `LoginFlow` coordinates credential collection, login verification, and login attempt logging.
 - `PasswordFlow` delegates password creation to `PasswordService`.
+- `RecoveryFlow` coordinates recovery-key validation, target account selection, password creation, and password-hash update.
 
 ### `app.Auth.Flow.Services`
 
-Contains smaller services used by authentication and access request flows.
+Contains smaller services used by authentication, recovery, and access request flows.
 
 - `RegistrationService` collects username, email, and phone number.
 - `PasswordService` validates password rules and creates BCrypt hashes.
 - `LoginInputCollector` collects login credentials.
 - `LoginVerification` checks credentials and routes behavior based on account status.
 - `FirstLogin` handles first-login access request groundwork for pending accounts.
+- `RecoveryCheck` reads the recovery key through terminal-only password input.
+- `CheckKeyStatus` checks an entered recovery key against the stored BCrypt hash.
+- `SelectUserForRecovery` collects the account name that should be recovered.
 - `SelectDepartment` validates department selection.
 - `RoleValidation`, `SelectJob`, and `AccountPolicy` are draft or placeholder classes.
 
@@ -202,11 +219,11 @@ Contains console output text and menu classes.
 
 Contains database access classes.
 
-- `ConfigRepository` creates missing starter accounts.
+- `ConfigRepository` creates missing starter accounts and stores the startup recovery-key hash.
 - `RegistrationRepository` creates registered user accounts.
 - `LoginRepository` checks usernames, password hashes, and account statuses.
 - `logsRepository` writes login attempt records.
-- `AuthRepository` contains access request, password update, failed login counting, role check, and status policy repository classes.
+- `AuthRepository` contains access request, password update, recovery, failed-login counting, role check, and status policy repository classes.
 
 ## Program Runtime Flow
 
@@ -220,16 +237,18 @@ Contains database access classes.
 
 ### 2. Configuration Phase
 
-The configuration phase prepares local runtime values and database access before users can authenticate.
+The configuration phase prepares local runtime values, database access, recovery-key storage, and starter accounts before users can authenticate.
 
 1. `FrontController` routes to `CONFIG`.
 2. `ConfigController.execute(scanner)` starts the configuration process.
 3. `EnvValidationService` validates required runtime values.
 4. `SQLValidationService` builds and tests the JDBC connection values.
 5. `DBManager.initialize(...)` stores the runtime database connection values.
-6. `CheckForDefaultAccounts` checks for starter admin accounts.
-7. `CreateDefaultAccounts` creates missing starter accounts.
-8. If the starter account check succeeds, boot continues into authentication.
+6. `HandleRecoveryKey` reads and hashes `RECOVERY_KEY`.
+7. `SetRecoveryKey` inserts or updates the recovery-key hash in `recovery_keys.id = 1`.
+8. `CheckForDefaultAccounts` checks for starter admin accounts.
+9. `CreateDefaultAccounts` creates missing starter accounts.
+10. If configuration succeeds, boot continues into authentication.
 
 ### 3. Authentication Phase
 
@@ -237,10 +256,11 @@ The authentication phase is the first interactive user phase.
 
 1. `FrontController` routes to `AUTH`.
 2. `AuthController` displays `AuthMenu`.
-3. The user chooses registration, login, or exit.
+3. The user chooses registration, login, recovery, or exit.
 4. Registration routes to `RegistrationFlow`.
 5. Login routes to `LoginFlow`.
-6. Exit shuts down the console application.
+6. Recovery routes to `RecoveryFlow`.
+7. Exit shuts down the console application.
 
 ## Registration Flow
 
@@ -289,6 +309,27 @@ waiting_for_password_change
 - The account is changed to active after the password update succeeds.
 ```
 
+## Recovery Flow
+
+Recovery resets the password hash for a selected existing account after recovery-key validation.
+
+1. `AuthController` routes option `3` to `RecoveryFlow.SystemAccounts(scanner)`.
+2. `RecoveryCheck` reads the recovery key through `System.console()`.
+3. `CollectRecoveryKey` loads `recovery_keys.id = 1` from the database.
+4. `CheckKeyStatus` verifies the entered key with BCrypt.
+5. `ShowSystemAccounts` displays system accounts after a valid key check.
+6. `SelectUserForRecovery` collects the account name to recover.
+7. `SelectUserForRecover` verifies that the account exists.
+8. `PasswordService` creates a new password hash.
+9. `UpdateSystemAccount` updates `accounts.password_hash` for the selected account.
+
+Current recovery scope:
+
+- The recovery baseline is considered done for the current stage.
+- The flow is exposed as `Recover System Accounts` in the auth menu.
+- The current repository update changes only `password_hash`.
+- Status, password-change flags, menu-access flags, and `recovery_key_id` are not changed by recovery yet.
+
 ## Pending User Access Flow
 
 Pending users can currently create an access request during first login.
@@ -318,7 +359,7 @@ If one or both are missing:
 3. Missing accounts are inserted through the repository layer.
 4. Starter accounts receive `waiting_for_password_change`.
 
-On first login, starter accounts must change their password. `UpdateUserPWSD` updates the password hash, changes account status to `active`, and clears the password-change flag.
+On first login, starter accounts must change their password. `UpdateUserPWSD` updates the password hash, changes account status to `active`, clears the password-change flag, and enables menu access.
 
 ## Current Structure Notes
 
