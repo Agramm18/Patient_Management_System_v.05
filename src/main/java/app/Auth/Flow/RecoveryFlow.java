@@ -4,6 +4,7 @@ import java.util.Scanner;
 
 import app.Auth.Flow.Services.AuthSecurityService.CheckKeyStatus;
 import app.Auth.Flow.Services.AuthSecurityService.RecoveryCheck;
+import app.Auth.Flow.Services.AuthSecurityService.SelectUserForRecovery;
 import app.Repository.AuthRepository.CollectRecoveryKey;
 
 public class RecoveryFlow {
@@ -22,6 +23,11 @@ public class RecoveryFlow {
 
         CheckKeyStatus check = new CheckKeyStatus();
         boolean canChangePassword = check.Value(recoveryKeyUser, storedHashinDB);
+
+        SelectUserForRecovery get = new SelectUserForRecovery();
+        get.username(scanner);
+
+        String recoverUsername = get.getgetRecoverUsername();
 
         if (canChangePassword) {
             PasswordFlow run = new PasswordFlow();
