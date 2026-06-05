@@ -12,12 +12,12 @@ public class CountFailedLoginAttempts {
     public int RETRY_COUNT_24_H;
     private int id;
 
-    public void Logs(String Username) {
+    public int Logs(String Username) {
         CollectID(Username);
-        CountUser();
+        return CountUser();
     }
 
-    private void CountUser() {
+    private int CountUser() {
 
         System.out.println("[INFO] Checking for Failed PWSD in 24 Hours");
 
@@ -31,7 +31,9 @@ public class CountFailedLoginAttempts {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                this.RETRY_COUNT_24_H = rs.getInt("failed_count");
+                return rs.getInt("failed_count");
+            } else {
+                return 0;
             }
 
         } catch (SQLException error) {
