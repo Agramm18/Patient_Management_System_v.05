@@ -1,4 +1,4 @@
-package app.Repository.AuthRepository;
+package app.Repository.AuthRepository.Management;
 
 import app.Config.DBManager;
 import java.sql.Connection;
@@ -15,7 +15,7 @@ import java.sql.ResultSet;
     1. Username + ID
 */
 
-public class CheckRoles {
+public class HasAssignedRole {
 
     public boolean userRole(String Username) {
         String sqlCheckUser = "SELECT id, user_role FROM accounts WHERE account_name = ?";

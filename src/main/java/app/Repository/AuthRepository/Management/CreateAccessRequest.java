@@ -1,4 +1,4 @@
-package app.Repository.AuthRepository;
+package app.Repository.AuthRepository.Management;
 
 
 import app.Config.DBManager;
@@ -17,7 +17,7 @@ import java.sql.ResultSet;
     2. Which Department is Requested
 */
 
-public class HandleAccessManagement {
+public class CreateAccessRequest {
     private static final String DEFAULT_REQUESTED_JOB = "unassigned";
     private static final int DEFAULT_REQUESTED_ROLE = 9;
 

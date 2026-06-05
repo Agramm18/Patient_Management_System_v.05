@@ -1,4 +1,4 @@
-package app.Repository.AuthRepository;
+package app.Repository.AuthRepository.Management;
 
 
 import app.Config.DBManager;

@@ -5,9 +5,9 @@ import java.util.Scanner;
 
 import app.Auth.Flow.Services.AuthSecurityService.CollectLogs;
 import app.Auth.Flow.Services.PasswordService.PasswordService;
-import app.Repository.AuthRepository.CountFailedLoginAttempts;
+import app.Repository.AuthRepository.Management.CountFailedLoginAttempts;
 import app.Repository.AuthRepository.ExecutePWSDPolicy;
-import app.Repository.AuthRepository.UpdateUserPWSD;
+import app.Repository.AuthRepository.Password.UpdateUserPassword;
 import app.Repository.LoginRepository.CheckUserInDB;
 
 
@@ -124,7 +124,7 @@ public class LoginVerification {
 
                     System.out.println("[INFO] Updating User PWSD");
 
-                    UpdateUserPWSD change = new UpdateUserPWSD();
+                    UpdateUserPassword change = new UpdateUserPassword();
                     boolean changeSuccess = change.dbValues(Username, hashedPWSD);
 
                     if (changeSuccess) {

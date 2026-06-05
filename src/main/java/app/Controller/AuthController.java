@@ -1,14 +1,9 @@
 package app.Controller;
 
 import app.Auth.Flow.LoginFlow;
-import app.Auth.Flow.PasswordFlow;
 import app.Auth.Flow.RecoveryFlow;
 import app.Auth.Flow.RegistrationFlow;
-import app.Auth.Flow.Services.AuthSecurityService.CheckKeyStatus;
-import app.Auth.Flow.Services.AuthSecurityService.RecoveryCheck;
-import app.Auth.Flow.Services.PasswordService.PasswordService;
 import app.CLIText.Menus.Program.AuthMenu;
-import app.Repository.AuthRepository.CollectRecoveryKey;
 
 import java.util.Scanner;
 

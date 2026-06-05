@@ -1,4 +1,4 @@
-package app.Repository.AuthRepository;
+package app.Repository.AuthRepository.Recovery;
 
 import app.Config.DBManager;
 import java.sql.Connection;

@@ -6,9 +6,9 @@ import app.Auth.Flow.Services.AuthSecurityService.CheckKeyStatus;
 import app.Auth.Flow.Services.AuthSecurityService.RecoveryCheck;
 import app.Auth.Flow.Services.AuthSecurityService.SelectUserForRecovery;
 import app.Auth.Flow.Services.PasswordService.PasswordService;
-import app.Repository.AuthRepository.CollectRecoveryKey;
-import app.Repository.AuthRepository.SelectUserForRecover;
-import app.Repository.AuthRepository.UpdateSystemAccount;
+import app.Repository.AuthRepository.Recovery.GetRecoveryKeyHash;
+import app.Repository.AuthRepository.Recovery.SelectUserForRecover;
+import app.Repository.AuthRepository.Password.UpdateSystemAccountPassword;
 
 public class RecoveryFlow {
 
@@ -19,7 +19,7 @@ public class RecoveryFlow {
 
         String recoveryKeyUser = validate.getEnteredHashByUser();
 
-        CollectRecoveryKey collect = new CollectRecoveryKey();
+        GetRecoveryKeyHash collect = new GetRecoveryKeyHash();
         collect.key();
 
         String storedHashinDB = collect.getDbValue();
@@ -42,7 +42,7 @@ public class RecoveryFlow {
 
             String password = update.getHashedPWSD();
 
-            UpdateSystemAccount run = new UpdateSystemAccount();
+            UpdateSystemAccountPassword run = new UpdateSystemAccountPassword();
             run.sqlQuerry(Username, password);
 
         }

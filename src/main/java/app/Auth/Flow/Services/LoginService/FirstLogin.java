@@ -5,8 +5,8 @@ import java.util.Scanner;
 import app.Auth.Flow.Services.AuthSecurityService.SelectDepartment;
 import app.CLIText.Menus.Departments.DepartmentMenu;
 import app.CLIText.Menus.DepartmentJobs.*;
-import app.Repository.AuthRepository.CheckStatusForDepartment;
-import app.Repository.AuthRepository.HandleAccessManagement;
+import app.Repository.AuthRepository.Management.HasAssignedDepartment;
+import app.Repository.AuthRepository.Management.CreateAccessRequest;
 
 /*
     In this class the first login is handled if the User status is pending in the DB accounts
@@ -85,7 +85,7 @@ public class FirstLogin {
             case 11:
                 SystemJobsMenu showSystem = new SystemJobsMenu();
 
-                CheckStatusForDepartment validate = new CheckStatusForDepartment();
+                HasAssignedDepartment validate = new HasAssignedDepartment();
                 boolean hasAccess = validate.status(Username);
 
                 if (hasAccess) {
@@ -97,7 +97,7 @@ public class FirstLogin {
                 break;
         }
 
-        HandleAccessManagement run = new HandleAccessManagement();
+        CreateAccessRequest run = new CreateAccessRequest();
         run.accessManagement(Username, department);
     }
 }

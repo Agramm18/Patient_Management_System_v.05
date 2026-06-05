@@ -1,5 +1,4 @@
-package app.Repository.AuthRepository;
-
+package app.Repository.AuthRepository.Management;
 
 import app.Config.DBManager;
 import java.sql.Connection;
@@ -7,20 +6,13 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 
-/*
-    In this Section the System Accounts Are Checked
+public class HasAssignedDepartment {
 
-    1. It will be checked if the User Password must be changed or not
-
-*/
-public class CheckSystemAccounts {
-
-    public boolean checkUserStatus(String Username) {
-        System.out.println("[INFO] Checking if the user must change his password");
+    public boolean status(String Username) {
 
         String sql = "SELECT * FROM accounts WHERE account_name = ?";
 
-        try (Connection connection = DBManager.getConnection();
+        try(Connection connection = DBManager.getConnection();
             PreparedStatement stmt = connection.prepareStatement(sql);
         ) {
             stmt.setString(1, Username);
@@ -28,17 +20,19 @@ public class CheckSystemAccounts {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                boolean requiersChange = rs.getBoolean("requires_password_change");
+                int account_job = rs.getInt("department");
 
-                if (requiersChange) {
+                if (account_job == 11 || account_job == 5) {
                     return true;
                 } else {
                     return false;
                 }
             }
+
         } catch (SQLException error) {
             System.out.println(error.getMessage());
         }
         return false;
     }
+
 }

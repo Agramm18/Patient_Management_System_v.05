@@ -1,12 +1,11 @@
-package app.Repository.AuthRepository;
+package app.Repository.AuthRepository.Password;
 
 import app.Config.DBManager;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.ResultSet;
 
-public class UpdateSystemAccount {
+public class UpdateSystemAccountPassword {
 
     public void sqlQuerry(String Username, String password) {
 

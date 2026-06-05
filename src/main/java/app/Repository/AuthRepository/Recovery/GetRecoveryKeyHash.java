@@ -1,4 +1,4 @@
-package app.Repository.AuthRepository;
+package app.Repository.AuthRepository.Recovery;
 
 import app.Config.DBManager;
 
@@ -7,7 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 
-public class CollectRecoveryKey {
+public class GetRecoveryKeyHash {
 
     private String dbValue;
 

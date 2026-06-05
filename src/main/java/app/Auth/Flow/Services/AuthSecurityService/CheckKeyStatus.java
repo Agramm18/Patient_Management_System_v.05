@@ -1,6 +1,6 @@
 package app.Auth.Flow.Services.AuthSecurityService;
 
-import app.Repository.AuthRepository.ShowSystemAccounts;
+import app.Repository.AuthRepository.Recovery.FindRecoverableUser;
 import org.mindrot.jbcrypt.BCrypt;
 
 public class CheckKeyStatus {
@@ -10,7 +10,7 @@ public class CheckKeyStatus {
 
         if (BCrypt.checkpw(recoveryKeyUser, storedHashinDB)) {
             System.out.println("[OK] The user now has access to change the password");
-            ShowSystemAccounts display = new ShowSystemAccounts();
+            FindRecoverableUser display = new FindRecoverableUser();
             display.systemAccounts();
 
 
