@@ -4,7 +4,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-
+import app.Config.LogManager;
+import app.Config.LogManager.LogType;
 /*
  This section is the DB Manager who collects the Username, PWSD and Url from the SQL Connection
 
@@ -15,7 +16,7 @@ import java.sql.SQLException;
 
 public final class DBManager {
     private static String sqlUser;
-    private static String sqlPWSD;
+    private static String sqlPassword;
     private static String sqlURL;
 
     private DBManager() {
@@ -27,12 +28,12 @@ public final class DBManager {
             String password,
             String url
     ) {
-        System.out.println("\n[INFO] Building global DB Connection");
-        System.out.println("[INFO] Save global DB runtime config");
-        System.out.println("[INFO] Set DB Config\n");
+        LogManager.log(LogType.MESSAGE, "Building global DB Connection");
+        LogManager.log(LogType.MESSAGE, "Save global DB runtime config");
+        LogManager.log(LogType.MESSAGE, "Set DB Config");
 
         sqlUser = user;
-        sqlPWSD = password;
+        sqlPassword = password;
         sqlURL = url;
 
         if (user == null || user.isBlank() || password == null || password.isBlank() || sqlURL == null || sqlURL.isBlank()) {
@@ -48,7 +49,7 @@ public final class DBManager {
         return DriverManager.getConnection(
                 sqlURL,
                 sqlUser,
-                sqlPWSD
+                sqlPassword
         );
     }
 }

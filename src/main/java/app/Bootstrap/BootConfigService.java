@@ -2,7 +2,11 @@ package app.Bootstrap;
 
 import app.CLIText.DisplayMessages.AuthMSG;
 import app.CLIText.DisplayMessages.LoaderMSG;
+import app.Config.LogManager;
 import app.Controller.*;
+
+import app.Config.LogManager;
+import app.Config.LogManager.LogType;
 
 import java.util.Scanner;
 
@@ -22,18 +26,18 @@ public class BootConfigService {
 
         FrontController dispatcher = new FrontController(auth, config, menu, service, ui);
 
-        System.out.println("[INFO] Booting into the System..........");
-        System.out.println("[INFO] Running Controller classes.......");
+        LogManager.log(LogType.MESSAGE, "Booting into the System");
+        LogManager.log(LogType.MESSAGE, "Running Controller classes");
 
         try {
             boolean configOK = dispatcher.navigateSubController(FrontController.RequestType.CONFIG, scanner);
 
             if (!configOK) {
-                throw new RuntimeException("\n[FATAL] System config failed");
+                throw new RuntimeException("System config failed");
             }
 
-            System.out.println("\n[OK] System Config where a success");
-            System.out.println("[INFO] Starting Authentication phase\n");
+            LogManager.log(LogType.MESSAGE, "System Config where a success");
+            LogManager.log(LogType.MESSAGE, "Starting Authentication phase");
 
             AuthMSG show = new AuthMSG();
             show.msg();
@@ -41,8 +45,7 @@ public class BootConfigService {
             dispatcher.navigateSubController(FrontController.RequestType.AUTH, scanner);
 
         } catch (RuntimeException error) {
-            System.out.println(error.getMessage());
-            System.out.println("[WARNING] System won't load and will be shut down right now");
+            LogManager.log(LogType.BOOT_FAILED, error.getMessage());
             System.exit(1);
         }
     }

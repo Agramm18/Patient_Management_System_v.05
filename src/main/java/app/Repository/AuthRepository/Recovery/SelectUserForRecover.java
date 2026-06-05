@@ -6,6 +6,9 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 
+import app.Config.LogManager;
+import app.Config.LogManager.LogType;
+
 public class SelectUserForRecover {
 
     public boolean inDB(String Username) {
@@ -19,16 +22,16 @@ public class SelectUserForRecover {
 
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
-                        System.out.println("\n[OK] The Username exist and can be changed\n");
+                        LogManager.log(LogType.RECOVERY_SUCCESS, "The Username exist and can be changed");
                         return true;
                     } else {
-                        System.out.println("[ERROR] The Username does not exsit in the DB");
+                        LogManager.log(LogType.RECOVERY_FAILED, "The Username does not exist in the DB");
                         return false;
                     }
                 }
 
         } catch (SQLException error) {
-            System.out.println(error.getMessage());
+            LogManager.log(LogType.SQL_EXCEPTION, error.getMessage());
             return false;
         }
     }

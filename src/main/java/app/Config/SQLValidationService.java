@@ -5,10 +5,13 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+import app.Config.LogManager;
+import app.Config.LogManager.LogType;
+
 public class SQLValidationService {
     private EnvValidationService env;
-    private String SQLUser;
-    private String sqlPWSD;
+    private String sqlUser;
+    private String sqlPassword;
     private String sqlURL;
 
     //Konstruktor to load env values from EnvValidationService.java
@@ -21,35 +24,34 @@ public class SQLValidationService {
         int port = env.getPort();
         String DBName = env.getDBName();
         String DBUser = env.getUser();
-        String PWSD = env.getPWSD();
+        String DBPassword = env.getPassword();
 
         String URL = "jdbc:mysql://" + host + ":" + port + "/" + DBName; //MySQL Connector URL
 
-        System.out.println("[INFO] Trying to Build the MySQL Connection with the .env values");
-        System.out.println("[DEBUG] URL: " + URL);
+        LogManager.log(LogType.MESSAGE, "Trying to Build the MySQL Connection with the .env values");
+        LogManager.log(LogType.SQL_DEBUG, "URL: " + URL);
 
         //Routing Class variables to method variables
-        this.SQLUser = DBUser;
-        this.sqlPWSD = PWSD;
+        this.sqlUser = DBUser;
+        this.sqlPassword = DBPassword;
         this.sqlURL = URL;
 
-        try (Connection connection = DriverManager.getConnection(URL, DBUser, PWSD)) {
-            System.out.println("[OK] The Database connection established successfully ");
+        try (Connection connection = DriverManager.getConnection(URL, DBUser, DBPassword)) {
+            LogManager.log(LogType.SQL_OK, "The Database connection established successfully ");
             return true;
         } catch (SQLException error) {
-            System.out.println("[ERROR] Failed to connect to Database");
-            System.out.println(error.getMessage());
+            LogManager.log(LogType.SQL_EXCEPTION, error.getMessage());
             return false;
         }
     }
 
     //Building getter to maintain a global connection
     public String getSQLUser() {
-        return SQLUser;
+        return sqlUser;
     }
 
     public String getSqlPWSD() {
-        return sqlPWSD;
+        return sqlPassword;
     }
 
     public String getSqlURL() {

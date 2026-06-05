@@ -10,13 +10,13 @@ public class ExecutePWSDPolicy {
 
 
     public void locked(String Username) {
-        String sql = "UPDATE accounts SET account_name = ? WHERE account_status = ?";
+        String sql = "UPDATE accounts SET account_status = ? WHERE account_name = ?";
 
         try (Connection connection = DBManager.getConnection();
             PreparedStatement stmt = connection.prepareStatement(sql);
         ) {
-            stmt.setString(1, Username);
-            stmt.setInt(2, 4);
+            stmt.setInt(1, 4);
+            stmt.setString(2, Username);
 
             int rows = stmt.executeUpdate();
 
@@ -31,13 +31,13 @@ public class ExecutePWSDPolicy {
     }
 
     public void quarantine(String Username) {
-        String sql = "UPDATE accounts SET account_name = ? WHERE account_status = ?";
+        String sql = "UPDATE accounts SET account_status = ? WHERE account_name = ?";
 
         try (Connection connection = DBManager.getConnection();
              PreparedStatement stmt = connection.prepareStatement(sql);
         ) {
-            stmt.setString(1, Username);
-            stmt.setInt(2, 5);
+            stmt.setInt(1, 5);
+            stmt.setString(2, Username);
 
             int rows = stmt.executeUpdate();
 
@@ -52,13 +52,13 @@ public class ExecutePWSDPolicy {
     }
 
     public void suspicious(String Username) {
-        String sql = "UPDATE accounts SET account_name = ? WHERE account_status = ?";
+        String sql = "UPDATE accounts SET account_status = ? WHERE account_name = ?";
 
         try (Connection connection = DBManager.getConnection();
              PreparedStatement stmt = connection.prepareStatement(sql);
         ) {
-            stmt.setString(1, Username);
-            stmt.setInt(2, 7);
+            stmt.setInt(1, 7);
+            stmt.setString(2, Username);
 
             int rows = stmt.executeUpdate();
 

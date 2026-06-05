@@ -6,6 +6,9 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 
+import app.Config.LogManager;
+import app.Config.LogManager.LogType;
+
 public class FindRecoverableUser {
     private int id;
     private String username;
@@ -29,7 +32,7 @@ public class FindRecoverableUser {
             System.out.println("\n");
 
         } catch (SQLException error) {
-            System.out.println(error.getMessage());
+           LogManager.log(LogType.SQL_EXCEPTION, error.getMessage());
         }
     }
 

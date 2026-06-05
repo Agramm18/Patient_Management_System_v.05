@@ -46,20 +46,19 @@ public class LoginVerification {
 
         try {
             boolean userValid = repository.checkUserInDB(Username);
-            boolean passwordOK = repository.checkPWSD(PWSD, Username);
-            String userStatus = repository.checkUserStatus(Username);
 
             if (!userValid) {
                 return new CollectLogs(false, "USERNAME_NOT_FOUND");
             }
 
-            System.out.println("\n[INFO] Continue with PWSD check\n");
-
-            System.out.println("\n[WARNING] Invalid Password detected");
-            System.out.println("[INFO] Please Notice if retry >=5 your account will be locked");
-            System.out.println("[INFO] If you have 25 Failed Passwords the Accounts will be set to quarantine");
+            System.out.println("[OK] The User exist continue with PWSD Check");
+            boolean passwordOK = repository.checkPWSD(PWSD, Username);
 
             if (!passwordOK) {
+                System.out.println("[INFO] Please Notice if retry >=5 your account will be locked");
+                System.out.println("[INFO] If you have 25 Failed Passwords the Accounts will be set to quarantine");
+                System.out.println("\n[WARNING] Invalid Password detected");
+
                 this.RETRYS++;
 
                 System.out.println("[INFO] Failed Passwords: " + this.RETRYS + "\n");
@@ -87,6 +86,8 @@ public class LoginVerification {
 
                 return new CollectLogs(false, "INVALID_PASSWORD");
             }
+
+            String userStatus = repository.checkUserStatus(Username);
 
             if (userStatus == null) {
                 return new CollectLogs(false, "Unknown Account Status");

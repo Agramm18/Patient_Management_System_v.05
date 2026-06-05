@@ -7,6 +7,9 @@ import app.CLIText.Menus.Program.AuthMenu;
 
 import java.util.Scanner;
 
+import app.Config.LogManager;
+import app.Config.LogManager.LogType;
+
 
 /*
     This section is a controller where the User has to choose what he wants to do
@@ -20,7 +23,7 @@ public class AuthController {
 
     public void verifyAccountStatus(Scanner scanner) {
         String accountStatusSTR;
-        System.out.println("\n[INFO] Running through the Registration or Login process\n");
+        LogManager.log(LogType.MESSAGE, "Running through the Registration or Login process");
 
         while (true) {
             try {
@@ -31,12 +34,12 @@ public class AuthController {
                 accountStatusSTR = scanner.nextLine().trim().toLowerCase();
 
                 if (accountStatusSTR.isBlank()) {
-                    throw new IllegalArgumentException("[ERROR] Please type in something to continue");
+                    throw new IllegalArgumentException("Please type in something to continue");
                 } else {
                     int userValue = Integer.parseInt(accountStatusSTR);
 
                     if (userValue < 1 || userValue > 4) {
-                        throw new IllegalArgumentException("[ERROR] The value can't be less than 1 or higher than 4");
+                        throw new IllegalArgumentException("The value can't be less than 1 or higher than 4");
                     } else if (userValue == 1) {
                         RegistrationFlow register = new RegistrationFlow();
                         register.user(scanner);
@@ -49,8 +52,8 @@ public class AuthController {
                         RecoveryFlow recover = new RecoveryFlow();
                         recover.SystemAccounts(scanner);
                     } else {
-                        System.out.println("\n[INFO] You have chosen to end this program");
-                        System.out.println("[INFO] Have a nice day and Good Bye!!\n");
+                        LogManager.log(LogType.MESSAGE, "You have chosen to end this program");
+                        LogManager.log(LogType.MESSAGE, "Have a nice day and Good Bye!!");
                         System.exit(0);
                         break;
                     }
@@ -59,7 +62,7 @@ public class AuthController {
             } catch (NumberFormatException numberError) {
                 System.out.println("[ERROR] Please type in a valid number");
             } catch (IllegalArgumentException error) {
-                System.out.println(error.getMessage());
+                LogManager.log(LogType.SYSTEM_WARN, error.getMessage());
             }
         }
     }

@@ -1,5 +1,8 @@
 package app.CLIText.DisplayMessages;
 
+import app.Config.LogManager;
+import app.Config.LogManager.LogType;
+
 public class ConfigMSG {
 
     public void configMSG() {
@@ -10,6 +13,6 @@ public class ConfigMSG {
         System.out.println("   Establishing SQL connection");
         System.out.println("==================================================\n");
 
-        System.out.println("\n[INFO] Load .env files...........\n");
+        LogManager.log(LogType.MESSAGE, "Load .env files");
     }
 }

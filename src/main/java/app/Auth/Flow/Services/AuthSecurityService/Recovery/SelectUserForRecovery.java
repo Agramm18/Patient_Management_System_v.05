@@ -1,6 +1,11 @@
 package app.Auth.Flow.Services.AuthSecurityService.Recovery;
 import java.util.Scanner;
 
+
+import app.Config.LogManager;
+import app.Config.LogManager.LogType;
+
+
 public class SelectUserForRecovery {
     private   String recoverUsername;
 
@@ -13,14 +18,14 @@ public class SelectUserForRecovery {
                 String username = scanner.nextLine();
 
                 if (username.isBlank()) {
-                    throw new IllegalArgumentException("[ERROR] The username can't be empty");
+                    throw new IllegalArgumentException("The username can't be empty");
                 }
 
                 this.recoverUsername = username;
                 return this.recoverUsername;
 
             } catch(IllegalArgumentException error) {
-                System.out.println(error.getMessage());
+                LogManager.log(LogType.CONFIG_FAILED, error.getMessage());
             }
         }
     }

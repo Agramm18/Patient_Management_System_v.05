@@ -7,6 +7,9 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 
+import app.Config.LogManager;
+import app.Config.LogManager.LogType;
+
 public class GetRecoveryKeyHash {
 
     private String dbValue;
@@ -23,7 +26,7 @@ public class GetRecoveryKeyHash {
                     this.dbValue = rs.getString("recovery_key_hash");
                 }
             } catch (SQLException error) {
-            System.out.println(error.getMessage());
+            LogManager.log(LogType.RECOVERY_SUCCESS, error.getMessage());
         }
     }
 

@@ -5,6 +5,9 @@ import java.io.Console;
 import java.util.Arrays;
 import java.util.Scanner;
 
+import app.Config.LogManager;
+import app.Config.LogManager.LogType;
+
 public class ValidateRecoveryKey {
     private char[] invisibleInput;
     private String passwordStringValue;
@@ -14,7 +17,7 @@ public class ValidateRecoveryKey {
         Console console = System.console();
 
         if (console == null) {
-            throw new IllegalStateException("[WARNING] Please run the program only in the Terminal");
+            throw new IllegalStateException("Please run the program only in the Terminal");
         }
 
 
@@ -25,11 +28,11 @@ public class ValidateRecoveryKey {
                 this.invisibleInput = console.readPassword("Please type in your recovery key: ");
 
                 if (this.invisibleInput == null || this.invisibleInput.length == 0) {
-                    throw new IllegalArgumentException("[ERROR] The password can't be empty please try again");
+                    throw new IllegalArgumentException("The password can't be empty please try again");
                 } else {
-                    System.out.println("[OK] Convert your Password as String");
+                    LogManager.log(LogType.MESSAGE, "Convert your Password as String");
                     String convertedPassword = String.valueOf(this.invisibleInput);
-                    System.out.println("[OK] Giving the Password to your Database");
+                    LogManager.log(LogType.MESSAGE, "Giving the Password to your Database");
                     this.passwordStringValue = convertedPassword;
                 }
 
@@ -38,7 +41,7 @@ public class ValidateRecoveryKey {
                 break;
 
             } catch (IllegalArgumentException error) {
-                System.out.println(error.getMessage());
+                LogManager.log(LogType.CONFIG_FAILED, error.getMessage());
             }
         }
 

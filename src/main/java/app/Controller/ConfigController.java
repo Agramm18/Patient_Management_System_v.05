@@ -1,6 +1,10 @@
 package app.Controller;
 import java.util.Scanner;
 
+import app.Config.LogManager;
+import app.Config.LogManager.LogType;
+
+import app.Repository.ConfigRepository.CheckForDefaultAccounts;
 import app.Repository.ConfigRepository.SetRecoveryKey;
 import io.github.cdimascio.dotenv.Dotenv;
 import app.Config.*;
@@ -18,8 +22,8 @@ public class ConfigController {
     private SQLValidationService sqlValidationService;
 
     public boolean execute(Scanner scanner) {
-        System.out.println("[INFO] Running Config Env & Build SQL Connection as Entrypoint for the System");
-        System.out.println("[INFO] Please note if anything is invalid in the .env config or SQL config the whole System will crash");
+        LogManager.log(LogType.MESSAGE, "Running Config Env & Build SQL Connection as Entrypoint for the System");
+        LogManager.log(LogType.MESSAGE, "Please note if anything is invalid in the .env config or SQL config the whole System will crash");
 
         EnvValidationService configurate = new EnvValidationService();
         boolean isValid = configurate.envStatus();

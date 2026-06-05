@@ -38,8 +38,8 @@ public class CountFailedLoginAttempts {
 
         } catch (SQLException error) {
             System.out.println(error.getMessage());
+            return 0;
         }
-
     }
 
     private void CollectID (String Username) {

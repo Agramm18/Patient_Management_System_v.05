@@ -1,8 +1,11 @@
-package app.Config;
+package app.Repository.ConfigRepository;
 import app.CLIText.DisplayMessages.DefaultAccountsMSG;
-import app.Repository.ConfigRepository.CreateDefaultAccounts;
+import app.Config.DBManager;
 
 import java.sql.*;
+
+import app.Config.LogManager;
+import app.Config.LogManager.LogType;
 
 
 /*
@@ -28,9 +31,9 @@ public class CheckForDefaultAccounts {
         DefaultAccountsMSG display = new DefaultAccountsMSG();
         display.msg();
 
-        System.out.println("\n[INFO] Checking if a Admin or a Local Admin exists in the DB");
-        System.out.println("[INFO] If none of the roles exists a default LocalAdmin will be added");
-        System.out.println("[INFO] If either one of these exists the other default role will be added");
+        LogManager.log(LogType.MESSAGE, "Checking if a Admin or a Local Admin exists in the DB");
+        LogManager.log(LogType.MESSAGE, "If none of the roles exists a default LocalAdmin will be added");
+        LogManager.log(LogType.MESSAGE, "If either one of these exists the other default role will be added");
 
         checkLocalAdmin();
         checkAdmin();
@@ -39,36 +42,37 @@ public class CheckForDefaultAccounts {
     }
 
     public void checkLocalAdmin() {
-        System.out.println("\n[INFO] Checking for an Local Admin in the DB");
+
+        LogManager.log(LogType.MESSAGE, "Checking for an Local Admin in the DB");
+
         int role = 1;
 
         String sql = "SELECT ID FROM accounts WHERE user_role = ? LIMIT 1";
 
         try (
-            Connection connection = DBManager.getConnection();
-            PreparedStatement statement = connection.prepareStatement(sql)
+                Connection connection = DBManager.getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)
         ) {
             statement.setInt(1, role);
 
             ResultSet result = statement.executeQuery();
 
             if(result.next()) {
-                System.out.println("[OK] Local Admin exist");
+                LogManager.log(LogType.CONFIG_SUCCESS, "Local Admin exist");
                 this.localAdminExist = true;
 
             } else {
-                System.out.println("[WARING] No Local Admin exist in the DB");
+                LogManager.log(LogType.CONFIG_FAILED, "No Local Admin exist in the DB");
                 this.localAdminExist = false;
             }
 
         } catch (SQLException error) {
-            System.out.println("[ERROR] Failed Local Admin check");
-            System.out.println(error.getMessage());
+            LogManager.log(LogType.SQL_EXCEPTION, error.getMessage());
         }
     }
 
     public void checkAdmin() {
-        System.out.println("\n[INFO] Checking for an Admin in the DB");
+        LogManager.log(LogType.MESSAGE, "Checking for an Admin in the DB");
         int role = 2;
         String sql = "SELECT ID FROM accounts WHERE user_role = ? LIMIT 1";
 
@@ -81,16 +85,15 @@ public class CheckForDefaultAccounts {
             ResultSet result = statement.executeQuery();
 
             if (result.next()) {
-                System.out.println("[OK] Admin exists in the DB\n");
+                LogManager.log(LogType.CONFIG_SUCCESS, "Admin exists in the DB");
                 this.adminExists = true;
             } else {
-                System.out.println("[WARNING] No Admin Account exists in the DB\n");
+                LogManager.log(LogType.CONFIG_FAILED, "No Admin Account exists in the DB");
                 this.adminExists = false;
             }
 
         } catch (SQLException error) {
-            System.out.println("[ERROR] Failed Admin check");
-            System.out.println(error.getMessage());
+            LogManager.log(LogType.SQL_EXCEPTION, error.getMessage());
         }
     }
 
@@ -99,19 +102,19 @@ public class CheckForDefaultAccounts {
         CreateDefaultAccounts create = new CreateDefaultAccounts();
 
         if (this.adminExists && this.localAdminExist) {
-            System.out.println("[OK] Both starter Accounts exists in the DB");
+            LogManager.log(LogType.CONFIG_SUCCESS, "Both starter Accounts exists in the DB");
             return true;
         }
 
         else if (this.adminExists) {
-            System.out.println("\n[INFO] The Default Local Admin will be created");
+            LogManager.log(LogType.CONFIG_SUCCESS, "The Default Local Admin will be created");
             return create.defaultAccounts(true, false);
 
         } else if (this.localAdminExist) {
-            System.out.println("\n[INFO] The Default Admin will be created");
+            LogManager.log(LogType.CONFIG_INFO, "The Default Admin will be created");
             return create.defaultAccounts(false, true);
         } else {
-            System.out.println("\n[INFO] Both the Local Admin and Admin will be created");
+            LogManager.log(LogType.CONFIG_INFO, "Both the Local Admin and Admin will be created");
             return create.defaultAccounts(true, true);
         }
     }

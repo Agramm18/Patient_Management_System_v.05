@@ -5,10 +5,13 @@ import java.sql.*;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.mindrot.jbcrypt.BCrypt;
 
+import app.Config.LogManager;
+import app.Config.LogManager.LogType;
+
 public class SetRecoveryKey {
 
     public void keyValue(String recoveryKey) {
-        System.out.println("[INFO] Put the Recovery Key into the DB");
+        LogManager.log(LogType.MESSAGE, "Put the Recovery Key into the DB");
         String sql = "INSERT INTO recovery_keys (id, recovery_key_hash) VALUES (1, ?)" +
                 "ON DUPLICATE  KEY UPDATE  recovery_key_hash = VALUES(recovery_key_hash)";
 
@@ -20,12 +23,12 @@ public class SetRecoveryKey {
             int rows = stmt.executeUpdate();
 
             if (rows > 0) {
-                System.out.println("[OK] The recovery key where entered successful");
-                System.out.println("[INFO] Rows affected: " + rows);
+                LogManager.log(LogType.CONFIG_SUCCESS, "he recovery key where entered successful");
+                LogManager.log(LogType.SQL_INFO, "Rows affected: " + rows);
             }
 
         } catch (SQLException error) {
-            System.out.println(error.getMessage());
+            LogManager.log(LogType.SQL_EXCEPTION, error.getMessage());
         }
     }
 }

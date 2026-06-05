@@ -5,6 +5,9 @@ import java.sql.*;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.mindrot.jbcrypt.BCrypt;
 
+import app.Config.LogManager;
+import app.Config.LogManager.LogType;
+
 /*
     In this Section the default Accounts for the Local Admin and Admin are created
 
@@ -46,14 +49,14 @@ public class CreateDefaultAccounts {
 
     private boolean createLocalDefaultAdmin() {
 
-        System.out.println("\n[INFO] Creating Local Admin");
+        LogManager.log(LogType.CONFIG_INFO, "Creating Local Admin");
 
         String LocalAdminName = dotenv.get("LOCAL_ADMIN_NAME");
-        String LocalAdminPWSD = dotenv.get("LOCAL_ADMIN_PWSD");
+        String LocalAdminPassword = dotenv.get("LOCAL_ADMIN_PASSWORD");
         String LocalAdminEmail = dotenv.get("LOCAL_ADMIN_EMAIL");
         String BootstrapKey = dotenv.get("BOOTSTRAP_KEY");
 
-        String HashedLocalPWSD;
+        String HashedLocalPassword;
         int role = 1;
         int status = 6;
         String job = "system_administrator";
@@ -65,9 +68,9 @@ public class CreateDefaultAccounts {
         boolean isSystemAccount = true;
 
 
-        System.out.println("[INFO] Hashing Password");
-        HashedLocalPWSD = BCrypt.hashpw(LocalAdminPWSD, BCrypt.gensalt(12));
-        System.out.println("[OK] Local Admin Password is sucsessfully Hashed");
+        LogManager.log(LogType.MESSAGE, "Hashing Password");
+        HashedLocalPassword = BCrypt.hashpw(LocalAdminPassword, BCrypt.gensalt(12));
+        LogManager.log(LogType.CONFIG_SUCCESS, "Local Admin Password is successfully Hashed");
 
         String sql = "INSERT INTO accounts (account_name, email, user_role, password_hash, bootstrap_key, account_status, user_job, permission, requires_password_change, department, has_access_to_menu, recovery_key_id, is_system_account) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -78,7 +81,7 @@ public class CreateDefaultAccounts {
             statement.setString(1, LocalAdminName);
             statement.setString(2, LocalAdminEmail);
             statement.setInt(3, role);
-            statement.setString(4, HashedLocalPWSD);
+            statement.setString(4, HashedLocalPassword);
             statement.setString(5, BootstrapKey);
             statement.setInt(6, status);
             statement.setString(7, job);
@@ -92,18 +95,16 @@ public class CreateDefaultAccounts {
             int rows = statement.executeUpdate();
 
             if (rows > 0) {
-                System.out.println("[OK] Local Admin is created");
-                System.out.println("[WARNING] A default Local Admin exists in the DB");
-                System.out.println("\n[INFO] Rows effected " + rows);
+                LogManager.log(LogType.CONFIG_SUCCESS, "Local Admin is created");
+                LogManager.log(LogType.SYSTEM_WARN, "A default Local Admin exists in the DB");
+                LogManager.log(LogType.MESSAGE, "Rows effected " + rows);
 
                 return true;
             }
             return false;
 
         } catch (SQLException error) {
-            System.out.println("\n[ERROR] Failed to create a default Local Admin");
-            System.out.println(error.getMessage());
-
+            LogManager.log(LogType.CONFIG_FAILED, error.getMessage());
             return false;
         }
     }
@@ -111,10 +112,10 @@ public class CreateDefaultAccounts {
     private boolean createDefaultAdmin() {
         System.out.println("\n[INFO] Creating Admin");
         String AdminName = dotenv.get("ADMIN_NAME");
-        String AdminPWSD = dotenv.get("ADMIN_PWSD_DEFAULT");
+        String AdminPassword = dotenv.get("ADMIN_PWSD_DEFAULT");
         String AdminEmail = dotenv.get("ADMIN_EMAIL_DEFAULT");
         String Bootstrap_Key = dotenv.get("BOOTSTRAP_KEY");
-        String HashedPWSD;
+        String HashedPassword;
         int role = 2;
         int status = 6;
         String admin_job = "application_administrator";
@@ -125,9 +126,9 @@ public class CreateDefaultAccounts {
         int recovery_id = 1;
         boolean isSystemAccount = true;
 
-        System.out.println("[INFO] Hashing Password");
-        HashedPWSD = BCrypt.hashpw(AdminPWSD, BCrypt.gensalt(12));
-        System.out.println("[OK] Admin Password is sucsessfully hashed");
+        LogManager.log(LogType.MESSAGE, "Hashing Password");
+        HashedPassword = BCrypt.hashpw(AdminPassword, BCrypt.gensalt(12));
+        LogManager.log(LogType.MESSAGE, "Admin Password is successfully hashed");
 
 
         String sql = "INSERT INTO accounts (account_name, email, user_role, password_hash, bootstrap_key, account_status, user_job, permission, requires_password_change, department, has_access_to_menu, recovery_key_id, is_system_account) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -139,7 +140,7 @@ public class CreateDefaultAccounts {
             statement.setString(1, AdminName);
             statement.setString(2, AdminEmail);
             statement.setInt(3, role);
-            statement.setString(4, HashedPWSD);
+            statement.setString(4, HashedPassword);
             statement.setString(5, Bootstrap_Key);
             statement.setInt(6, status);
             statement.setString(7, admin_job);
@@ -153,16 +154,16 @@ public class CreateDefaultAccounts {
             int rows = statement.executeUpdate();
 
             if (rows > 0) {
-                System.out.println("[OK] Admin is created");
-                System.out.println("[WARNING] A default Admin account exists in the DB");
-                System.out.println("\n[INFO] Rows effected " + rows);
+                LogManager.log(LogType.CONFIG_SUCCESS, "Admin is created");
+                LogManager.log(LogType.SYSTEM_WARN, "A default Admin account exists in the DB");
+                LogManager.log(LogType.CONFIG_SUCCESS, "Rows effected " + rows);
                 return true;
             }
 
             return false;
         } catch (SQLException error) {
-            System.out.println("\n[ERROR] Failed to create a default Admin");
-            System.out.println(error.getMessage());
+            LogManager.log(LogType.SQL_DEBUG, "Failed to create a default Admin");
+            LogManager.log(LogType.SQL_EXCEPTION, error.getMessage());
             return false;
         }
     }
