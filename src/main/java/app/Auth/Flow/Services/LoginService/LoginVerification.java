@@ -35,7 +35,8 @@ public class LoginVerification {
         PENDING,
         LOCKED,
         ON_QUARANTINE,
-        WAITING_FOR_PASSWORD_CHANGE
+        WAITING_FOR_PASSWORD_CHANGE,
+        SUSPICIOUS
     };
 
     private String AccountStatus;
@@ -126,10 +127,14 @@ public class LoginVerification {
                     boolean changeSuccess = change.dbValues(Username, hashedPWSD);
 
                     if (changeSuccess) {
-                        return new CollectLogs(true, "First Login for System account");
+                        return new CollectLogs(true, "password is changed successfully");
                     } else {
-                        return new CollectLogs(false, "Password need to change");
+                        return new CollectLogs(false, "something went wrong with the password change");
                     }
+
+                case "suspicious":
+                    System.out.println("[INFO] You account is set to suspicious maybe you need to change your password");
+                    return new CollectLogs(true, "You account is set to suspicious maybe you need to change your password");
             }
 
             this.RETRYS = 0;
