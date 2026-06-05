@@ -1,4 +1,4 @@
-package app.Auth.Flow.Services.AuthSecurityService;
+package app.Auth.Flow.Services.AuthSecurityService.Management;
 
 import java.util.Scanner;
 import app.CLIText.Menus.Program.roleMenu;
@@ -11,7 +11,7 @@ import app.CLIText.Menus.Program.roleMenu;
  */
 
 
-public class RoleValidation {
+public class CollectUserRole {
 
     public void requestRoles(Scanner scanner) {
         boolean selectedRoleIsValid = false;

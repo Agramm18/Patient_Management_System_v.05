@@ -1,4 +1,4 @@
-package app.Auth.Flow.Services.AuthSecurityService;
+package app.Auth.Flow.Services.AuthSecurityService.Management;
 import java.util.Scanner;
 
 
@@ -12,7 +12,7 @@ import java.util.Scanner;
 
 */
 
-public class SelectDepartment {
+public class CollectUserDepartment {
     private int selectedDepartment;
 
     public void department(Scanner scanner) {

@@ -387,7 +387,7 @@ The diagram reflects the current Java console application state:
   note for RecoveryFlow "Recovery baseline is implemented. Current update changes password_hash only."
   note for HandleAccessManagement "Current request stores selected department and default job/role values."
   note for ExecutePWSDPolicy "Threshold methods are placeholders and do not persist status changes yet."
-  note for AuthLogResult "Source class: app.Auth.Flow.Services.AuthSecurityService.CollectLogs. Renamed in this diagram to avoid collision."
+  note for AuthLogResult "Source class: app.Auth.Flow.Services.AuthSecurityService.Audit.CollectLogs. Renamed in this diagram to avoid collision."
   note for LoginAttemptRepository "Source class: app.Repository.logsRepository.CollectLogs. Renamed in this diagram to avoid collision."
 ```
 

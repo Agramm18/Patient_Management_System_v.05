@@ -1,13 +1,11 @@
-package app.Auth.Flow.Services.AuthSecurityService;
+package app.Auth.Flow.Services.AuthSecurityService.Recovery;
 
-
-import org.mindrot.jbcrypt.BCrypt;
 
 import java.io.Console;
 import java.util.Arrays;
 import java.util.Scanner;
 
-public class RecoveryCheck {
+public class ValidateRecoveryKey {
     private char[] invisibleInput;
     private String passwordStringValue;
     private String enteredHashByUser;
@@ -18,6 +16,7 @@ public class RecoveryCheck {
         if (console == null) {
             throw new IllegalStateException("[WARNING] Please run the program only in the Terminal");
         }
+
 
 
         while (true) {

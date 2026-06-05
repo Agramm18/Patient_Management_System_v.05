@@ -29,7 +29,7 @@ public class LoginFlow {
             String Username = login.getEnteredUserName();
             String PWSD = login.getEnteredPWSD();
 
-            app.Auth.Flow.Services.AuthSecurityService.CollectLogs result = check.loggedUser(Username, PWSD, scanner);
+            app.Auth.Flow.Services.AuthSecurityService.Audit.CollectLogs result = check.loggedUser(Username, PWSD, scanner);
 
             //Collect values for logs
             store.loginAttempts(

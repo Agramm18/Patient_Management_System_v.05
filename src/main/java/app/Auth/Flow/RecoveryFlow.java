@@ -2,9 +2,9 @@ package app.Auth.Flow;
 
 import java.util.Scanner;
 
-import app.Auth.Flow.Services.AuthSecurityService.CheckKeyStatus;
-import app.Auth.Flow.Services.AuthSecurityService.RecoveryCheck;
-import app.Auth.Flow.Services.AuthSecurityService.SelectUserForRecovery;
+import app.Auth.Flow.Services.AuthSecurityService.Recovery.*;
+import app.Auth.Flow.Services.AuthSecurityService.Recovery.SelectUserForRecovery;
+import app.Auth.Flow.Services.AuthSecurityService.Recovery.ValidateRecoveryKey;
 import app.Auth.Flow.Services.PasswordService.PasswordService;
 import app.Repository.AuthRepository.Recovery.GetRecoveryKeyHash;
 import app.Repository.AuthRepository.Recovery.SelectUserForRecover;
@@ -14,8 +14,9 @@ public class RecoveryFlow {
 
     public void SystemAccounts(Scanner scanner) {
         System.out.println("[INFO] You can now Reset your Password");
-        RecoveryCheck validate = new RecoveryCheck();
+        ValidateRecoveryKey validate = new ValidateRecoveryKey();
         validate.keyValues(scanner);
+
 
         String recoveryKeyUser = validate.getEnteredHashByUser();
 

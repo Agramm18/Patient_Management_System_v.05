@@ -1,4 +1,4 @@
-package app.Auth.Flow.Services.AuthSecurityService;
+package app.Auth.Flow.Services.AuthSecurityService.Recovery;
 
 import app.Repository.AuthRepository.Recovery.FindRecoverableUser;
 import org.mindrot.jbcrypt.BCrypt;

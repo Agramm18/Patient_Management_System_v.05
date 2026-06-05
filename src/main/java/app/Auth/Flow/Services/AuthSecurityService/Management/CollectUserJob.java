@@ -1,4 +1,4 @@
-package app.Auth.Flow.Services.AuthSecurityService;
+package app.Auth.Flow.Services.AuthSecurityService.Management;
 
 
 /*
@@ -7,5 +7,5 @@ package app.Auth.Flow.Services.AuthSecurityService;
     later it will collect the job that the user requested
 */
 
-public class SelectJob {
+public class CollectUserJob {
 }

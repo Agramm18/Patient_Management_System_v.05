@@ -2,7 +2,7 @@ package app.Auth.Flow.Services.LoginService;
 
 import java.util.Scanner;
 
-import app.Auth.Flow.Services.AuthSecurityService.SelectDepartment;
+import app.Auth.Flow.Services.AuthSecurityService.Management.CollectUserDepartment;
 import app.CLIText.Menus.Departments.DepartmentMenu;
 import app.CLIText.Menus.DepartmentJobs.*;
 import app.Repository.AuthRepository.Management.HasAssignedDepartment;
@@ -36,7 +36,7 @@ public class FirstLogin {
 
         System.out.println("\n[INFO] Please setup an Department");
 
-        SelectDepartment choose = new SelectDepartment();
+        CollectUserDepartment choose = new CollectUserDepartment();
         choose.department(scanner);
 
         int department = choose.getSelectedDepartment();

@@ -1,4 +1,4 @@
-package app.Auth.Flow.Services.AuthSecurityService;
+package app.Auth.Flow.Services.AuthSecurityService.Audit;
 
 /*
     This part is to collect the logs for the DB Table login_logs

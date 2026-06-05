@@ -3,7 +3,7 @@ package app.Auth.Flow.Services.LoginService;
 import java.sql.SQLException;
 import java.util.Scanner;
 
-import app.Auth.Flow.Services.AuthSecurityService.CollectLogs;
+import app.Auth.Flow.Services.AuthSecurityService.Audit.CollectLogs;
 import app.Auth.Flow.Services.PasswordService.PasswordService;
 import app.Repository.AuthRepository.Management.CountFailedLoginAttempts;
 import app.Repository.AuthRepository.ExecutePWSDPolicy;
