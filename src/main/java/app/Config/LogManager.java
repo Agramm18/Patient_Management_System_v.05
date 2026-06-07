@@ -51,7 +51,12 @@ public class LogManager {
         MESSAGE,
 
         SYSTEM_WARN,
-        SYSTEM_INFO
+        SYSTEM_INFO,
+
+        SECURITY_INFO,
+        SECURITY_SUCCESS,
+        SECURITY_FAILED,
+        SECURITY_WARN
     }
 
     public static void log(LogType type, String logMessage) {
@@ -79,6 +84,11 @@ public class LogManager {
                 CONFIG.info(logMessage);
                 break;
 
+
+            case SECURITY_INFO:
+                SECURITY.info(logMessage);
+                break;
+
             //Success Logs
             case SQL_OK:
                 SQL.info(logMessage);
@@ -94,6 +104,11 @@ public class LogManager {
 
             case AUTH_SUCCESS:
                 AUTH.info(logMessage);
+                break;
+
+
+            case SECURITY_SUCCESS:
+                SECURITY.info(logMessage);
                 break;
 
             //Error Logs
@@ -113,6 +128,10 @@ public class LogManager {
                 AUTH.error(logMessage);
                 break;
 
+            case SECURITY_WARN:
+            case SECURITY_FAILED:
+                SECURITY.warn(logMessage);
+                break;
 
             //Other Errors
             case ACCOUNT_STATUS_PROBLEM:

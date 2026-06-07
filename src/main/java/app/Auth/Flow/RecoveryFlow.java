@@ -9,6 +9,8 @@ import app.Auth.Flow.Services.PasswordService.PasswordService;
 import app.Repository.AuthRepository.Recovery.GetRecoveryKeyHash;
 import app.Repository.AuthRepository.Recovery.SelectUserForRecover;
 import app.Repository.AuthRepository.Password.UpdateSystemAccountPassword;
+import app.Config.LogManager;
+import app.Controller.*;
 
 public class RecoveryFlow {
     private int RETRY_COUNT = 0;
@@ -17,7 +19,6 @@ public class RecoveryFlow {
     public void SystemAccounts(Scanner scanner) {
         while (true) {
             try {
-                System.out.println("[INFO] You can now Reset your Password");
                 ValidateRecoveryKey validate = new ValidateRecoveryKey();
                 validate.keyValues(scanner);
 
@@ -55,16 +56,16 @@ public class RecoveryFlow {
                     break;
                 } else {
                     this.RETRY_COUNT++;
-                    System.out.println("[INFO] Total Retrys: " + this.RETRY_COUNT);
+                    LogManager.log(LogManager.LogType.SECURITY_INFO, "Total Retry: " + this.RETRY_COUNT);
                     if (this.RETRY_COUNT >= this.MAX_RETRYS) {
-                        throw new IllegalStateException("[ERROR] Retry limit reached please try again");
+                        throw new IllegalStateException("Retry limit reached please try again");
                     }
-                    throw new IllegalArgumentException(("[ERROR] The Key is wrong"));
+                    throw new IllegalArgumentException(("The Key is wrong"));
                 }
             } catch (IllegalArgumentException error) {
-                System.out.println(error.getMessage());
+                LogManager.log(LogManager.LogType.INVALID_INPUT, error.getMessage());
             } catch(IllegalStateException error) {
-                System.out.println(error.getMessage());
+                LogManager.log(LogManager.LogType.SECURITY_WARN, error.getMessage());
                 break;
             }
         }

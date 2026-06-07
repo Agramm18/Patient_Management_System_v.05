@@ -20,8 +20,6 @@ public class ValidateRecoveryKey {
             throw new IllegalStateException("Please run the program only in the Terminal");
         }
 
-
-
         while (true) {
             try {
 
@@ -41,10 +39,11 @@ public class ValidateRecoveryKey {
                 break;
 
             } catch (IllegalArgumentException error) {
-                LogManager.log(LogType.CONFIG_FAILED, error.getMessage());
+                LogManager.log(LogType.INVALID_INPUT, error.getMessage());
+            } catch (IllegalStateException error) {
+                LogManager.log(LogType.SYSTEM_WARN, error.getMessage());
             }
         }
-
     }
 
     public String getEnteredHashByUser() {

@@ -23,7 +23,7 @@ public class AuthController {
 
     public void verifyAccountStatus(Scanner scanner) {
         String accountStatusSTR;
-        LogManager.log(LogType.MESSAGE, "Running through the Registration or Login process");
+        LogManager.log(LogType.AUTH_INFO, "Running through the Registration or Login process");
 
         while (true) {
             try {
@@ -49,6 +49,7 @@ public class AuthController {
                         login.user(scanner);
 
                     } else if (userValue == 3) {
+                        LogManager.log(LogType.SECURITY_INFO, "Starting Recovery");
                         RecoveryFlow recover = new RecoveryFlow();
                         recover.SystemAccounts(scanner);
                     } else {
@@ -60,9 +61,9 @@ public class AuthController {
                 }
 
             } catch (NumberFormatException numberError) {
-                System.out.println("[ERROR] Please type in a valid number");
+                LogManager.log(LogType.INVALID_INPUT, "Please type in a valid number");
             } catch (IllegalArgumentException error) {
-                LogManager.log(LogType.SYSTEM_WARN, error.getMessage());
+                LogManager.log(LogType.INVALID_INPUT, error.getMessage());
             }
         }
     }

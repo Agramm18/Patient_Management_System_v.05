@@ -11,7 +11,7 @@ import app.Config.LogManager.LogType;
 public class CheckKeyStatus {
 
     public boolean Value(String recoveryKeyUser, String storedHashinDB) {
-        LogManager.log(LogType.MESSAGE, "Check if the value matches the key");
+        LogManager.log(LogType.SECURITY_INFO, "Check if the value matches the key");
 
         if (BCrypt.checkpw(recoveryKeyUser, storedHashinDB)) {
             LogManager.log(LogType.CONFIG_SUCCESS, "The user now has access to change the password");
@@ -19,7 +19,7 @@ public class CheckKeyStatus {
             display.systemAccounts();
             return true;
         } else {
-            LogManager.log(LogType.CONFIG_FAILED, "The key is wrong, please try again");
+            LogManager.log(LogType.SECURITY_WARN, "The key is wrong, please try again");
             return false;
         }
     }
