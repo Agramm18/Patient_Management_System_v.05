@@ -1,45 +1,33 @@
 # Patient Management UML
 
-Last synchronized: 2026-06-03.
+Last synchronized: 2026-06-07.
 
-This Markdown file contains the current Mermaid class diagram for Patient Management System V5.01. It mirrors `patient-management-uml.mmd` and is intended for GitHub Markdown rendering.
+This diagram shows the active architecture and the most important placeholders in Patient Management System V5.01. The raw Mermaid source is maintained in `patient-management-uml.mmd`.
 
-## Scope
+The diagram reflects:
 
-The diagram reflects the current Java console application state:
+- Controller-driven configuration and authentication
+- Registration, login, password, recovery, and pending-user flows
+- JDBC repository relationships
+- Persisted failed-login status policy
+- Partial SLF4J and Logback migration
+- Current placeholders and known recovery/access boundaries
 
-- Startup flow through `Main`, `BootConfigService`, `FrontController`, and `ConfigController`
-- Active authentication route through `AuthController`
-- Registration, login, password-change, and recovery flows
-- Recovery-key hashing, storage, validation, and password-hash reset baseline
-- Pending-user first-login access request groundwork
-- Repository classes for accounts, login attempts, recovery keys, and access requests
-- Placeholder areas for menu routing, service/UI layers, job selection, role integration, and account status policy persistence
-
-## Current Diagram
-
-```mermaidclassDiagram
-  %% Patient Management System V5.01 - current Java class diagram
-  %% Last synchronized: 2026-06-03
-  %% Environment setup: docs/setup/ENV_SETUP.md
-  %% Database setup: docs/setup/DB_SETUP.md
+```mermaid
+classDiagram
+  %% Patient Management System V5.01
+  %% Last synchronized: 2026-06-07
 
   direction LR
 
-  namespace app {
+  namespace BootstrapAndControllers {
     class Main {
       +main(args) void
     }
-  }
-
-  namespace Bootstrap {
     class BootConfigService {
       +displayLoader() void
       +SystemConfig(scanner) void
     }
-  }
-
-  namespace Controller {
     class FrontController {
       +navigateSubController(request, scanner) boolean
     }
@@ -69,15 +57,14 @@ The diagram reflects the current Java console application state:
     }
   }
 
-  namespace Config {
+  namespace Configuration {
     class EnvValidationService {
-      -String dbHost
-      -int dbPortINT
-      -String dbName
-      -String dbUser
-      -String dbPWSD
       +envStatus() boolean
-      +setEnvValues(Host, port, Name, User, PWSD) void
+      +getHost() String
+      +getPort() int
+      +getDBName() String
+      +getUser() String
+      +getPassword() String
     }
     class SQLValidationService {
       +DBConnection() boolean
@@ -91,19 +78,20 @@ The diagram reflects the current Java console application state:
       +getConnection() Connection
     }
     class HandleRecoveryKey {
-      -String recoveryKeyPlain
-      -String recoveryKeyHashed
       +plainKey() void
       +hashedKey() void
       +getRecoveryKeyHashed() String
     }
-    class CheckForDefaultAccounts {
-      +dbAccounts() boolean
-      +validateResults() boolean
+    class LogManager {
+      <<utility>>
+      +log(type, message) void
+    }
+    class LogType {
+      <<enumeration>>
     }
   }
 
-  namespace AuthFlow {
+  namespace AuthenticationFlows {
     class RegistrationFlow {
       +user(scanner) void
     }
@@ -118,7 +106,7 @@ The diagram reflects the current Java console application state:
     }
   }
 
-  namespace AuthServices {
+  namespace AuthenticationServices {
     class RegistrationService {
       +userAccunt(scanner) void
       +getUserName() String
@@ -137,134 +125,103 @@ The diagram reflects the current Java console application state:
       +getEnteredPWSD() String
     }
     class LoginVerification {
-      +loggedUser(Username, PWSD, scanner) AuthLogResult
+      +loggedUser(username, password, scanner) AuthLogResult
+    }
+    class AuthLogResult {
+      +isSuccess() boolean
+      +getFailureReason() String
     }
     class FirstLogin {
-      +firstSetup(Username, scanner) void
+      +firstSetup(username, scanner) void
     }
-    class RecoveryCheck {
+    class CollectUserDepartment {
+      +department(scanner) void
+      +getSelectedDepartment() int
+    }
+    class CollectUserJob {
+      <<placeholder>>
+    }
+    class CollectUserRole {
+      +requestRoles(scanner) void
+    }
+    class AccountPolicy {
+      <<placeholder>>
+    }
+    class ValidateRecoveryKey {
       +keyValues(scanner) void
       +getEnteredHashByUser() String
     }
     class CheckKeyStatus {
-      +Value(recoveryKeyUser, storedHashinDB) boolean
+      +Value(enteredKey, storedHash) boolean
     }
     class SelectUserForRecovery {
       +username(scanner) String
       +getRecoverUsername() String
     }
-    class SelectDepartment {
-      +department(scanner) void
-      +getSelectedDepartment() int
-    }
-    class RoleValidation {
-      +requestRoles(scanner) void
-    }
-    class SelectJob {
-      <<placeholder>>
-    }
-    class AccountPolicy {
-      <<placeholder>>
-    }
-    class AuthLogResult {
-      <<value object>>
-      +isSuccess() boolean
-      +getFailureReason() String
-    }
   }
 
-  namespace RepositoryAuth {
-    class CheckRoles {
-      +userRole(Username) boolean
+  namespace Repositories {
+    class CheckForDefaultAccounts {
+      +dbAccounts() boolean
+      +validateResults() boolean
     }
-    class CheckStatusForDepartment {
-      +status(Username) boolean
-    }
-    class CheckSystemAccounts {
-      +checkUserStatus(Username) boolean
-    }
-    class CollectRecoveryKey {
-      +key() void
-      +getDbValue() String
-    }
-    class CountFailedLoginAttempts {
-      +Logs(Username) void
-      +getRETRY_COUNT_24_H() int
-    }
-    class ExecutePWSDPolicy {
-      <<placeholder>>
-      +locked(Username) void
-      +quarantine(Username) void
-      +suspicious(Username) void
-    }
-    class HandleAccessManagement {
-      +accessManagement(Username, Department) void
-    }
-    class SelectUserForRecover {
-      +inDB(Username) boolean
-    }
-    class SetNewStatus {
-      <<placeholder>>
-    }
-    class ShowSystemAccounts {
-      +systemAccounts() void
-    }
-    class UpdateSystemAccount {
-      +sqlQuerry(Username, password) void
-    }
-    class UpdateUserPWSD {
-      +dbValues(Username, hashedPWSD) boolean
-    }
-  }
-
-  namespace RepositoryConfig {
     class CreateDefaultAccounts {
-      +defaultAccounts(CreateDefaultLocalAdmin, CreateDefaultAdmin) boolean
+      +defaultAccounts(createLocalAdmin, createAdmin) boolean
     }
     class SetRecoveryKey {
       +keyValue(recoveryKey) void
     }
-  }
-
-  namespace RepositoryLogin {
+    class CreateAccount {
+      +newAccount(username, email, phone, hash) void
+    }
     class CheckUserInDB {
       +checkUserInDB(username) boolean
-      +checkPWSD(pwsd, username) boolean
+      +checkPWSD(password, username) boolean
       +checkUserStatus(username) String
     }
-  }
-
-  namespace RepositoryLogs {
     class LoginAttemptRepository {
-      +loginAttempts(Username, isSuccess, failureReason) void
+      +loginAttempts(username, success, reason) void
+    }
+    class CountFailedLoginAttempts {
+      +Logs(username) int
+    }
+    class ExecutePWSDPolicy {
+      +locked(username) void
+      +suspicious(username) void
+      +quarantine(username) void
+    }
+    class UpdateUserPassword {
+      +dbValues(username, hash) boolean
+    }
+    class CreateAccessRequest {
+      +accessManagement(username, department) void
+    }
+    class HasAssignedDepartment {
+      +status(username) boolean
+    }
+    class GetRecoveryKeyHash {
+      +key() void
+      +getDbValue() String
+    }
+    class FindRecoverableUser {
+      +systemAccounts() void
+    }
+    class SelectUserForRecover {
+      +inDB(username) boolean
+    }
+    class UpdateSystemAccountPassword {
+      +sqlQuerry(username, password) void
+    }
+    class SetNewStatus {
+      <<placeholder>>
     }
   }
 
-  namespace RepositoryRegistration {
-    class CreateAccount {
-      +newAccount(Username, Email, PhoneNumber, HashedPWSD) void
-    }
-  }
-
-  namespace MenusAndText {
-    class AuthMenu {
-      +authMenu() void
-    }
-    class roleMenu {
-      +roles() void
-    }
-    class DepartmentMenu {
-      +departments() void
-    }
-    class DepartmentJobMenus {
-      <<menu group>>
-    }
-    class DisplayMessages {
-      <<message group>>
-    }
-  }
-
-  namespace External {
+  namespace MenusAndExternal {
+    class AuthMenu
+    class DepartmentMenu
+    class DepartmentJobMenus
+    class roleMenu
     class Scanner {
       <<java.util>>
     }
@@ -277,124 +234,114 @@ The diagram reflects the current Java console application state:
     class BCrypt {
       <<jbcrypt>>
     }
-    class Connection {
-      <<java.sql>>
+    class SLF4J {
+      <<logging API>>
     }
-    class PreparedStatement {
-      <<java.sql>>
+    class Logback {
+      <<logging backend>>
     }
-    class ResultSet {
-      <<java.sql>>
-    }
-    class DatabaseSchema {
-      <<reference>>
+    class MySQL {
+      <<database>>
     }
   }
 
   Main ..> BootConfigService : starts
   Main ..> Scanner : creates
-  BootConfigService ..> FrontController : creates dispatcher
+  BootConfigService ..> FrontController : creates
   BootConfigService ..> AuthController : creates
   BootConfigService ..> ConfigController : creates
-  BootConfigService ..> MenuController : creates placeholder
-  BootConfigService ..> ServiceController : creates placeholder
-  BootConfigService ..> uiController : creates placeholder
-  BootConfigService ..> RequestType : CONFIG then AUTH
+  BootConfigService ..> MenuController : creates
+  BootConfigService ..> ServiceController : creates
+  BootConfigService ..> uiController : creates
+  FrontController ..> RequestType : routes CONFIG and AUTH
+  FrontController *-- ConfigController
+  FrontController *-- AuthController
 
-  FrontController *-- AuthController : holds
-  FrontController *-- ConfigController : holds
-  FrontController *-- MenuController : holds
-  FrontController *-- ServiceController : holds
-  FrontController *-- uiController : holds
-  FrontController ..> RequestType : routes
-  FrontController ..> Scanner : passes input
+  ConfigController ..> EnvValidationService
+  ConfigController ..> SQLValidationService
+  ConfigController ..> DBManager
+  ConfigController ..> HandleRecoveryKey
+  ConfigController ..> SetRecoveryKey
+  ConfigController ..> CheckForDefaultAccounts
+  EnvValidationService ..> Dotenv
+  SQLValidationService ..> MySQL : validates connection
+  DBManager ..> MySQL : opens connections
+  HandleRecoveryKey ..> Dotenv
+  HandleRecoveryKey ..> BCrypt : hashes key
+  CheckForDefaultAccounts ..> CreateDefaultAccounts
 
-  ConfigController ..> EnvValidationService : validates .env
-  ConfigController ..> SQLValidationService : validates DB connection
-  ConfigController ..> DBManager : initializes runtime DB config
-  ConfigController ..> HandleRecoveryKey : hashes RECOVERY_KEY
-  ConfigController ..> SetRecoveryKey : stores recovery hash
-  ConfigController ..> CheckForDefaultAccounts : checks starter accounts
+  AuthController ..> AuthMenu
+  AuthController ..> RegistrationFlow
+  AuthController ..> LoginFlow
+  AuthController ..> RecoveryFlow
 
-  EnvValidationService ..> Dotenv : loads values
-  SQLValidationService ..> Connection : tests DB connection
-  DBManager ..> Connection : opens configured connections
-  HandleRecoveryKey ..> Dotenv : reads RECOVERY_KEY
-  HandleRecoveryKey ..> BCrypt : hashpw()
-  SetRecoveryKey ..> DBManager : getConnection()
-  SetRecoveryKey ..> PreparedStatement : upserts recovery key
-  SetRecoveryKey ..> DatabaseSchema : writes recovery_keys
-  CheckForDefaultAccounts ..> CreateDefaultAccounts : creates missing accounts
-  CreateDefaultAccounts ..> BCrypt : hashes starter passwords
-  CreateDefaultAccounts ..> DatabaseSchema : writes accounts
+  RegistrationFlow ..> RegistrationService
+  RegistrationFlow ..> CreateAccount
+  RegistrationService ..> PasswordFlow
+  PasswordFlow ..> PasswordService
+  PasswordService ..> Console
+  PasswordService ..> BCrypt
 
-  AuthController ..> AuthMenu : displays options
-  AuthController ..> RegistrationFlow : option 1
-  AuthController ..> LoginFlow : option 2
-  AuthController ..> RecoveryFlow : option 3
-  AuthController ..> Scanner : reads menu input
+  LoginFlow ..> LoginInputCollector
+  LoginFlow ..> LoginVerification
+  LoginFlow ..> LoginAttemptRepository
+  LoginInputCollector ..> Console
+  LoginVerification ..> AuthLogResult
+  LoginVerification *-- CheckUserInDB
+  LoginVerification ..> FirstLogin
+  LoginVerification ..> PasswordService
+  LoginVerification ..> UpdateUserPassword
+  LoginVerification ..> CountFailedLoginAttempts
+  LoginVerification ..> ExecutePWSDPolicy
+  CheckUserInDB ..> BCrypt
 
-  RegistrationFlow ..> RegistrationService : collects profile data
-  RegistrationFlow ..> CreateAccount : persists account
-  RegistrationService ..> PasswordFlow : creates password hash
-  PasswordFlow ..> PasswordService : validates and hashes
-  PasswordService ..> Console : hidden password input
-  PasswordService ..> BCrypt : hashpw()
-  CreateAccount ..> DatabaseSchema : writes pending account
+  FirstLogin ..> DepartmentMenu
+  FirstLogin ..> CollectUserDepartment
+  FirstLogin ..> DepartmentJobMenus
+  FirstLogin ..> HasAssignedDepartment
+  FirstLogin ..> CreateAccessRequest
+  CollectUserRole ..> roleMenu
 
-  LoginFlow ..> LoginInputCollector : collects credentials
-  LoginFlow ..> LoginVerification : verifies credentials
-  LoginFlow ..> LoginAttemptRepository : logs attempt
-  LoginInputCollector ..> Console : hidden password input
-  LoginVerification *-- CheckUserInDB : repository field
-  LoginVerification ..> FirstLogin : pending account setup
-  LoginVerification ..> PasswordService : password-change account
-  LoginVerification ..> UpdateUserPWSD : updates starter password
-  LoginVerification ..> CountFailedLoginAttempts : counts failures
-  LoginVerification ..> ExecutePWSDPolicy : threshold hooks
-  CheckUserInDB ..> BCrypt : checkpw()
-  CheckUserInDB ..> DatabaseSchema : reads accounts and status
-  LoginAttemptRepository ..> DatabaseSchema : writes login_attempts
+  RecoveryFlow ..> ValidateRecoveryKey
+  RecoveryFlow ..> GetRecoveryKeyHash
+  RecoveryFlow ..> CheckKeyStatus
+  RecoveryFlow ..> SelectUserForRecovery
+  RecoveryFlow ..> SelectUserForRecover
+  RecoveryFlow ..> PasswordService
+  RecoveryFlow ..> UpdateSystemAccountPassword
+  ValidateRecoveryKey ..> Console
+  CheckKeyStatus ..> BCrypt
+  CheckKeyStatus ..> FindRecoverableUser
 
-  RecoveryFlow ..> RecoveryCheck : reads recovery key
-  RecoveryFlow ..> CollectRecoveryKey : loads stored hash
-  RecoveryFlow ..> CheckKeyStatus : validates key
-  RecoveryFlow ..> SelectUserForRecovery : collects target account
-  RecoveryFlow ..> SelectUserForRecover : checks account exists
-  RecoveryFlow ..> PasswordService : creates new password hash
-  RecoveryFlow ..> UpdateSystemAccount : updates password hash
-  RecoveryCheck ..> Console : hidden key input
-  CheckKeyStatus ..> BCrypt : checkpw()
-  CheckKeyStatus ..> ShowSystemAccounts : displays system accounts
-  CollectRecoveryKey ..> DatabaseSchema : reads recovery_keys
-  SelectUserForRecover ..> DatabaseSchema : reads accounts
-  UpdateSystemAccount ..> DatabaseSchema : updates accounts.password_hash
+  LogManager ..> LogType
+  LogManager ..> SLF4J
+  SLF4J ..> Logback
 
-  FirstLogin ..> DepartmentMenu : shows departments
-  FirstLogin ..> SelectDepartment : validates department
-  FirstLogin ..> DepartmentJobMenus : displays job menu placeholders
-  FirstLogin ..> CheckStatusForDepartment : system department guard
-  FirstLogin ..> HandleAccessManagement : stores request
-  SelectDepartment ..> Scanner : reads department id
-  RoleValidation ..> roleMenu : shows roles
-  RoleValidation ..> Scanner : reads role id
-  HandleAccessManagement ..> DatabaseSchema : writes access_management
+  SetRecoveryKey ..> DBManager
+  CreateDefaultAccounts ..> DBManager
+  CreateAccount ..> DBManager
+  CheckUserInDB ..> DBManager
+  LoginAttemptRepository ..> DBManager
+  CountFailedLoginAttempts ..> DBManager
+  ExecutePWSDPolicy ..> DBManager
+  UpdateUserPassword ..> DBManager
+  CreateAccessRequest ..> DBManager
+  GetRecoveryKeyHash ..> DBManager
+  FindRecoverableUser ..> DBManager
+  SelectUserForRecover ..> DBManager
+  UpdateSystemAccountPassword ..> DBManager
 
-  ExecutePWSDPolicy ..> SetNewStatus : intended status update path
-
-  note for DatabaseSchema "Schema, required IDs, seed data, migrations, and verification SQL are documented in docs/setup/DB_SETUP.md."
-  note for FrontController "Current switch routes CONFIG and AUTH. MENU, SERVICE, UI, and EXIT are reserved."
-  note for RecoveryFlow "Recovery baseline is implemented. Current update changes password_hash only."
-  note for HandleAccessManagement "Current request stores selected department and default job/role values."
-  note for ExecutePWSDPolicy "Threshold methods are placeholders and do not persist status changes yet."
-  note for AuthLogResult "Source class: app.Auth.Flow.Services.AuthSecurityService.Audit.CollectLogs. Renamed in this diagram to avoid collision."
-  note for LoginAttemptRepository "Source class: app.Repository.logsRepository.CollectLogs. Renamed in this diagram to avoid collision."
+  note for FrontController "Only CONFIG and AUTH are routed."
+  note for LoginAttemptRepository "Source class: app.Repository.logsRepository.CollectLogs"
+  note for AuthLogResult "Source class: app.Auth.Flow.Services.AuthSecurityService.Audit.CollectLogs"
+  note for ExecutePWSDPolicy "Persists locked, suspicious, and quarantine status IDs."
+  note for CreateAccessRequest "Stores selected department with default job and role."
+  note for LogManager "Logging migration is partial and no logback.xml exists."
+  note for SelectUserForRecover "Final lookup currently accepts any existing account."
 ```
 
-## Notes
+## Diagram Boundaries
 
-- `CONFIG` and `AUTH` are the active controller routes.
-- `MENU`, `SERVICE`, `UI`, and `EXIT` are reserved controller phases.
-- Recovery baseline is implemented for the current stage, but currently updates only `accounts.password_hash`.
-- Access requests currently store selected department plus default job and role values.
-- Failed-login status policy methods are placeholders and do not persist status changes yet.
+- The diagram groups the many CLI message and department-job menu classes.
+- Database tables are represented by the MySQL dependency rather than individual table classes.
+- `AuthLogResult` and `LoginAttemptRepository` are aliases used to distinguish two source classes both named `CollectLogs`.

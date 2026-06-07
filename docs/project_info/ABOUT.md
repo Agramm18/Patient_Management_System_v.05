@@ -22,7 +22,7 @@ The project currently concentrates on the foundation required before patient-man
 
 The first version of the project was written in Python while learning programming fundamentals and Object-Oriented Programming. That version focused on input handling and basic application logic.
 
-The Java rebuild started during training as a Fachinformatiker fuer Anwendungsentwicklung. The goal of the rebuild is to improve the architecture, persistence model, security behavior, and maintainability while gaining practical experience with Java and enterprise-oriented development concepts.
+The Java rebuild started during vocational training in application development. The goal of the rebuild is to improve the architecture, persistence model, security behavior, and maintainability while gaining practical experience with Java and enterprise-oriented development concepts.
 
 The original Python project is available at:
 
