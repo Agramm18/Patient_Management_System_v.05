@@ -1,5 +1,6 @@
 package app.Config;
 
+import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,8 +12,9 @@ public class LogManager {
     private static final Logger ACCESS = LoggerFactory.getLogger("ACCESS");
     private static final Logger systemLogger = LoggerFactory.getLogger("SYSTEM");
     private static final Logger DATABASE = LoggerFactory.getLogger("DATABASE");
-    private static final Logger SYSTEM = LoggerFactory.getLogger("MESSAGE");
+    private static final Logger SYSTEM = LoggerFactory.getLogger("SYSTEM");
     private static final Logger SQL = LoggerFactory.getLogger("SQL");
+    private static final Logger CREDENTIALS = LoggerFactory.getLogger("CREDENTIALS");
 
     public enum LogType {
         SQL_EXCEPTION,
@@ -21,13 +23,13 @@ public class LogManager {
         SQL_DEBUG,
         SQL_INFO,
 
-        ACCOUNT_STATUS_PROBLEM,
-
         RECOVERY_FAILED,
         RECOVERY_SUCCESS,
+        RECOVERY_INFO,
 
         BOOT_FAILED,
         BOOT_SUCCESS,
+        BOOT_INFO,
 
         CONFIG_FAILED,
         CONFIG_SUCCESS,
@@ -35,11 +37,15 @@ public class LogManager {
 
         AUTH_FAILED,
         AUTH_SUCCESS,
+        AUTH_INFO,
 
         INVALID_INPUT,
         INVALID_PASSWORD,
         MISSING_INPUT,
         BLANK_INPUT,
+
+        ACCOUNT_STATUS_PROBLEM,
+        ACCOUNT_USERNAME_NOT_FOUND,
 
         MESSAGE,
 
@@ -49,56 +55,18 @@ public class LogManager {
     public static void log(LogType type, String logMessage) {
 
         switch (type) {
-            case SQL_EXCEPTION:
-                DATABASE.error(logMessage);
+
+            //Info Logs
+            case SQL_INFO:
+                SQL.info(logMessage);
                 break;
 
-            case SQL_OK:
-                DATABASE.info(logMessage);
-                break;
-
-            case SQL_DEBUG:
-                DATABASE.debug(logMessage);
-                break;
-
-            case BOOT_FAILED:
-                systemLogger.error(logMessage);
-                break;
-
-            case RECOVERY_FAILED:
-            case ACCOUNT_STATUS_PROBLEM:
-                SECURITY.warn(logMessage);
-                break;
-
-            case RECOVERY_SUCCESS:
-                SECURITY.info(logMessage);
-                break;
-
-            case AUTH_FAILED:
-                AUTH.warn(logMessage);
-
-            case MISSING_INPUT:
-            case INVALID_INPUT:
-            case BLANK_INPUT:
-                systemLogger.warn(logMessage);
-                break;
-
-            case AUTH_SUCCESS:
-            case BOOT_SUCCESS:
-            case CONFIG_SUCCESS:
-                systemLogger.info(logMessage);
-                break;
-
-            case CONFIG_FAILED:
-                CONFIG.error(logMessage);
-                break;
-
-            case INVALID_PASSWORD:
-            case USERNAME_NOT_FOUND:
-                AUTH.warn(logMessage);
+            case RECOVERY_INFO:
+                AUTH.info(logMessage);
                 break;
 
             case MESSAGE:
+            case BOOT_INFO:
                 SYSTEM.info(logMessage);
                 break;
 
@@ -106,12 +74,55 @@ public class LogManager {
                 CONFIG.info(logMessage);
                 break;
 
-            case SYSTEM_WARN:
+            //Success Logs
+            case SQL_OK:
+                SQL.info(logMessage);
+                break;
+
+            case RECOVERY_SUCCESS:
+                SECURITY.info(logMessage);
+                break;
+
+            case BOOT_SUCCESS:
+                SYSTEM.info(logMessage);
+                break;
+
+            case AUTH_SUCCESS:
+                AUTH.info(logMessage);
+                break;
+
+            //Error Logs
+            case SQL_EXCEPTION:
+                SQL.error(logMessage);
+                break;
+
+            case RECOVERY_FAILED:
+                SECURITY.error(logMessage);
+                break;
+
+            case BOOT_FAILED:
                 SYSTEM.warn(logMessage);
                 break;
 
-            case SQL_INFO:
-                SQL.info(logMessage);
+            case AUTH_FAILED:
+                AUTH.error(logMessage);
+                break;
+
+
+            //Other Errors
+            case ACCOUNT_STATUS_PROBLEM:
+                DATABASE.error(logMessage);
+                break;
+
+            case ACCOUNT_USERNAME_NOT_FOUND:
+                DATABASE.error(logMessage);
+                break;
+
+            case INVALID_INPUT:
+            case INVALID_PASSWORD:
+            case MISSING_INPUT:
+            case BLANK_INPUT:
+                CREDENTIALS.error(logMessage);
                 break;
         }
     }
