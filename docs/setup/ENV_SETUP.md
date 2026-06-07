@@ -1,86 +1,122 @@
 # Environment Setup
 
-Last synchronized: 2026-06-03.
+Last synchronized: 2026-06-07.
 
-This file documents the required `.env` configuration for the Patient Management System V5.01 project.
+This document describes the `.env` values used by the current Java implementation.
 
 ## File Location
 
-Create a file named `.env` in the project root, next to `pom.xml`.
+Create `.env` in the project root next to `pom.xml`.
 
 ```text
-Patient_Management_System_v.05/
+Patient_Management_V5.01/
 |-- .env
 |-- pom.xml
 |-- src/
 `-- docs/
 ```
 
-Do not commit real local credentials, production credentials, or bootstrap secrets.
+The file is ignored by Git. Do not commit credentials, starter passwords, bootstrap keys, or recovery keys.
 
-## Required Variables
-
-Use the following template:
+## Current Template
 
 ```env
 DB_HOST=localhost
 DB_PORT=3306
 DB_NAME=patient_management_v5
 DB_USER=your_mysql_user
-DB_PWSD=your_mysql_password
+DB_PASSWORD=your_mysql_password
 
 LOCAL_ADMIN_NAME=local_admin
-LOCAL_ADMIN_PWSD=change_this_default_password
+LOCAL_ADMIN_PASSWORD=replace_with_a_strong_starter_password
 LOCAL_ADMIN_EMAIL=local_admin@example.com
 
 ADMIN_NAME=admin
-ADMIN_PWSD_DEFAULT=change_this_default_password
+ADMIN_PASSWORD_DEFAULT=replace_with_a_strong_starter_password
+ADMIN_PWSD_DEFAULT=replace_with_the_same_starter_password
 ADMIN_EMAIL_DEFAULT=admin@example.com
 
-BOOTSTRAP_KEY=change_this_bootstrap_key
-RECOVERY_KEY=change_this_recovery_key
+BOOTSTRAP_KEY=replace_with_a_bootstrap_key
+RECOVERY_KEY=replace_with_a_recovery_key
 ```
+
+## Required Values
+
+`EnvValidationService` currently requires:
+
+- `DB_HOST`
+- `DB_PORT`
+- `DB_NAME`
+- `DB_USER`
+- `DB_PASSWORD`
+- `LOCAL_ADMIN_NAME`
+- `LOCAL_ADMIN_PASSWORD`
+- `LOCAL_ADMIN_EMAIL`
+- `ADMIN_NAME`
+- `ADMIN_PASSWORD_DEFAULT`
+- `ADMIN_EMAIL_DEFAULT`
+- `BOOTSTRAP_KEY`
+- `RECOVERY_KEY`
+
+`DB_PORT` must be numeric. Every other required value must exist and must not be blank.
+
+## Known Admin Password-Key Mismatch
+
+The current implementation contains an environment-key inconsistency:
+
+- `EnvValidationService` validates `ADMIN_PASSWORD_DEFAULT`.
+- `CreateDefaultAccounts` currently reads `ADMIN_PWSD_DEFAULT` when it creates the admin account.
+
+Until the code is aligned, define both values with the same password. This is a temporary compatibility requirement and is tracked in `../project_info/ToDo.md`.
 
 ## Database Values
 
-- `DB_HOST` is the hostname or IP address of the MySQL server.
-- `DB_PORT` must be numeric.
-- `DB_NAME` must match the database created in [DB_SETUP.md](./DB_SETUP.md).
-- `DB_USER` must have permission to connect to the configured database.
-- `DB_PWSD` is the password for `DB_USER`.
+- `DB_HOST` is the MySQL host name or IP address.
+- `DB_PORT` is the MySQL TCP port.
+- `DB_NAME` must match the database created in `DB_SETUP.md`.
+- `DB_USER` must be able to connect to the configured database.
+- `DB_PASSWORD` is the password for the configured MySQL user.
+
+Older documentation used `DB_PWSD`; that name is not read by the current code.
 
 ## Starter Account Values
 
-The default account values are used only when one or both starter accounts are missing from the database.
+Starter-account values are used only when an account with role `1` or role `2` is missing.
 
-- `LOCAL_ADMIN_NAME`, `LOCAL_ADMIN_PWSD`, and `LOCAL_ADMIN_EMAIL` are used for the `local_admin` starter account.
-- `ADMIN_NAME`, `ADMIN_PWSD_DEFAULT`, and `ADMIN_EMAIL_DEFAULT` are used for the `admin` starter account.
-- `BOOTSTRAP_KEY` is stored with starter accounts so bootstrap-created accounts can be identified later.
-- `RECOVERY_KEY` is used by the recovery flow for system-account password reset.
+- Local admin uses `LOCAL_ADMIN_NAME`, `LOCAL_ADMIN_PASSWORD`, and `LOCAL_ADMIN_EMAIL`.
+- Admin uses `ADMIN_NAME`, `ADMIN_PWSD_DEFAULT`, and `ADMIN_EMAIL_DEFAULT` during creation.
+- `BOOTSTRAP_KEY` is stored with created starter accounts.
+- Starter passwords are hashed with BCrypt before insert.
 
-Both starter account passwords are hashed before they are stored in the database.
+The starter-account values are still required during every startup because environment validation checks them even when both accounts already exist.
 
-## Recovery Key Value
+## Recovery Key
 
 `RECOVERY_KEY` is required during startup.
 
-Current runtime behavior:
+Current behavior:
 
-- `EnvValidationService` fails startup when `RECOVERY_KEY` is missing or blank.
-- `HandleRecoveryKey` reads the plain key from `.env`.
-- `HandleRecoveryKey` hashes the key with BCrypt.
-- `SetRecoveryKey` stores the hash in `recovery_keys` with `id = 1`.
-- Later startup runs update the same recovery-key row.
-- `RecoveryFlow` checks user input against the stored BCrypt hash before password reset.
+1. `HandleRecoveryKey` reads the plain value.
+2. The value is hashed with BCrypt.
+3. `SetRecoveryKey` inserts or updates `recovery_keys.id = 1`.
+4. Recovery input is checked against the stored hash.
 
-Do not reuse the database password, starter account passwords, or bootstrap key as the recovery key.
+The recovery hash changes on each startup because BCrypt creates a new salt, even when the plain key remains unchanged.
+
+Do not reuse database credentials, starter passwords, or the bootstrap key as the recovery key.
 
 ## Runtime Validation
 
-During startup, `EnvValidationService` checks that the `.env` file exists and that required values are present. `SQLValidationService` then builds the database connection configuration from the loaded values.
+Startup stops before authentication when:
 
-If environment validation, database connection validation, or global DB runtime initialization fails, startup stops before authentication begins.
+- `.env` is missing.
+- A required value is missing or blank.
+- `DB_PORT` is not numeric.
+- The test database connection fails.
+- `DBManager` receives invalid runtime values.
+
+Hidden password and recovery-key input requires a real terminal-backed `System.console()`. Running through an IDE configuration without a terminal can fail in authentication flows.
 
 ## Related Setup
 
-After creating `.env`, follow [DB_SETUP.md](./DB_SETUP.md) to create the development database, tables, and seed data.
+After creating `.env`, follow `DB_SETUP.md` to create and seed the database.

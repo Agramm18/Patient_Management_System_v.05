@@ -39,6 +39,7 @@ public class LogManager {
         AUTH_FAILED,
         AUTH_SUCCESS,
         AUTH_INFO,
+        AUTH_DEBUG,
 
         INVALID_INPUT,
         INVALID_PASSWORD,
@@ -52,6 +53,7 @@ public class LogManager {
 
         SYSTEM_WARN,
         SYSTEM_INFO,
+        SYSTEM_DEBUG,
 
         SECURITY_INFO,
         SECURITY_SUCCESS,
@@ -87,6 +89,10 @@ public class LogManager {
 
             case SECURITY_INFO:
                 SECURITY.info(logMessage);
+                break;
+
+            case AUTH_INFO:
+                AUTH.info(logMessage);
                 break;
 
             //Success Logs
@@ -148,6 +154,9 @@ public class LogManager {
             case BLANK_INPUT:
                 CREDENTIALS.error(logMessage);
                 break;
+
+            case AUTH_DEBUG:
+                AUTH.debug(logMessage);
         }
     }
 

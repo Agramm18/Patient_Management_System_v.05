@@ -1,143 +1,166 @@
 # Current Project Status
 
-Last synchronized: 2026-06-03.
+Last synchronized: 2026-06-07.
 
-Patient Management System V5.01 is currently a Java 21 console application. The active implementation focuses on application bootstrapping, local configuration validation, MySQL connectivity, account registration, login, starter account creation, password handling, login attempt logging, recovery-key based system-account password reset, and the first groundwork for pending-user access requests.
+Patient Management System V5.01 is currently a Java 21 console application focused on configuration, authentication, account security, recovery, and access-request foundations.
 
-The project is not a complete patient management system yet. Patient records, appointments, billing, treatment workflows, reporting, full administration workflows, a graphical UI, REST APIs, and deployment tooling are still outside the implemented runtime.
-
-## Active Scope
-
-The currently active runtime is:
+The project contains 67 Java source files. The active runtime is:
 
 ```text
-Main -> BootConfigService -> FrontController -> ConfigController -> AuthController
+Main
+-> BootConfigService
+-> FrontController
+-> ConfigController
+-> AuthController
 ```
 
-Only the `CONFIG` and `AUTH` controller routes are active. `MENU`, `SERVICE`, `UI`, and `EXIT` exist in the controller enum but are not implemented as routed application phases yet.
+Only `CONFIG` and `AUTH` are routed by `FrontController`. `MENU`, `SERVICE`, `UI`, and `EXIT` are reserved request types.
 
-## Implemented
+## Build State
 
-The current application includes:
+- `mvn -DskipTests compile` succeeds as of 2026-06-07.
+- No `src/test` directory or automated test suite exists.
+- No `src/main/resources` directory or explicit Logback configuration exists.
+- The application must be run from a terminal for hidden password and recovery-key input.
 
-- Maven project setup with Java 21.
-- Console startup through `app.Main`.
-- Boot orchestration through `BootConfigService`.
-- Controller dispatch through `FrontController`.
-- Configuration startup through `ConfigController`.
-- Local environment validation through `EnvValidationService`, including `RECOVERY_KEY` validation.
-- MySQL JDBC URL creation and connection checks through `SQLValidationService`.
-- Runtime database connection access through `DBManager`.
-- Startup fail-fast behavior when environment validation, database connection validation, or DB runtime initialization fails.
-- Recovery-key hashing through `HandleRecoveryKey` and startup persistence through `SetRecoveryKey`.
-- Starter account checks through `CheckForDefaultAccounts`.
-- Automatic creation of missing `local_admin` and `admin` starter accounts through `CreateDefaultAccounts`.
-- BCrypt password hashing for starter accounts, registered users, login verification, and recovery-key verification.
-- Registration through `RegistrationFlow`, `RegistrationService`, `PasswordFlow`, and `CreateAccount`.
-- Login input collection through `LoginInputCollector`.
-- Username, password, and account status checks through `LoginVerification` and `CheckUserInDB`.
-- Account status handling for `active`, `disabled`, `pending`, `locked`, `on_quarantine`, and `waiting_for_password_change`.
-- First password change flow for starter accounts in `waiting_for_password_change`.
-- Password update and activation for starter accounts through `UpdateUserPWSD`.
-- System-account recovery menu route through `AuthController` and `RecoveryFlow`.
-- Recovery-key input through `RecoveryCheck`, stored-key loading through `CollectRecoveryKey`, key validation through `CheckKeyStatus`, target account lookup through `SelectUserForRecovery` and `SelectUserForRecover`, and password update through `UpdateSystemAccount`.
-- Login attempt persistence through `app.Repository.logsRepository.CollectLogs`.
-- Failed password counting over recent login attempts through `CountFailedLoginAttempts`.
-- Placeholder password policy status routing through `ExecutePWSDPolicy`.
-- First-login access request groundwork for pending users.
-- Department selection through `DepartmentMenu` and `SelectDepartment`.
-- Department-specific job menu placeholders.
-- Access request storage through `HandleAccessManagement`.
+## Implemented Runtime
 
-## Current Runtime Flow
+### Bootstrap and Configuration
 
-1. `app.Main` creates a shared `Scanner`, prints the startup message, displays the loader, and starts `BootConfigService`.
-2. `BootConfigService` creates `AuthController`, `ConfigController`, `MenuController`, `ServiceController`, and `uiController`.
-3. `BootConfigService` creates a `FrontController` and routes first to `CONFIG`.
-4. `ConfigController` validates local configuration, builds the database connection values, initializes `DBManager`, hashes `RECOVERY_KEY`, stores it in `recovery_keys`, and checks starter accounts.
-5. Missing starter accounts are created automatically and receive `waiting_for_password_change`.
-6. If configuration returns success, the application routes to `AUTH`.
-7. `AuthController` shows the authentication menu with registration, login, recovery, and exit.
-8. Registration collects username, email, phone number, and password, then creates a pending account.
-9. Login checks whether the username exists, verifies the password with BCrypt, loads the account status, and writes a login attempt log.
-10. Pending users enter the first-login access request flow and select a department.
-11. Starter accounts with `waiting_for_password_change` must create a new password before their status is changed to `active`.
-12. Recovery validates the recovery key, asks for the account to recover, and updates the selected account password hash.
+- `Main` creates the shared `Scanner` and starts `BootConfigService`.
+- `BootConfigService` creates all controllers and routes through configuration before authentication.
+- Invalid environment values, failed database validation, or invalid `DBManager` initialization stop startup.
+- `EnvValidationService` validates the `.env` file and required values.
+- `SQLValidationService` builds and tests the MySQL JDBC connection.
+- `DBManager` stores the runtime connection values and opens repository connections.
+- `HandleRecoveryKey` hashes `RECOVERY_KEY`.
+- `SetRecoveryKey` inserts or updates `recovery_keys.id = 1`.
+- `CheckForDefaultAccounts` creates missing role-1 and role-2 starter accounts.
 
-## Current Recovery State
+### Authentication Menu
 
-The recovery baseline is considered done for the current stage.
+`AuthController` continuously offers:
 
-Current behavior:
+1. Registration
+2. Login
+3. Recover System Accounts
+4. Exit
 
-- `.env` must provide `RECOVERY_KEY`.
-- During startup, `HandleRecoveryKey` hashes the plain recovery key with BCrypt.
-- `SetRecoveryKey` stores the hash in `recovery_keys` with `id = 1`, updating the same row on later startup runs.
-- The auth menu exposes `Recover System Accounts`.
-- `RecoveryCheck` reads the recovery key through terminal-only password input.
-- `CollectRecoveryKey` loads the stored hash from the database.
-- `CheckKeyStatus` verifies the entered key with BCrypt.
-- `SelectUserForRecovery` asks which account should be recovered.
-- `SelectUserForRecover` checks whether the account exists.
-- `PasswordService` creates a new password hash.
-- `UpdateSystemAccount` writes the new password hash to `accounts.password_hash`.
+After registration, login, or recovery returns, the authentication menu is shown again.
 
-Remaining hardening for recovery belongs to security and cleanup work, not to the baseline completion item. Examples: enforcing that a failed recovery-key check stops the flow immediately, deciding whether recovery should be limited to system accounts, and deciding whether recovery should also reset account status fields.
+### Registration
 
-## Current Access Request State
+- Collects username, email address, and phone number.
+- Validates username length, basic email format, and basic phone format.
+- Shows the collected data and allows one field to be changed.
+- Uses `PasswordService` to validate and hash the password with BCrypt.
+- Creates an account with pending status, intern role, unassigned department, no menu access, and `is_system_account = false`.
+- Registration-related output is being migrated from direct console messages to `LogManager`.
 
-Pending users can create an access request during first login. The current flow stores the requesting account and selected department. Requested job and requested role still use default values:
+### Login
 
-- `requested_job`: `unassigned`
-- `requested_role`: `9` (`intern`)
+- Collects the username through `Scanner`.
+- Collects the password through terminal-backed `System.console()`.
+- Verifies usernames and BCrypt password hashes through `CheckUserInDB`.
+- Loads the account status from `account_status`.
+- Writes every completed login result to `login_attempts`.
+- Repeats login attempts until `LoginVerification` returns success.
 
-Approval, rejection, activation after approval, and admin-side request management are not implemented yet.
+Current account-status behavior:
 
-## Current Security State
+| Status | Current behavior |
+| --- | --- |
+| `active` | Login returns success. No main menu is routed yet. |
+| `disabled` | Login fails and repeats. |
+| `pending` | Starts the first-login access-request flow and records the result as successful with a reason. |
+| `locked` | Login fails and repeats. |
+| `on_quarantine` | Login fails and repeats. |
+| `waiting_for_password_change` | Requires a new password, then activates the account and enables menu access. |
+| `suspicious` | Login returns success with a warning reason. |
 
-The system uses BCrypt for password hashing and password verification. Password entry for login, password creation, and recovery requires a terminal-backed `System.console()` and fails fast when that console is unavailable.
+### Failed-Login Policy
 
-Login attempts are written to the database. Failed password attempts can be counted over a 24-hour window, but the status transition methods for locking, quarantine, and suspicious activity are currently placeholders and do not update account state yet.
+`CountFailedLoginAttempts` counts `INVALID_PASSWORD` records for the account from the previous 24 hours. `ExecutePWSDPolicy` now persists status changes:
 
-## Documentation Boundaries
+| Stored failed-password count | Status update |
+| --- | --- |
+| `>= 5` | `locked`, status ID `4` |
+| `>= 6` | `suspicious`, status ID `7` |
+| `>= 25` | `on_quarantine`, status ID `5` |
 
-Environment configuration details are maintained only in `docs/setup/ENV_SETUP.md`.
+The current login attempt is written after policy evaluation, so the database count does not include the attempt currently being processed. This makes threshold changes occur one attempt later than the displayed threshold suggests.
 
-Database setup, schema details, seed data, required IDs, and verification queries are maintained only in `docs/setup/DB_SETUP.md`.
+### Starter Accounts
 
-This status file intentionally describes runtime behavior without duplicating setup instructions.
+Missing starter accounts are detected by role:
+
+- Role `1`: local admin
+- Role `2`: admin
+
+Created starter accounts:
+
+- Are marked as system accounts
+- Use BCrypt password hashes
+- Reference recovery key ID `1`
+- Start with `waiting_for_password_change`
+- Require a password change
+- Do not initially have menu access
+
+After a successful first password change, `UpdateUserPassword` sets the account to active, clears `requires_password_change`, and enables menu access.
+
+### Recovery
+
+- Requires the recovery key through `System.console()`.
+- Loads the stored hash from `recovery_keys.id = 1`.
+- Verifies the entered key with BCrypt.
+- Allows up to four invalid recovery-key attempts.
+- Lists accounts where `is_system_account = true`.
+- Accepts an account name and updates its password hash.
+
+The displayed list is limited to system accounts, but the final account lookup currently accepts any existing account name. Recovery updates only `password_hash`.
+
+### Pending-User Access Request
+
+- Pending users select a department from IDs `1` through `11`.
+- A matching department job menu is displayed.
+- Access to the System department menu is guarded by the account's currently assigned department.
+- `CreateAccessRequest` stores the account ID and selected department.
+- Requested job remains `unassigned`.
+- Requested role remains role `9` (`intern`).
+
+Job selection, role selection, approval, rejection, and activation are not connected.
+
+### Logging
+
+The project now includes Logback and a custom `LogManager` facade with category loggers such as `BOOT`, `CONFIG`, `AUTH`, `SECURITY`, `SQL`, `DATABASE`, and `CREDENTIALS`.
+
+Logging migration is partial:
+
+- Boot, configuration, recovery, and parts of registration use `LogManager`.
+- Many login, repository, menu, and password messages still use `System.out.println`.
+- No `logback.xml` exists, so Logback uses its default configuration.
+- Some declared `LogType` values are not handled by the current `LogManager.log` switch and therefore produce no output.
 
 ## Current Limitations
 
-- There is no connected main menu after a successful active login.
-- Patient management is not implemented.
-- Appointment, billing, treatment, reporting, and hospital administration workflows are not implemented.
-- Job selection is not implemented beyond displaying placeholder department job menus.
-- Role selection exists as a menu and validation class, but it is not connected to the active access request flow.
-- Access requests are stored, but there is no approval, rejection, or activation workflow.
-- `ExecutePWSDPolicy` contains empty status transition methods, so failed password policy thresholds do not yet change account status.
-- `SetNewStatus`, `MenuController`, `ServiceController`, `uiController`, `AccountPolicy`, and `SelectJob` are placeholders.
-- The registration correction path needs review to ensure changed data is reconfirmed and password creation still runs.
-- Repository operations still mostly print errors instead of returning consistent success/failure results.
-- There are no automated tests yet.
-- The application is still console-based; JavaFX, REST API support, Docker, CI, and production logging are planned for later stages.
+- No connected main menu exists after active login.
+- Patient-management product features are not implemented.
+- Registration correction can continue without reconfirmation or password creation.
+- Registration does not perform explicit username or email uniqueness checks before insert.
+- Admin starter-account creation reads a different password key than environment validation.
+- Failed-login threshold counting excludes the current attempt.
+- Recovery selection is not strictly limited to system accounts.
+- Access requests store default job and role values.
+- No admin approval or rejection workflow exists.
+- Logging migration is incomplete.
+- Repository error handling and return values are inconsistent.
+- No automated tests, CI pipeline, Maven Wrapper, formatter, Docker setup, or JavaFX UI exists.
 
 ## Run Commands
 
-Build the project:
-
-```bash
-mvn clean package
-```
-
-Compile without packaging:
-
 ```bash
 mvn -DskipTests compile
-```
-
-Start the console application:
-
-```bash
 mvn exec:java
 ```
+
+See `../setup/ENV_SETUP.md` and `../setup/DB_SETUP.md` before running the application.

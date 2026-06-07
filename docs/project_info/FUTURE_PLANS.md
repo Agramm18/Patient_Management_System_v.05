@@ -1,78 +1,86 @@
 # Future Plans
 
-Last synchronized: 2026-06-03.
+Last synchronized: 2026-06-07.
 
-The project is currently in the authentication, account-management, recovery, and access-request foundation stage. Product features should stay behind the access-management foundation until login, approval, activation, and routing are stable.
+The project is currently building the account, security, and access-management foundation required before patient-management features are added.
+
+## Immediate Direction
+
+The next stable application chain should be:
+
+```text
+valid registration
+-> authenticated pending user
+-> complete access request
+-> admin approval or rejection
+-> account activation
+-> role-aware main menu
+```
 
 ## Near-Term Priorities
 
-These items are required before patient-management features should be added:
+- Finish the migration to consistent application logging.
+- Fix registration reconfirmation and reject incomplete registration data.
+- Align the admin starter-account password environment key.
+- Add username and email uniqueness checks before registration inserts.
+- Make failed-login thresholds include the current attempt and define reset behavior.
+- Enforce system-account-only recovery or rename the feature to reflect broader recovery.
+- Implement job selection and return a selected job value.
+- Implement role selection and return a selected role ID.
+- Store complete access requests.
+- Add admin approval and rejection workflows.
+- Route active users into a real main menu.
+- Add automated tests for core authentication and security behavior.
 
-- Registration data integrity and duplicate-account checks
-- Real job selection during pending-user first login
-- Role selection that returns and stores the selected role ID
-- Complete access request persistence with department, job, role, and optional reason
-- Admin approval and rejection workflow
-- Account activation based on approved access requests
-- Main-menu routing for active users
-- Persistent failed-login status policy
-- Automated tests for password, registration, recovery, login, and access-request behavior
+## First Functional Release Goals
 
-## Core Production Goals
-
-Features required before the first functional release:
-
-- Patient management
+- Stable registration, login, recovery, and account-status behavior
+- Complete access-request and approval workflow
+- Role, department, permission, and menu-access enforcement
+- Main console menu
+- Patient records and patient search
 - Appointment scheduling
-- Department management
-- Staff management
-- Role and permission management
-- Audit logging
-- Main menu implementation
-- Complete access request workflow
-- Patient administration including medical, financial, and administrative tasks
-- Log collection through database persistence or application-level logging
-- Core security concepts and policies
-- Stable database modeling for RBAC and access delegation
-- Error handling and exception strategy
-- Input validation strategy
-- Documentation and architecture diagrams
+- Staff and department management
+- Audit and security event review
+- Consistent error handling and logging
+- Automated unit and repository integration tests
 
-## Short-Term Plans
+## Engineering Improvements
 
-### Testing and Development
-
-- Unit tests
-- Integration tests
-- Debugging setup
-- Automated testing pipeline
-- Maven Wrapper
-- Formatting or linting setup
-
-### User Interface
-
-- Console main menu first
-- JavaFX graphical user interface later
+- Add JUnit and test structure.
+- Add Maven Wrapper.
+- Add a Logback configuration under `src/main/resources`.
+- Add formatter and static-analysis tooling.
+- Replace magic numeric IDs with named constants or typed values.
+- Normalize package, class, and method naming.
+- Replace global database configuration with dependency injection when the architecture is ready.
+- Add CI after the first automated tests exist.
 
 ## Long-Term Plans
 
-### Backend and Infrastructure
+### User Interface and APIs
 
-- REST API support
-- Redis integration for caching and session management
-- Docker containerization
-- Kubernetes deployment support
-- Cloud compatibility with AWS, Azure, and similar platforms
+- JavaFX graphical user interface
+- REST API
+- External service integration
+
+### Infrastructure
+
+- Docker
+- Kubernetes
+- Redis
+- Cloud deployment
 
 ### Monitoring and Security
 
+- Structured audit logging
+- Application metrics
+- Prometheus
+- Grafana
 - Security monitoring
-- Grafana integration
-- Prometheus integration
-- Custom application metrics
 
-### AI and Data Processing
+### Data Processing
 
-- Machine learning integration into application workflows
+- Reporting and analytics
 - Python-based data processing
-- JSON-based service communication
+- Machine-learning experiments where a clear patient-management use case exists

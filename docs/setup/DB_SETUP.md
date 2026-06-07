@@ -1,12 +1,10 @@
 # Database Setup
 
-Last synchronized: 2026-06-03.
+Last synchronized: 2026-06-07.
 
-This file contains the database-related documentation for the Patient Management System V5.01 project. Keep SQL setup, schema details, seed data, required IDs, default account database values, and database checks in this file.
+This document defines the MySQL schema and reference IDs expected by the current Java implementation.
 
-## Environment Configuration
-
-Create the project `.env` file from [ENV_SETUP.md](./ENV_SETUP.md) before running the application. The `DB_NAME` value must match the database created below.
+Create `.env` first by following `ENV_SETUP.md`.
 
 ## Database Creation
 
@@ -15,27 +13,42 @@ CREATE DATABASE IF NOT EXISTS patient_management_v5;
 USE patient_management_v5;
 ```
 
-Create and seed the tables in the order shown below because of foreign key dependencies.
+Create and seed tables in the order shown because later tables use foreign keys.
 
-## Required IDs Used By Java Code
+## Required Reference IDs
 
-The current Java code depends on these IDs:
+The Java code currently uses numeric IDs directly.
 
-- Role `1`: `local_admin`
-- Role `2`: `admin`
-- Role `9`: `intern`
-- Role `10`: `apprentice`
-- Department `5`: `IT`
-- Department `11`: `System`
-- Department `12`: `unassigned`
-- Status `1`: `active`
-- Status `2`: `disabled`
-- Status `3`: `pending`
-- Status `4`: `locked`
-- Status `5`: `on_quarantine`
-- Status `6`: `waiting_for_password_change`
+### Roles
 
-Use explicit IDs when seeding reference data so the Java defaults match the database.
+| ID | Value |
+| --- | --- |
+| 1 | `local_admin` |
+| 2 | `admin` |
+| 9 | `intern` |
+| 10 | `apprentice` |
+
+### Departments
+
+| ID | Value |
+| --- | --- |
+| 5 | `IT` |
+| 11 | `System` |
+| 12 | `unassigned` |
+
+### Account Statuses
+
+| ID | Value |
+| --- | --- |
+| 1 | `active` |
+| 2 | `disabled` |
+| 3 | `pending` |
+| 4 | `locked` |
+| 5 | `on_quarantine` |
+| 6 | `waiting_for_password_change` |
+| 7 | `suspicious` |
+
+Status ID `7` is required by `ExecutePWSDPolicy.suspicious`.
 
 ## Roles
 
@@ -53,21 +66,21 @@ VALUES
     (1, 'local_admin', 'Full infrastructure and system access'),
     (2, 'admin', 'Administrative access for user and system management'),
     (3, 'it_specialist', 'IT specialist access for system maintenance'),
-    (4, 'it_support', 'Technical support access for troubleshooting'),
+    (4, 'it_support', 'Technical support access'),
     (5, 'doctor', 'Medical access to patient treatment data'),
-    (6, 'nurse', 'Limited medical access under doctor permissions'),
-    (7, 'finance', 'Access to financial and billing information'),
-    (8, 'office_staff', 'Administrative access to patient organization data'),
-    (9, 'intern', 'Restricted training role with minimal permissions'),
-    (10, 'apprentice', 'Training role with limited operational permissions');
+    (6, 'nurse', 'Medical care access'),
+    (7, 'finance', 'Financial and billing access'),
+    (8, 'office_staff', 'Administrative office access'),
+    (9, 'intern', 'Restricted training access'),
+    (10, 'apprentice', 'Limited operational training access');
 ```
 
-## Account Status
+## Account Statuses
 
 ```mysql
 CREATE TABLE account_status (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    status VARCHAR(50) NOT NULL DEFAULT 'disabled',
+    status VARCHAR(50) NOT NULL UNIQUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -79,7 +92,8 @@ VALUES
     (3, 'pending'),
     (4, 'locked'),
     (5, 'on_quarantine'),
-    (6, 'waiting_for_password_change');
+    (6, 'waiting_for_password_change'),
+    (7, 'suspicious');
 ```
 
 ## Departments
@@ -97,14 +111,14 @@ INSERT INTO departments (id, department_name, department_description)
 VALUES
     (1, 'Medical', 'Medical treatment and patient care'),
     (2, 'Emergency', 'Emergency response and urgent care'),
-    (3, 'Laboratory', 'Lab tests, diagnostics and analysis'),
-    (4, 'Pharmacy', 'Medication, prescriptions and stock'),
-    (5, 'IT', 'Software, systems and technical support'),
-    (6, 'Security', 'Security, access control and monitoring'),
-    (7, 'Finance', 'Billing, accounting and financial tasks'),
+    (3, 'Laboratory', 'Lab tests, diagnostics, and analysis'),
+    (4, 'Pharmacy', 'Medication, prescriptions, and stock'),
+    (5, 'IT', 'Software, systems, and technical support'),
+    (6, 'Security', 'Security, access control, and monitoring'),
+    (7, 'Finance', 'Billing, accounting, and financial tasks'),
     (8, 'Office', 'Office work and administration support'),
     (9, 'Administration', 'Management and organizational tasks'),
-    (10, 'Training', 'Training, education and onboarding'),
+    (10, 'Training', 'Training, education, and onboarding'),
     (11, 'System', 'System administration and internal system roles'),
     (12, 'unassigned', 'Default department for new accounts');
 ```
@@ -122,6 +136,8 @@ CREATE TABLE recovery_keys (
 );
 ```
 
+During every successful startup, `SetRecoveryKey` inserts or updates row ID `1`.
+
 ## Accounts
 
 ```mysql
@@ -136,7 +152,7 @@ CREATE TABLE accounts (
     account_status INT NOT NULL DEFAULT 2,
     permission VARCHAR(50) NOT NULL DEFAULT 'read_only',
     is_system_account BOOLEAN NOT NULL DEFAULT FALSE,
-    has_access_to_menu BOOLEAN NOT NULL DEFAULT false,
+    has_access_to_menu BOOLEAN NOT NULL DEFAULT FALSE,
     password_hash VARCHAR(255) NOT NULL,
     requires_password_change BOOLEAN NOT NULL DEFAULT FALSE,
     failed_password_attempts INT NOT NULL DEFAULT 0,
@@ -145,11 +161,10 @@ CREATE TABLE accounts (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
+    FOREIGN KEY (department) REFERENCES departments(id),
     FOREIGN KEY (user_role) REFERENCES roles(id),
     FOREIGN KEY (account_status) REFERENCES account_status(id),
-    FOREIGN KEY (department) REFERENCES departments(id),
-    CONSTRAINT fk_accounts_recovery_key
-        FOREIGN KEY (recovery_key_id) REFERENCES recovery_keys(id)
+    FOREIGN KEY (recovery_key_id) REFERENCES recovery_keys(id)
 );
 ```
 
@@ -164,11 +179,14 @@ CREATE TABLE login_attempts (
     is_success BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT fk_login_attempts_account
-        FOREIGN KEY (account_id) REFERENCES accounts(id)
+    FOREIGN KEY (account_id) REFERENCES accounts(id)
         ON DELETE SET NULL
 );
 ```
+
+Unknown usernames are stored with `account_id = NULL`.
+
+`CountFailedLoginAttempts` currently counts only rows where `failure_reason = 'INVALID_PASSWORD'` from the previous 24 hours.
 
 ## Access Management
 
@@ -188,142 +206,126 @@ CREATE TABLE access_management (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
     FOREIGN KEY (requested_by) REFERENCES accounts(id),
+    FOREIGN KEY (requested_department) REFERENCES departments(id),
     FOREIGN KEY (requested_role) REFERENCES roles(id),
-    FOREIGN KEY (approved_by) REFERENCES accounts(id),
     FOREIGN KEY (request_status) REFERENCES account_status(id),
-    FOREIGN KEY (requested_department) REFERENCES departments(id)
+    FOREIGN KEY (approved_by) REFERENCES accounts(id)
 );
 ```
 
-## Current Java Database Defaults
+## Current Java Defaults
 
-`ConfigController` stores the recovery key during startup after DB initialization:
+### Registered Accounts
 
-- `HandleRecoveryKey` reads `RECOVERY_KEY` from `.env`.
-- The plain recovery key is hashed with BCrypt.
-- `SetRecoveryKey` inserts or updates `recovery_keys.id = 1`.
-- The recovery key scope uses the database default `resetting system accounts`.
+`CreateAccount` explicitly inserts:
 
-`CreateAccount` creates registered user accounts with:
+- Status `3`: pending
+- Role `9`: intern
+- Department `12`: unassigned
+- `has_access_to_menu = false`
+- `is_system_account = false`
 
-- `account_status`: `3` (`pending`)
-- `user_role`: `9` (`intern`)
-- `department`: `12` (`unassigned`)
-- `user_job`: database default `unassigned`
-- `permission`: database default `read_only`
-- `is_system_account`: `false`
-- `has_access_to_menu`: `false`
+The database defaults provide `user_job = 'unassigned'` and `permission = 'read_only'`.
 
-`CreateDefaultAccounts` creates missing starter accounts with:
+### Starter Accounts
 
-- `local_admin`: role `1`, status `6`, department `11`, job `system_administrator`, permission `root_access`, `requires_password_change = true`, `has_access_to_menu = false`
-- `admin`: role `2`, status `6`, department `5`, job `application_administrator`, permission `admin_rights`, `requires_password_change = true`, `has_access_to_menu = false`
+`CreateDefaultAccounts` creates:
 
-Both starter accounts use password hashes generated from `.env` password values and store the `.env` `BOOTSTRAP_KEY`.
+| Account | Role | Status | Department | Job | Permission |
+| --- | --- | --- | --- | --- | --- |
+| Local admin | 1 | 6 | 11 | `system_administrator` | `root_access` |
+| Admin | 2 | 6 | 5 | `application_administrator` | `admin_rights` |
 
-`HandleAccessManagement` creates pending access requests with:
+Both accounts:
 
-- `requested_by`: account ID resolved from the username
-- `requested_department`: selected department ID from `1` to `11`
-- `requested_job`: `unassigned`
-- `requested_role`: `9` (`intern`)
-- `request_status`: database default `3` (`pending`)
+- Are system accounts
+- Require a password change
+- Start without menu access
+- Reference recovery key ID `1`
+- Store the bootstrap key
 
-`UpdateUserPWSD` changes a starter account after first password change:
+### Access Requests
 
-- Updates `password_hash`
-- Sets `account_status = 1`
-- Sets `requires_password_change = FALSE`
-- Sets `has_access_to_menu = TRUE`
+`CreateAccessRequest` currently stores:
 
-`RecoveryFlow` resets a selected existing account password after recovery-key validation:
+- Requesting account ID
+- Selected department ID
+- Job `unassigned`
+- Role `9`
+- Default request status `3`
 
-- Loads `recovery_keys.id = 1` through `CollectRecoveryKey`
-- Checks the entered recovery key with BCrypt through `CheckKeyStatus`
-- Selects a target account by account name
-- Verifies that the account exists through `SelectUserForRecover`
-- Creates a new password hash through `PasswordService`
-- Updates `accounts.password_hash` through `UpdateSystemAccount`
+### Password and Status Updates
 
-The current recovery flow updates only the password hash. It does not currently change `account_status`, `requires_password_change`, `has_access_to_menu`, or `recovery_key_id`.
+- `UpdateUserPassword` changes the password hash, sets status ID `1`, clears the password-change flag, and enables menu access.
+- `UpdateSystemAccountPassword` changes only the password hash.
+- `ExecutePWSDPolicy` sets status ID `4`, `5`, or `7`.
 
-`app.Repository.logsRepository.CollectLogs` writes each login attempt to `login_attempts`. If the username is unknown, `account_id` remains `NULL`.
+## Migration for Existing Databases
 
-## Existing Database Migration
-
-Use this migration when the database already exists and the new recovery key structure must be added.
+At minimum, an existing database created from the previous documentation needs the suspicious status:
 
 ```mysql
 USE patient_management_v5;
 
-ALTER TABLE accounts
-    MODIFY COLUMN has_access_to_menu BOOLEAN NOT NULL DEFAULT FALSE
-    AFTER permission;
-
-ALTER TABLE accounts
-    ADD COLUMN is_system_account BOOLEAN NOT NULL DEFAULT FALSE
-    AFTER permission;
-
-UPDATE accounts
-SET accounts.is_system_account = TRUE
-WHERE account_name IN ('local_admin', 'admin');
-
-CREATE TABLE IF NOT EXISTS recovery_keys (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    recovery_key_hash VARCHAR(255) NOT NULL,
-    is_active BOOLEAN NOT NULL DEFAULT TRUE,
-    key_scope VARCHAR(255) NOT NULL DEFAULT 'resetting system accounts',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-
-ALTER TABLE accounts
-    ADD COLUMN recovery_key_id INT DEFAULT NULL
-    AFTER bootstrap_key;
-
-ALTER TABLE accounts
-    ADD CONSTRAINT fk_accounts_recovery_key
-    FOREIGN KEY (recovery_key_id) REFERENCES recovery_keys(id);
+INSERT INTO account_status (id, status)
+VALUES (7, 'suspicious')
+ON DUPLICATE KEY UPDATE status = VALUES(status);
 ```
 
-Use `has_access_to_menu` with underscores. `has-access_to_menu` is not valid as an unquoted MySQL column name.
+Verify that system-account and recovery columns exist:
 
-For a local development reset, `accounts` cannot be truncated while referenced by `login_attempts` unless foreign key checks are disabled for the reset.
+```mysql
+SHOW COLUMNS FROM accounts LIKE 'is_system_account';
+SHOW COLUMNS FROM accounts LIKE 'recovery_key_id';
+SHOW COLUMNS FROM accounts LIKE 'has_access_to_menu';
+SHOW TABLES LIKE 'recovery_keys';
+```
+
+## Development Reset
+
+Foreign-key checks must be disabled when truncating referenced tables:
 
 ```mysql
 SET FOREIGN_KEY_CHECKS = 0;
+TRUNCATE TABLE access_management;
 TRUNCATE TABLE login_attempts;
 TRUNCATE TABLE accounts;
+TRUNCATE TABLE recovery_keys;
 SET FOREIGN_KEY_CHECKS = 1;
 ```
 
+The next application startup recreates the recovery-key row and missing starter accounts.
+
 ## Query.sql
 
-`Query.sql` currently contains only the department table creation and department seed data. Use the complete setup in this file when creating a full development database.
+The root-level `Query.sql` is an ignored local scratch file. It currently contains only an insert for the `suspicious` account status. It is not the canonical schema and is not tracked by Git.
+
+Use this document as the current database setup source.
 
 ## Verification Queries
 
 ```mysql
 SHOW TABLES;
-SHOW COLUMNS FROM roles;
-SHOW COLUMNS FROM account_status;
-SHOW COLUMNS FROM departments;
-SHOW COLUMNS FROM recovery_keys;
-SHOW COLUMNS FROM accounts;
-SHOW COLUMNS FROM login_attempts;
-SHOW COLUMNS FROM access_management;
 
 SELECT id, role_name FROM roles ORDER BY id;
 SELECT id, status FROM account_status ORDER BY id;
 SELECT id, department_name FROM departments ORDER BY id;
+
 SELECT id, is_active, key_scope, created_at, updated_at
 FROM recovery_keys
 ORDER BY id;
-SELECT id, LEFT(recovery_key_hash, 7) AS hash_prefix, is_active, key_scope
-FROM recovery_keys
-WHERE id = 1;
-SELECT id, account_name, user_role, account_status, department, user_job, permission,
-       is_system_account, has_access_to_menu, requires_password_change, bootstrap_key, recovery_key_id
+
+SELECT id, account_name, user_role, account_status, department, user_job,
+       permission, is_system_account, has_access_to_menu,
+       requires_password_change, recovery_key_id
 FROM accounts
 ORDER BY id;
+
+SELECT id, account_id, entered_username, failure_reason, is_success, created_at
+FROM login_attempts
+ORDER BY id DESC;
+
+SELECT *
+FROM access_management
+ORDER BY id DESC;
 ```

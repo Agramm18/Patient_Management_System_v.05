@@ -41,6 +41,7 @@ public class AuthController {
                     if (userValue < 1 || userValue > 4) {
                         throw new IllegalArgumentException("The value can't be less than 1 or higher than 4");
                     } else if (userValue == 1) {
+                        LogManager.log(LogType.AUTH_INFO, "Please continue with adding your user");
                         RegistrationFlow register = new RegistrationFlow();
                         register.user(scanner);
 

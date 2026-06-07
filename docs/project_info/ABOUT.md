@@ -1,54 +1,61 @@
 # About This Project
 
-## Why Did I Build a Patient Management System?
+Last synchronized: 2026-06-07.
 
-At the beginning of my software development journey, I wanted to build a larger project that would challenge me and help me develop real-world programming skills.
+## Project Purpose
 
-I was looking for a project that:
+Patient Management System V5.01 is a long-term learning and portfolio project. It is designed to provide practical experience with the structure and technical concerns of a larger business application instead of focusing only on isolated programming exercises.
 
-* Was larger than typical beginner projects
-* Required Object-Oriented Programming (OOP)
-* Included multiple software components working together
-* Went beyond common beginner projects such as calculators, weather applications, or to-do lists
+The project currently concentrates on the foundation required before patient-management features can be implemented safely:
 
-To find a suitable project idea, I brainstormed and evaluated different possibilities with the help of ChatGPT. Based on my goals and learning objectives, a Patient Management System was suggested as a project that would expose me to software architecture, authentication systems, database design, security concepts, and enterprise application development.
+- Application bootstrap and controller routing
+- Runtime configuration validation
+- MySQL and JDBC integration
+- Registration and authentication
+- Password hashing and password-change flows
+- Recovery-key based system-account recovery
+- Login attempt auditing and account-status policies
+- Pending-user access requests
+- Application-level logging
 
-The idea immediately appealed to me because it combines many different software engineering concepts in a single project.
+## Background
 
-## Project Background
+The first version of the project was written in Python while learning programming fundamentals and Object-Oriented Programming. That version focused on input handling and basic application logic.
 
-The first version of this project was originally developed in Python as part of my effort to learn programming fundamentals and Object-Oriented Programming.
+The Java rebuild started during training as a Fachinformatiker fuer Anwendungsentwicklung. The goal of the rebuild is to improve the architecture, persistence model, security behavior, and maintainability while gaining practical experience with Java and enterprise-oriented development concepts.
 
-The early version focused mainly on input handling and basic application logic. It did not include a database layer, advanced architecture concepts, authentication workflows, or a graphical user interface.
-
-The original project can be found here:
+The original Python project is available at:
 
 https://github.com/Agramm18/Patient-Management-System
 
-While the Python version served as a valuable learning experience, it also highlighted areas where the project architecture, maintainability, and overall software design could be improved.
+## Current Stage
 
-## Why I Rebuilt the Project
+The current implementation is a Java 21 console application. It is not yet a complete hospital or patient-management product.
 
-I later decided to rebuild the project in Java during my training as a Fachinformatiker für Anwendungsentwicklung.
+The active runtime covers configuration and authentication. Patient records, appointments, treatment workflows, billing, reporting, a connected main menu, JavaFX, REST APIs, and deployment automation are planned but not implemented.
 
-One of the reasons for this decision was that I already had prior programming experience from learning Python independently. Because of this background, I often progressed faster than the pace of the programming lessons at vocational school.
+## Learning Goals
 
-To continue challenging myself and deepen my understanding of software development, I decided to rebuild the entire project in Java instead of simply creating small practice applications.
+The project is used to practice and demonstrate:
 
-The goal was not only to learn the Java language itself but also to gain practical experience with:
+- Object-Oriented Programming
+- Controller, service, and repository separation
+- MySQL schema design and JDBC access
+- Authentication and authorization foundations
+- BCrypt password and recovery-key hashing
+- Role-Based Access Control concepts
+- Security policy implementation
+- Logging with SLF4J and Logback
+- Maven dependency management
+- Technical documentation with Markdown and Mermaid
+- Incremental refactoring and quality improvement
 
-* Object-Oriented Programming
-* Software architecture and design patterns
-* Database design and integration
-* Authentication and authorization systems
-* Role-Based Access Control (RBAC)
-* MySQL and JDBC
-* Maven project management
-* Software documentation
-* Testing and quality assurance
+## Documentation
 
-## Project Goals
+Use the following documents for the current state:
 
-The primary goal of this project is educational. It serves as a long-term learning platform where I can continuously improve my programming, architecture, database, and software engineering skills.
-
-At the same time, I aim to build a realistic management system that resembles the structure and complexity of professional business applications and provides practical experience with technologies commonly used in enterprise environments.
+- `CURRENT_STATUS.md` for implemented behavior and limitations
+- `ToDo.md` for current priorities and known defects
+- `../architecture/PROJECT_STRUCTURE.md` for package responsibilities
+- `../architecture/TECHNICHAL.md` for technical details
+- `../setup/ENV_SETUP.md` and `../setup/DB_SETUP.md` for local setup
