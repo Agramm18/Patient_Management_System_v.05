@@ -15,6 +15,7 @@ public class LogManager {
     private static final Logger SYSTEM = LoggerFactory.getLogger("SYSTEM");
     private static final Logger SQL = LoggerFactory.getLogger("SQL");
     private static final Logger CREDENTIALS = LoggerFactory.getLogger("CREDENTIALS");
+    private static final Logger BOOT = LoggerFactory.getLogger("BOOT");
 
     public enum LogType {
         SQL_EXCEPTION,
@@ -49,7 +50,8 @@ public class LogManager {
 
         MESSAGE,
 
-        SYSTEM_WARN
+        SYSTEM_WARN,
+        SYSTEM_INFO
     }
 
     public static void log(LogType type, String logMessage) {
@@ -65,9 +67,12 @@ public class LogManager {
                 AUTH.info(logMessage);
                 break;
 
-            case MESSAGE:
-            case BOOT_INFO:
+            case SYSTEM_INFO:
                 SYSTEM.info(logMessage);
+                break;
+
+            case BOOT_INFO:
+                BOOT.info(logMessage);
                 break;
 
             case CONFIG_INFO:
@@ -84,7 +89,7 @@ public class LogManager {
                 break;
 
             case BOOT_SUCCESS:
-                SYSTEM.info(logMessage);
+                BOOT.info(logMessage);
                 break;
 
             case AUTH_SUCCESS:
@@ -101,7 +106,7 @@ public class LogManager {
                 break;
 
             case BOOT_FAILED:
-                SYSTEM.warn(logMessage);
+                BOOT.warn(logMessage);
                 break;
 
             case AUTH_FAILED:

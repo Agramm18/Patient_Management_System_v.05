@@ -26,8 +26,8 @@ public class BootConfigService {
 
         FrontController dispatcher = new FrontController(auth, config, menu, service, ui);
 
-        LogManager.log(LogType.MESSAGE, "Booting into the System");
-        LogManager.log(LogType.MESSAGE, "Running Controller classes");
+        LogManager.log(LogType.BOOT_INFO, "Booting into the System");
+        LogManager.log(LogType.BOOT_INFO, "Running Controller classes");
 
         try {
             boolean configOK = dispatcher.navigateSubController(FrontController.RequestType.CONFIG, scanner);
@@ -36,8 +36,8 @@ public class BootConfigService {
                 throw new RuntimeException("System config failed");
             }
 
-            LogManager.log(LogType.MESSAGE, "System Config where a success");
-            LogManager.log(LogType.MESSAGE, "Starting Authentication phase");
+            LogManager.log(LogType.BOOT_INFO, "System Config where a success");
+            LogManager.log(LogType.BOOT_INFO, "Starting Authentication phase");
 
             AuthMSG show = new AuthMSG();
             show.msg();

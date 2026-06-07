@@ -31,9 +31,9 @@ public class CheckForDefaultAccounts {
         DefaultAccountsMSG display = new DefaultAccountsMSG();
         display.msg();
 
-        LogManager.log(LogType.MESSAGE, "Checking if a Admin or a Local Admin exists in the DB");
-        LogManager.log(LogType.MESSAGE, "If none of the roles exists a default LocalAdmin will be added");
-        LogManager.log(LogType.MESSAGE, "If either one of these exists the other default role will be added");
+        LogManager.log(LogType.CONFIG_INFO, "Checking if a Admin or a Local Admin exists in the DB");
+        LogManager.log(LogType.CONFIG_INFO, "If none of the roles exists a default LocalAdmin will be added");
+        LogManager.log(LogType.CONFIG_INFO, "If either one of these exists the other default role will be added");
 
         checkLocalAdmin();
         checkAdmin();
@@ -43,7 +43,7 @@ public class CheckForDefaultAccounts {
 
     public void checkLocalAdmin() {
 
-        LogManager.log(LogType.MESSAGE, "Checking for an Local Admin in the DB");
+        LogManager.log(LogType.CONFIG_INFO, "Checking for an Local Admin in the DB");
 
         int role = 1;
 
@@ -72,7 +72,7 @@ public class CheckForDefaultAccounts {
     }
 
     public void checkAdmin() {
-        LogManager.log(LogType.MESSAGE, "Checking for an Admin in the DB");
+        LogManager.log(LogType.CONFIG_INFO, "Checking for an Admin in the DB");
         int role = 2;
         String sql = "SELECT ID FROM accounts WHERE user_role = ? LIMIT 1";
 

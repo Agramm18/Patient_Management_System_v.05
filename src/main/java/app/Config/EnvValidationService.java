@@ -40,7 +40,7 @@ public class EnvValidationService {
             }
 
             LogManager.log(LogType.CONFIG_SUCCESS, "It seems that the .env file exists");
-            LogManager.log(LogType.MESSAGE, "Continue with the value check");
+            LogManager.log(LogType.CONFIG_INFO, "Continue with the value check");
 
             boolean paramValid = checkENVParam();
 

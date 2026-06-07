@@ -28,9 +28,9 @@ public final class DBManager {
             String password,
             String url
     ) {
-        LogManager.log(LogType.MESSAGE, "Building global DB Connection");
-        LogManager.log(LogType.MESSAGE, "Save global DB runtime config");
-        LogManager.log(LogType.MESSAGE, "Set DB Config");
+        LogManager.log(LogType.CONFIG_INFO, "Building global DB Connection");
+        LogManager.log(LogType.CONFIG_INFO, "Save global DB runtime config");
+        LogManager.log(LogType.CONFIG_INFO, "Set DB Config");
 
         sqlUser = user;
         sqlPassword = password;

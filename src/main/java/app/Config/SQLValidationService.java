@@ -28,7 +28,7 @@ public class SQLValidationService {
 
         String URL = "jdbc:mysql://" + host + ":" + port + "/" + DBName; //MySQL Connector URL
 
-        LogManager.log(LogType.MESSAGE, "Trying to Build the MySQL Connection with the .env values");
+        LogManager.log(LogType.CONFIG_INFO, "Trying to Build the MySQL Connection with the .env values");
         LogManager.log(LogType.SQL_DEBUG, "URL: " + URL);
 
         //Routing Class variables to method variables

@@ -11,7 +11,7 @@ import app.Config.LogManager.LogType;
 public class SetRecoveryKey {
 
     public void keyValue(String recoveryKey) {
-        LogManager.log(LogType.MESSAGE, "Put the Recovery Key into the DB");
+        LogManager.log(LogType.CONFIG_INFO, "Put the Recovery Key into the DB");
         String sql = "INSERT INTO recovery_keys (id, recovery_key_hash) VALUES (1, ?)" +
                 "ON DUPLICATE  KEY UPDATE  recovery_key_hash = VALUES(recovery_key_hash)";
 
@@ -23,7 +23,7 @@ public class SetRecoveryKey {
             int rows = stmt.executeUpdate();
 
             if (rows > 0) {
-                LogManager.log(LogType.CONFIG_SUCCESS, "he recovery key where entered successful");
+                LogManager.log(LogType.SQL_OK, "he recovery key where entered successful");
                 LogManager.log(LogType.SQL_INFO, "Rows affected: " + rows);
             }
 
