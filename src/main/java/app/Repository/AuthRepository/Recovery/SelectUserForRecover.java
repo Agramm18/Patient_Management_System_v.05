@@ -31,6 +31,7 @@ public class SelectUserForRecover {
                 }
 
         } catch (SQLException error) {
+            System.out.println(error.getMessage());
             LogManager.log(LogType.SQL_EXCEPTION, error.getMessage());
             return false;
         }

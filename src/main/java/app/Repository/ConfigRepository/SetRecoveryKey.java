@@ -23,11 +23,12 @@ public class SetRecoveryKey {
             int rows = stmt.executeUpdate();
 
             if (rows > 0) {
-                LogManager.log(LogType.SQL_OK, "he recovery key where entered successful");
+                LogManager.log(LogType.RECOVERY_SUCCESS, "The recovery key where entered successful");
                 LogManager.log(LogType.SQL_INFO, "Rows affected: " + rows);
             }
 
         } catch (SQLException error) {
+            System.out.println(error.getMessage());
             LogManager.log(LogType.SQL_EXCEPTION, error.getMessage());
         }
     }

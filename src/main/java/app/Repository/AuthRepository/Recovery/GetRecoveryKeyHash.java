@@ -26,7 +26,8 @@ public class GetRecoveryKeyHash {
                     this.dbValue = rs.getString("recovery_key_hash");
                 }
             } catch (SQLException error) {
-            LogManager.log(LogType.RECOVERY_SUCCESS, error.getMessage());
+            System.out.println(error.getMessage());
+            LogManager.log(LogType.SQL_EXCEPTION, error.getMessage());
         }
     }
 

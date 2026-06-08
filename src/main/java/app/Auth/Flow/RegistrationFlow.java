@@ -18,7 +18,7 @@ import java.util.Scanner;
 public class RegistrationFlow {
 
     public void user(Scanner scanner) {
-        System.out.println("\n[INFO] You can now Register your User");
+
         RegistrationService register = new RegistrationService();
         register.userAccunt(scanner);
 

@@ -23,7 +23,8 @@ public class AuthController {
 
     public void verifyAccountStatus(Scanner scanner) {
         String accountStatusSTR;
-        LogManager.log(LogType.AUTH_INFO, "Running through the Registration or Login process");
+        System.out.println("[INFO] Running through the Authentication process");
+        LogManager.log(LogType.AUTH_INFO, "Running through the Authentication process");
 
         while (true) {
             try {
@@ -41,29 +42,34 @@ public class AuthController {
                     if (userValue < 1 || userValue > 4) {
                         throw new IllegalArgumentException("The value can't be less than 1 or higher than 4");
                     } else if (userValue == 1) {
-                        LogManager.log(LogType.AUTH_INFO, "Please continue with adding your user");
+                        System.out.println("[INFO] Starting Registration process");
+                        LogManager.log(LogType.AUTH_INFO, "Starting Registration process");
                         RegistrationFlow register = new RegistrationFlow();
                         register.user(scanner);
 
                     } else if (userValue == 2) {
+                        System.out.println("[INFO] Starting Login process");
+                        LogManager.log(LogType.AUTH_INFO, "Starting Login process");
                         LoginFlow login = new LoginFlow();
                         login.user(scanner);
-
                     } else if (userValue == 3) {
-                        LogManager.log(LogType.SECURITY_INFO, "Starting Recovery");
+                        System.out.println("[INFO] Starting Recovery process");
+                        LogManager.log(LogType.SECURITY_INFO, "Starting Recovery process");
                         RecoveryFlow recover = new RecoveryFlow();
                         recover.SystemAccounts(scanner);
                     } else {
-                        LogManager.log(LogType.MESSAGE, "You have chosen to end this program");
-                        LogManager.log(LogType.MESSAGE, "Have a nice day and Good Bye!!");
+                        System.out.println("[OK] The Program will end. Good bye!!");
+                        LogManager.log(LogType.SYSTEM_SUCCESS, "The user have chosen to end this program");
                         System.exit(0);
                         break;
                     }
                 }
 
             } catch (NumberFormatException numberError) {
-                LogManager.log(LogType.INVALID_INPUT, "Please type in a valid number");
+                System.out.println("[ERROR] It seems that you didn't type in a number: " + numberError.getMessage());
+                LogManager.log(LogType.INVALID_INPUT, "The User typed not in a Number");
             } catch (IllegalArgumentException error) {
+                System.out.println("[ERROR] Something went wrong: " + error.getMessage());
                 LogManager.log(LogType.INVALID_INPUT, error.getMessage());
             }
         }

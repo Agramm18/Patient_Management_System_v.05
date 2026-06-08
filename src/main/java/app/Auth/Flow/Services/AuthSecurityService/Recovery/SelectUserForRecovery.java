@@ -25,6 +25,7 @@ public class SelectUserForRecovery {
                 return this.recoverUsername;
 
             } catch(IllegalArgumentException error) {
+                System.out.println(error.getMessage());
                 LogManager.log(LogType.INVALID_INPUT, error.getMessage());
             }
         }

@@ -28,17 +28,20 @@ public final class DBManager {
             String password,
             String url
     ) {
-        LogManager.log(LogType.CONFIG_INFO, "Building global DB Connection");
-        LogManager.log(LogType.CONFIG_INFO, "Save global DB runtime config");
-        LogManager.log(LogType.CONFIG_INFO, "Set DB Config");
+        LogManager.log(LogType.SQL_INFO, "Building global DB Connection");
+        LogManager.log(LogType.SQL_INFO, "Save global DB runtime config");
+        LogManager.log(LogType.SQL_INFO, "Set DB Config");
 
         sqlUser = user;
         sqlPassword = password;
         sqlURL = url;
 
         if (user == null || user.isBlank() || password == null || password.isBlank() || sqlURL == null || sqlURL.isBlank()) {
+            LogManager.log(LogType.SQL_ERROR, "Something went wrong or is missing");
             return false;
         } else {
+            System.out.println("[OK] Global SQL Connection was a success");
+            LogManager.log(LogType.SQL_OK, "The Global SQL Connection was a success");
             return true;
         }
 

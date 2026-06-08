@@ -22,8 +22,11 @@ public class ConfigController {
     private SQLValidationService sqlValidationService;
 
     public boolean execute(Scanner scanner) {
-        LogManager.log(LogType.SYSTEM_INFO, "Running Config Env & Build SQL Connection as Entrypoint for the System");
-        LogManager.log(LogType.SYSTEM_INFO, "Please note if anything is invalid in the .env config or SQL config the whole System will crash");
+
+        System.out.println("[INFO] Running Config Env & Build SQL Connection as Entrypoint for the System");
+        System.out.println("[INFO] Please note if anything is invalid in the .env config or SQL config the whole System will crash");
+
+        LogManager.log(LogType.CONFIG_INFO, "Running Config Env & Build SQL Connection as Entrypoint for the System");
 
         EnvValidationService configurate = new EnvValidationService();
         boolean isValid = configurate.envStatus();

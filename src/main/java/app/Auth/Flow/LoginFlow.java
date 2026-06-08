@@ -15,7 +15,6 @@ public class LoginFlow {
 
     //Current Runtime flow to coordinate Login flow
     public void user(Scanner scanner) {
-        System.out.println("\n[INFO] Welcome You can now Login your User\n");
 
         //Build Obj to call the Login flow
         LoginVerification check = new LoginVerification();

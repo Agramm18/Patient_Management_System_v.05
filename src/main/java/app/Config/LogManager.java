@@ -23,6 +23,9 @@ public class LogManager {
         SQL_OK,
         SQL_DEBUG,
         SQL_INFO,
+        SQL_ERROR,
+        SQL_WARN,
+        SQL_FAILED,
 
         RECOVERY_FAILED,
         RECOVERY_SUCCESS,
@@ -35,6 +38,7 @@ public class LogManager {
         CONFIG_FAILED,
         CONFIG_SUCCESS,
         CONFIG_INFO,
+        CONFIG_WARN,
 
         AUTH_FAILED,
         AUTH_SUCCESS,
@@ -54,6 +58,7 @@ public class LogManager {
         SYSTEM_WARN,
         SYSTEM_INFO,
         SYSTEM_DEBUG,
+        SYSTEM_SUCCESS,
 
         SECURITY_INFO,
         SECURITY_SUCCESS,
@@ -117,6 +122,14 @@ public class LogManager {
                 SECURITY.info(logMessage);
                 break;
 
+            case CONFIG_SUCCESS:
+                CONFIG.info(logMessage);
+                break;
+
+
+            case SYSTEM_SUCCESS:
+                SYSTEM.info(logMessage);
+                break;
             //Error Logs
             case SQL_EXCEPTION:
                 SQL.error(logMessage);
@@ -134,9 +147,17 @@ public class LogManager {
                 AUTH.error(logMessage);
                 break;
 
+            case CONFIG_FAILED:
+                CONFIG.error(logMessage);
+                break;
+
             case SECURITY_WARN:
             case SECURITY_FAILED:
                 SECURITY.warn(logMessage);
+                break;
+
+            case SQL_ERROR:
+                SQL.error(logMessage);
                 break;
 
             //Other Errors
@@ -157,6 +178,18 @@ public class LogManager {
 
             case AUTH_DEBUG:
                 AUTH.debug(logMessage);
+
+            case CONFIG_WARN:
+                CONFIG.warn(logMessage);
+                break;
+
+            case SQL_DEBUG:
+                SQL.debug(logMessage);
+                break;
+
+            case SQL_WARN:
+                SQL.warn(logMessage);
+                break;
         }
     }
 

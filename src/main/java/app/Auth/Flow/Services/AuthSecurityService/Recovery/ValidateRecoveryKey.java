@@ -28,9 +28,9 @@ public class ValidateRecoveryKey {
                 if (this.invisibleInput == null || this.invisibleInput.length == 0) {
                     throw new IllegalArgumentException("The password can't be empty please try again");
                 } else {
-                    LogManager.log(LogType.MESSAGE, "Convert your Password as String");
+                    LogManager.log(LogType.SECURITY_INFO, "Convert your Password as String");
                     String convertedPassword = String.valueOf(this.invisibleInput);
-                    LogManager.log(LogType.MESSAGE, "Giving the Password to your Database");
+                    LogManager.log(LogType.SQL_INFO, "Giving the Password to your Database");
                     this.passwordStringValue = convertedPassword;
                 }
 
@@ -39,8 +39,10 @@ public class ValidateRecoveryKey {
                 break;
 
             } catch (IllegalArgumentException error) {
+                System.out.println(error.getMessage());
                 LogManager.log(LogType.INVALID_INPUT, error.getMessage());
             } catch (IllegalStateException error) {
+                System.out.println(error.getMessage());
                 LogManager.log(LogType.SYSTEM_WARN, error.getMessage());
             }
         }

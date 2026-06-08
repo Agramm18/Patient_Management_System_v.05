@@ -70,7 +70,7 @@ public class CreateDefaultAccounts {
 
         LogManager.log(LogType.CONFIG_INFO, "Hashing Password");
         HashedLocalPassword = BCrypt.hashpw(LocalAdminPassword, BCrypt.gensalt(12));
-        LogManager.log(LogType.CONFIG_INFO, "Local Admin Password is successfully Hashed");
+        LogManager.log(LogType.CONFIG_SUCCESS, "Local Admin Password is successfully Hashed");
 
         String sql = "INSERT INTO accounts (account_name, email, user_role, password_hash, bootstrap_key, account_status, user_job, permission, requires_password_change, department, has_access_to_menu, recovery_key_id, is_system_account) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -96,7 +96,7 @@ public class CreateDefaultAccounts {
 
             if (rows > 0) {
                 LogManager.log(LogType.CONFIG_SUCCESS, "Local Admin is created");
-                LogManager.log(LogType.SYSTEM_WARN, "A default Local Admin exists in the DB");
+                LogManager.log(LogType.SQL_WARN, "A default Local Admin exists in the DB");
                 LogManager.log(LogType.SQL_OK, "Rows effected " + rows);
 
                 return true;
@@ -104,6 +104,7 @@ public class CreateDefaultAccounts {
             return false;
 
         } catch (SQLException error) {
+            System.out.println(error.getMessage());
             LogManager.log(LogType.CONFIG_FAILED, error.getMessage());
             return false;
         }
@@ -126,9 +127,9 @@ public class CreateDefaultAccounts {
         int recovery_id = 1;
         boolean isSystemAccount = true;
 
-        LogManager.log(LogType.CONFIG_INFO, "Hashing Password");
+        LogManager.log(LogType.SECURITY_INFO, "Hashing Password");
         HashedPassword = BCrypt.hashpw(AdminPassword, BCrypt.gensalt(12));
-        LogManager.log(LogType.CONFIG_INFO, "Admin Password is successfully hashed");
+        LogManager.log(LogType.SECURITY_SUCCESS, "Admin Password is successfully hashed");
 
 
         String sql = "INSERT INTO accounts (account_name, email, user_role, password_hash, bootstrap_key, account_status, user_job, permission, requires_password_change, department, has_access_to_menu, recovery_key_id, is_system_account) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -155,13 +156,14 @@ public class CreateDefaultAccounts {
 
             if (rows > 0) {
                 LogManager.log(LogType.CONFIG_SUCCESS, "Admin is created");
-                LogManager.log(LogType.SYSTEM_WARN, "A default Admin account exists in the DB");
+                LogManager.log(LogType.SQL_WARN, "A default Admin account exists in the DB");
                 LogManager.log(LogType.SQL_OK, "Rows effected " + rows);
                 return true;
             }
 
             return false;
         } catch (SQLException error) {
+            System.out.println(error.getMessage());
             LogManager.log(LogType.SQL_DEBUG, "Failed to create a default Admin");
             LogManager.log(LogType.SQL_EXCEPTION, error.getMessage());
             return false;

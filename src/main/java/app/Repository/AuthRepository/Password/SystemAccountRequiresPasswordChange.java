@@ -28,9 +28,9 @@ public class SystemAccountRequiresPasswordChange {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                boolean requiersChange = rs.getBoolean("requires_password_change");
+                boolean requiresChange = rs.getBoolean("requires_password_change");
 
-                if (requiersChange) {
+                if (requiresChange) {
                     return true;
                 } else {
                     return false;

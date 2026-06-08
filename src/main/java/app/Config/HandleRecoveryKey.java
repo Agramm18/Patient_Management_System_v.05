@@ -17,12 +17,12 @@ public class HandleRecoveryKey {
     }
 
     public void plainKey() {
-        LogManager.log(LogType.CONFIG_INFO, "Collecting recovery from .env file");
+        LogManager.log(LogType.SECURITY_INFO, "Collecting recovery from .env file");
         this.recoveryKeyPlain= dotenv.get("RECOVERY_KEY");
     }
 
     public void hashedKey() {
-        LogManager.log(LogType.CONFIG_INFO, "Hashing Plain key to an unreadable format");
+        LogManager.log(LogType.SECURITY_INFO, "Hashing Plain key to an unreadable format");
         this.recoveryKeyHashed = BCrypt.hashpw(this.recoveryKeyPlain, BCrypt.gensalt(12));
     }
 

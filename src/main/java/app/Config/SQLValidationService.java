@@ -26,9 +26,11 @@ public class SQLValidationService {
         String DBUser = env.getUser();
         String DBPassword = env.getPassword();
 
+        System.out.println("[INFO] Building Global SQL Connection");
+        LogManager.log(LogType.CONFIG_INFO, "Building Global importable SQL Connection");
         String URL = "jdbc:mysql://" + host + ":" + port + "/" + DBName; //MySQL Connector URL
 
-        LogManager.log(LogType.CONFIG_INFO, "Trying to Build the MySQL Connection with the .env values");
+        System.out.println("[DEBUG] SQL URL: " + URL);
         LogManager.log(LogType.SQL_DEBUG, "URL: " + URL);
 
         //Routing Class variables to method variables
@@ -37,9 +39,11 @@ public class SQLValidationService {
         this.sqlURL = URL;
 
         try (Connection connection = DriverManager.getConnection(URL, DBUser, DBPassword)) {
+            System.out.println("[OK] SQL is connected successfully");
             LogManager.log(LogType.SQL_OK, "The Database connection established successfully ");
             return true;
         } catch (SQLException error) {
+            System.out.println("[ERROR] Something wen wrong with the SQL");
             LogManager.log(LogType.SQL_EXCEPTION, error.getMessage());
             return false;
         }

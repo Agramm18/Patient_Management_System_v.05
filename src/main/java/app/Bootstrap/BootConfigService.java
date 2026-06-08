@@ -2,12 +2,12 @@ package app.Bootstrap;
 
 import app.CLIText.DisplayMessages.AuthMSG;
 import app.CLIText.DisplayMessages.LoaderMSG;
+
+import app.Config.LogManager.LogType;
 import app.Config.LogManager;
 import app.Controller.*;
 
-import app.Config.LogManager;
-import app.Config.LogManager.LogType;
-
+import java.sql.SQLException;
 import java.util.Scanner;
 
 public class BootConfigService {
@@ -26,7 +26,7 @@ public class BootConfigService {
 
         FrontController dispatcher = new FrontController(auth, config, menu, service, ui);
 
-        LogManager.log(LogType.BOOT_INFO, "Booting into the System");
+        LogManager.log(LogType.BOOT_INFO, "Starting Boot Process");
         LogManager.log(LogType.BOOT_INFO, "Running Controller classes");
 
         try {
@@ -36,8 +36,11 @@ public class BootConfigService {
                 throw new RuntimeException("System config failed");
             }
 
-            LogManager.log(LogType.BOOT_INFO, "System Config where a success");
-            LogManager.log(LogType.BOOT_INFO, "Starting Authentication phase");
+            System.out.println("[OK] The System Config was a success");
+            System.out.println("[INFO] Starting Authentication phase");
+
+            LogManager.log(LogType.CONFIG_SUCCESS, "System Config was a success");
+            LogManager.log(LogType.SYSTEM_INFO, "Starting Authentication phase");
 
             AuthMSG show = new AuthMSG();
             show.msg();
@@ -45,7 +48,8 @@ public class BootConfigService {
             dispatcher.navigateSubController(FrontController.RequestType.AUTH, scanner);
 
         } catch (RuntimeException error) {
-            LogManager.log(LogType.BOOT_FAILED, error.getMessage());
+            System.out.println("[ERROR] System Config Failed");
+            LogManager.log(LogType.CONFIG_FAILED, error.getMessage());
             System.exit(1);
         }
     }

@@ -10,7 +10,7 @@ import app.Repository.AuthRepository.Recovery.GetRecoveryKeyHash;
 import app.Repository.AuthRepository.Recovery.SelectUserForRecover;
 import app.Repository.AuthRepository.Password.UpdateSystemAccountPassword;
 import app.Config.LogManager;
-import app.Controller.*;
+import app.Config.LogManager.LogType;
 
 public class RecoveryFlow {
     private int RETRY_COUNT = 0;
@@ -63,8 +63,10 @@ public class RecoveryFlow {
                     throw new IllegalArgumentException(("The Key is wrong"));
                 }
             } catch (IllegalArgumentException error) {
+                System.out.println(error.getMessage());
                 LogManager.log(LogManager.LogType.INVALID_INPUT, error.getMessage());
             } catch(IllegalStateException error) {
+                System.out.println(error.getMessage());
                 LogManager.log(LogManager.LogType.SECURITY_WARN, error.getMessage());
                 break;
             }

@@ -53,6 +53,7 @@ public class RegistrationService {
                     break;
                 }
             } catch (IllegalArgumentException error) {
+                System.out.println(error.getMessage());
                 LogManager.log(LogType.INVALID_INPUT, error.getMessage());
             }
 
@@ -81,6 +82,7 @@ public class RegistrationService {
                     break;
                 }
             } catch (IllegalArgumentException error) {
+                System.out.println(error.getMessage());
                 LogManager.log(LogType.INVALID_INPUT, error.getMessage());
             }
         }
@@ -112,6 +114,7 @@ public class RegistrationService {
                 }
             } catch (IllegalArgumentException error) {
                 System.out.println(error.getMessage());
+                LogManager.log(LogType.INVALID_INPUT, "Something went wrong: " + error.getMessage());
             }
         }
     }
@@ -146,7 +149,7 @@ public class RegistrationService {
                 } else {
 
                     //If anything is incorrect you can change the value
-                    System.out.println("[INFO] Please Enter what you want to chang");
+                    System.out.println("[INFO] Please Enter what you want to change");
                     System.out.println("[INFO] 1 User Name");
                     System.out.println("[INFO] 2 Email Address");
                     System.out.println("[INFO] 3 Phone Number");
@@ -168,6 +171,7 @@ public class RegistrationService {
                 }
                 break;
             } catch (IllegalArgumentException error) {
+                System.out.println(error.getMessage());
                 LogManager.log(LogType.INVALID_INPUT, error.getMessage());
             }
         }
