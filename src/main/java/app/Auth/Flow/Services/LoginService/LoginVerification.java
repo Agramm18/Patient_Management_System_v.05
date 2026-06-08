@@ -10,6 +10,8 @@ import app.Repository.AuthRepository.Password.ExecutePWSDPolicy;
 import app.Repository.AuthRepository.Password.UpdateUserPassword;
 import app.Repository.LoginRepository.CheckUserInDB;
 
+import app.Config.LogManager;
+import app.Config.LogManager.LogType;
 
 /*
      This Section Checks the Username and Validate how to proceed after the first Login
@@ -48,24 +50,31 @@ public class LoginVerification {
             boolean userValid = repository.checkUserInDB(Username);
 
             if (!userValid) {
+                LogManager.log(LogType.USERNAME_NOT_FOUND, "The Username " + Username + " Where not found");
                 return new CollectLogs(false, "USERNAME_NOT_FOUND");
             }
 
-            System.out.println("[OK] The User exist continue with PWSD Check");
+            System.out.println("[OK] The User exists continue with PWSD Check");
             boolean passwordOK = repository.checkPWSD(PWSD, Username);
 
             if (!passwordOK) {
+
                 System.out.println("[INFO] Please Notice if retry >=5 your account will be locked");
                 System.out.println("[INFO] If you have 25 Failed Passwords the Accounts will be set to quarantine");
+
+                LogManager.log(LogType.SECURITY_WARN, "The User entered a wrong Password");
+
                 System.out.println("\n[WARNING] Invalid Password detected");
 
                 this.RETRYS++;
 
+                LogManager.log(LogType.SECURITY_WARN, "Failed Passwords: " + this.RETRYS);
                 System.out.println("[INFO] Failed Passwords: " + this.RETRYS + "\n");
 
                 CountFailedLoginAttempts count = new CountFailedLoginAttempts();
                 int failedAttempts = count.Logs(Username);
 
+                LogManager.log(LogType.SECURITY_WARN, "Failed Passwords in 24 Hours: " + failedAttempts);
                 System.out.println("\n[INFO] FAILED PWSD Im 24 Hours: " + failedAttempts + "\n");
 
                 ExecutePWSDPolicy changeStatusTo = new ExecutePWSDPolicy();

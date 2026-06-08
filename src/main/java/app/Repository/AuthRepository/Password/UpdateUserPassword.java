@@ -5,6 +5,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import app.Config.LogManager;
+import app.Config.LogManager.LogType;
+
 public class UpdateUserPassword {
 
     public boolean dbValues (String Username, String hashedPWSD) {
@@ -19,17 +22,25 @@ public class UpdateUserPassword {
             int rows = stmt.executeUpdate();
 
             if (rows > 0) {
+                LogManager.log(LogType.SECURITY_SUCCESS, "The password where changed successfully");
+                LogManager.log(LogType.AUTH_INFO, "The DB Value for requrires_password_change will be set to false");
+                LogManager.log(LogType.SQL_INFO, "Rows affected: " + rows);
+
                 System.out.println("\n[OK Password is changed successfully]");
-                System.out.println("[INFO] Other the DB Value for requires_password_change will be set to false");
+                System.out.println("[INFO] The DB Value for requrires_password_change will be set to false");
                 changePWSDStatus(Username);
                 System.out.println("[INFO] Rows affected: " + rows + "\n");
                 return true;
             } else {
-                System.out.println("[ERROR] Something went wrong please try again");
-                return false;
+                throw new IllegalStateException("[ERROR] The Username where not found in the DB");
             }
 
         } catch (SQLException error) {
+            LogManager.log(LogType.SQL_EXCEPTION, error.getMessage());
+            System.out.println(error.getMessage());
+            return false;
+        } catch (IllegalStateException error) {
+            LogManager.log(LogType.USERNAME_NOT_FOUND, error.getMessage());
             System.out.println(error.getMessage());
         }
         return false;
@@ -51,6 +62,7 @@ public class UpdateUserPassword {
             }
 
         } catch (SQLException error) {
+            LogManager.log(LogType.SQL_EXCEPTION, error.getMessage());
             System.out.println(error.getMessage());
         }
     }

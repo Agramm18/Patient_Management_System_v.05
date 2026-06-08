@@ -8,6 +8,9 @@ import app.CLIText.Menus.DepartmentJobs.*;
 import app.Repository.AuthRepository.Management.HasAssignedDepartment;
 import app.Repository.AuthRepository.Management.CreateAccessRequest;
 
+import app.Config.LogManager;
+import app.Config.LogManager.LogType;
+
 /*
     In this class the first login is handled if the User status is pending in the DB accounts
 

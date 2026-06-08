@@ -7,6 +7,9 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 
+import app.Config.LogManager;
+import app.Config.LogManager.LogType;
+
 /*
     In this Section the System Accounts Are Checked
 
@@ -37,7 +40,9 @@ public class SystemAccountRequiresPasswordChange {
                 }
             }
         } catch (SQLException error) {
+            LogManager.log(LogType.SQL_EXCEPTION, error.getMessage());
             System.out.println(error.getMessage());
+            return false;
         }
         return false;
     }

@@ -30,6 +30,7 @@ public class HasAssignedDepartment {
             }
 
         } catch (SQLException error) {
+
             System.out.println(error.getMessage());
         }
         return false;

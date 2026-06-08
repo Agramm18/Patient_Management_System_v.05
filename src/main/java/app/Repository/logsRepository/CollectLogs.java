@@ -6,7 +6,8 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.PreparedStatement;
 
-
+import app.Config.LogManager;
+import app.Config.LogManager.LogType;
 /*
     This Section handles the DB Action for the Login logs
 
@@ -52,12 +53,14 @@ public class CollectLogs {
             int rows = stmtInsertData.executeUpdate();
 
             if (rows > 0) {
+                LogManager.log(LogType.SECURITY_SUCCESS, "The Login attempt from  "+ username + " was saved");
                 System.out.println("[OK] Login attempt was saved");
             } else {
                 System.out.println("[WARNING] Login attempt wsa not saved");
             }
 
         } catch (SQLException error) {
+            LogManager.log(LogType.SQL_EXCEPTION, error.getMessage());
             System.out.println(error.getMessage());
         }
     }
