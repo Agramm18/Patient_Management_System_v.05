@@ -1,6 +1,8 @@
 package app.Auth.Flow.Services.AuthSecurityService.Management;
 import java.util.Scanner;
 
+import app.Config.LogManager;
+import app.Config.LogManager.LogType;
 
 /*
     In this Section the User can request his Department
@@ -36,9 +38,11 @@ public class CollectUserDepartment {
                  }
 
              } catch (NumberFormatException error) {
+                 LogManager.log(LogType.INVALID_INPUT, error.getMessage());
                  System.out.println("[ERROR] Please enter a valid number");
                  System.out.println(error.getMessage());
              } catch (IllegalArgumentException error) {
+                 LogManager.log(LogType.INVALID_INPUT, error.getMessage());
                  System.out.println(error.getMessage());
              }
         }

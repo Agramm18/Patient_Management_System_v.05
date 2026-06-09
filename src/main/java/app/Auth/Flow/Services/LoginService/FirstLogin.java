@@ -34,8 +34,12 @@ public class FirstLogin {
 
     public void firstSetup(String Username, Scanner scanner) {
 
+        LogManager.log(LogType.AUTH_INFO, "Starting default User Setup for first login");
+
         DepartmentMenu show = new DepartmentMenu();
         show.departments();
+
+        LogManager.log(LogType.AUTH_INFO, "Starting Department Selection");
 
         System.out.println("\n[INFO] Please setup an Department");
 
@@ -43,6 +47,8 @@ public class FirstLogin {
         choose.department(scanner);
 
         int department = choose.getSelectedDepartment();
+
+        LogManager.log(LogType.AUTH_INFO, "The User have choose the Department: " + department);
 
         switch (department) {
             case 1:

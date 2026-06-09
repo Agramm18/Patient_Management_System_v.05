@@ -6,7 +6,8 @@ import app.Auth.Flow.Services.LoginService.LoginVerification;
 import app.Auth.Flow.Services.LoginService.LoginInputCollector;
 import app.Repository.logsRepository.CollectLogs;
 
-
+import app.Config.LogManager;
+import app.Config.LogManager.LogType;
 /*
     Just sub controller to rout to the Login flow and to collect the logs
 */
@@ -38,6 +39,7 @@ public class LoginFlow {
             );
             
             if (result.isSuccess()) {
+                LogManager.log(LogType.AUTH_SUCCESS, "The Login was a Success");
                 return;
             }
         }

@@ -54,7 +54,8 @@ public class LoginVerification {
                 return new CollectLogs(false, "USERNAME_NOT_FOUND");
             }
 
-            System.out.println("[OK] The User exists continue with PWSD Check");
+            System.out.println("[OK] The User exists continue with password check");
+            LogManager.log(LogType.AUTH_INFO, "The User " + Username + "exists continue with password check");
             boolean passwordOK = repository.checkPWSD(PWSD, Username);
 
             if (!passwordOK) {
@@ -104,12 +105,15 @@ public class LoginVerification {
 
             switch (userStatus) {
                 case "active":
+                    LogManager.log(LogType.AUTH_INFO, "The User Status is active");
                     System.out.println("[OK] The User account is active");
                     return new CollectLogs(true, null);
                 case "disabled":
+                    LogManager.log(LogType.AUTH_INFO, "The User Status is disabled");
                     System.out.println("[WARNING] This account is Locked an must be activated by an administrator");
                     return new CollectLogs(false, "Account is Locked");
                 case "pending":
+                    LogManager.log(LogType.AUTH_INFO, "The User Status is pending");
                     System.out.println("[INFO] This account is not fully activated");
 
                     FirstLogin run = new FirstLogin();
@@ -117,12 +121,15 @@ public class LoginVerification {
 
                     return new CollectLogs(true, "Must be authorized");
                 case "locked":
+                    LogManager.log(LogType.AUTH_INFO, "The User Status is locked");
                     System.out.println("[WARNING] This account is locked and must be activated by an administrator");
                     return new CollectLogs(false, "Account is locked");
                 case "on_quarantine":
+                    LogManager.log(LogType.AUTH_INFO, "The User Status is on_quarantine");
                     System.out.println("[FATAL] This account is on quarantine and must be checked");
                     return new CollectLogs(false, "Account is on quarantine based on malicious activities");
                 case "waiting_for_password_change":
+                    LogManager.log(LogType.AUTH_INFO, "The User Status is waiting_for_password_change");
                     System.out.println("\n[INFO] First Login for a System Account recognized");
                     System.out.println("[INFO] Please change your current password to continue\n");
 
@@ -137,12 +144,14 @@ public class LoginVerification {
                     boolean changeSuccess = change.dbValues(Username, hashedPWSD);
 
                     if (changeSuccess) {
+                        LogManager.log(LogType.SECURITY_INFO, "The password was changed successfully");
                         return new CollectLogs(true, "password is changed successfully");
                     } else {
                         return new CollectLogs(false, "something went wrong with the password change");
                     }
 
                 case "suspicious":
+                    LogManager.log(LogType.AUTH_INFO, "The User Status is suspicious");
                     System.out.println("[INFO] You account is set to suspicious maybe you need to change your password");
                     return new CollectLogs(true, "You account is set to suspicious maybe you need to change your password");
             }
@@ -152,6 +161,7 @@ public class LoginVerification {
             return new CollectLogs(true, null);
 
         } catch (SQLException error) {
+            LogManager.log(LogType.SQL_EXCEPTION, error.getMessage());
             System.out.println("[ERROR] SQL error during login: " + error.getMessage());
             return new CollectLogs(false, "SQL_EXCEPTION");
         }

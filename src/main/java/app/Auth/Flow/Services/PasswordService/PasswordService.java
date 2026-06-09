@@ -6,7 +6,8 @@ import java.io.Console;
 import java.util.Arrays;
 import java.util.Scanner;
 
-
+import app.Config.LogManager;
+import app.Config.LogManager.LogType;
 /*
     This section handles the Password Validation & Creation
 
@@ -44,6 +45,7 @@ public class PasswordService {
 
     //Parrent Method to call other methods
     public void userPWSD(Scanner scanner) {
+        LogManager.log(LogType.SECURITY_INFO, "Starting Password creation");
         System.out.println("[INFO] Running through password creation");
         System.out.println("[INFO] Creating plain text PWSD");
 
@@ -57,8 +59,11 @@ public class PasswordService {
                 System.out.println(error.getMessage());
                 this.retryCount++;
                 System.out.println("[INFO] Retry Count: " + this.retryCount);
+                LogManager.log(LogType.SECURITY_WARN, "Retry Count: " + this.retryCount);
+                LogManager.log(LogType.INVALID_INPUT, error.getMessage());
 
                 if (this.retryCount >= MAX_RETRY_COUNT) {
+                    LogManager.log(LogType.SECURITY_WARN, "The user typed in to many wrong passwords");
                     System.out.println("[ERROR] Max retry attempts reached your account will be disabled");
                     throw new IllegalStateException("[INFO] Please reactivate your account via the basic AUTH Menu");
                 }
@@ -66,15 +71,15 @@ public class PasswordService {
         }
 
         retypePWSD(scanner);
-        System.out.println("[INFO] Converting Char back to string");
+        LogManager.log(LogType.SECURITY_INFO, "Converting Char back to String");
         convertCHARtoString();
-        System.out.println("[INFO] Hashing String values to an unreadable format");
+        LogManager.log(LogType.SECURITY_INFO, "Hashing entered String value");
         PlainToHash();
-        System.out.println("[OK] Password where hashed successfully");
+        LogManager.log(LogType.SECURITY_SUCCESS, "The Password was hashed successfully");
     }
 
     //Collect the Plain Password with invisible Console input
-    public void plainPWSD() {
+    private void plainPWSD() {
         Console console = System.console();
 
         if (console == null) {
@@ -83,13 +88,12 @@ public class PasswordService {
 
         while (true) {
             try {
-
-
                 //Create pwsd with invisible user input
                 pwsdCHAR = console.readPassword("[INFO] Please set a password for your account: ");
                 break;
 
             } catch (Exception error) {
+                LogManager.log(LogType.SECURITY_WARN, "The Program was not run via terminal");
                 System.out.println(error.getMessage());
             }
         }
@@ -162,6 +166,7 @@ public class PasswordService {
         }
 
         Arrays.fill(verifyPWSD, '\0');
+        LogManager.log(LogType.SECURITY_SUCCESS, "The password is ok");
         System.out.println("[OK] Your password is correct an fit to all the credentials");
     }
 
@@ -169,6 +174,7 @@ public class PasswordService {
     private void convertCHARtoString() {
         this.plainPWSD = String.valueOf(pwsdCHAR);
         System.out.println("[OK] Passwords are converted");
+        LogManager.log(LogType.SECURITY_INFO, "The password was converted back to string");
         Arrays.fill(pwsdCHAR, '\0');
     }
 
