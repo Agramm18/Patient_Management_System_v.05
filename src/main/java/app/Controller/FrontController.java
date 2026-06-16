@@ -1,6 +1,10 @@
 package app.Controller;
 import java.util.Scanner;
 
+
+import app.Auth.Flow.Services.LoginService.CurrentUser;
+import app.Auth.Flow.CurrentSession;
+
 /*
     This Section is the Frontcontroller which basically Manage the other controllers
 
@@ -23,6 +27,8 @@ public class FrontController {
     private final MenuController menuController;
     private final ServiceController serviceController;
     private final uiController UIController;
+
+    private CurrentUser currentUser;
 
     //Enum to store request types
     public enum RequestType {
@@ -51,6 +57,10 @@ public class FrontController {
 
             case AUTH:
                 authController.verifyAccountStatus(scanner);
+                return true;
+
+            case MENU:
+                menuController.routeMenu(scanner);
                 return true;
         }
 
