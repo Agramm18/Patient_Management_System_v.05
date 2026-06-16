@@ -1,8 +1,8 @@
 # Future Plans
 
-Last synchronized: 2026-06-07.
+Last synchronized: 2026-06-16.
 
-The project is currently building the account, security, and access-management foundation required before patient-management features are added.
+The project is currently building the account, security, session, menu-routing, and access-management foundation required before patient-management features are added.
 
 ## Immediate Direction
 
@@ -14,7 +14,9 @@ valid registration
 -> complete access request
 -> admin approval or rejection
 -> account activation
+-> active current-user session
 -> role-aware main menu
+-> working admin or local-admin actions
 ```
 
 ## Near-Term Priorities
@@ -25,19 +27,21 @@ valid registration
 - Add username and email uniqueness checks before registration inserts.
 - Make failed-login thresholds include the current attempt and define reset behavior.
 - Enforce system-account-only recovery or rename the feature to reflect broader recovery.
+- Stabilize `CurrentUser` and `CurrentSession` handling for every successful login path.
+- Make `MenuFlow.chooseOption` return valid results.
+- Connect admin and local-admin menu options to real service workflows.
 - Implement job selection and return a selected job value.
 - Implement role selection and return a selected role ID.
 - Store complete access requests.
 - Add admin approval and rejection workflows.
-- Route active users into a real main menu.
-- Add automated tests for core authentication and security behavior.
+- Add automated tests for core authentication, session, menu-routing, and security behavior.
 
 ## First Functional Release Goals
 
-- Stable registration, login, recovery, and account-status behavior
+- Stable registration, login, recovery, account-status, and session behavior
 - Complete access-request and approval workflow
 - Role, department, permission, and menu-access enforcement
-- Main console menu
+- Main console menu with usable local-admin and admin actions
 - Patient records and patient search
 - Appointment scheduling
 - Staff and department management

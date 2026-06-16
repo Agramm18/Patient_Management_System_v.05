@@ -1,6 +1,6 @@
 # Project Archive
 
-Last synchronized: 2026-06-07.
+Last synchronized: 2026-06-16.
 
 This document records completed milestones and superseded project directions. It is historical context, not the current task list.
 
@@ -25,7 +25,9 @@ The project was rebuilt in Java to practice:
 - MySQL and JDBC
 - Authentication and password security
 - Controller, service, and repository separation
-- Access-management and RBAC concepts
+- Runtime session modeling
+- Menu-routing and RBAC concepts
+- Access-management concepts
 - Technical documentation
 
 ## Completed Milestones
@@ -37,7 +39,8 @@ The project was rebuilt in Java to practice:
 - Bootstrap flow moved into `BootConfigService`
 - `FrontController` and request types introduced
 - Configuration and authentication controller routes connected
-- Placeholder menu, service, and UI controllers reserved
+- `MENU` route connected for active menu-enabled users
+- Placeholder service and UI controllers reserved
 
 ### Configuration and Database
 
@@ -65,7 +68,7 @@ The project was rebuilt in Java to practice:
 - Pending-account insert implemented
 - Registration logging migration started
 
-### Login and Security Policy
+### Login, Session, and Security Policy
 
 - Username lookup implemented
 - BCrypt password verification implemented
@@ -73,6 +76,9 @@ The project was rebuilt in Java to practice:
 - Login-attempt database persistence implemented
 - 24-hour invalid-password counting implemented
 - Persisted transitions to locked, suspicious, and quarantine states implemented
+- `CurrentUser` object introduced for active-user runtime data
+- `CurrentSession` introduced as the current runtime session holder
+- Login values loaded through `CollectLoginValues`
 
 ### Recovery
 
@@ -94,18 +100,26 @@ The project was rebuilt in Java to practice:
 - System department menu access guard added
 - Pending access-request insert implemented with selected department and default job/role values
 
+### Menu Routing
+
+- `MenuController` introduced for role-based menu routing
+- `MenuFlow` introduced for menu option validation groundwork
+- Local-admin menu display class introduced
+- Admin menu display class introduced
+- Admin menu now lists the first planned administrative actions
+
 ### Logging
 
 - Logback dependency added
 - `LogManager` facade introduced
 - Category loggers introduced for boot, configuration, authentication, security, SQL, database, and credentials
-- Boot, configuration, and recovery flows partially migrated from direct console diagnostics
+- Boot, configuration, recovery, and parts of authentication flows partially migrated from direct console diagnostics
 
 ### Documentation
 
 - Documentation organized under `docs/project_info`, `docs/setup`, `docs/architecture`, and `docs/archive`
 - Current status, roadmap, setup, architecture, and Mermaid UML documentation created
-- Documentation synchronized with the logging and password-policy implementation on 2026-06-07
+- Documentation synchronized with the session and menu-routing baseline on 2026-06-16
 
 ## Superseded Documentation Notes
 
@@ -117,12 +131,14 @@ The following older statements are no longer current:
 - Recovery account display is now filtered to system accounts.
 - Repository classes and authentication services were reorganized into more specific subpackages.
 - `Query.sql` is not the complete database setup and is ignored by Git.
+- `FrontController` no longer routes only `CONFIG` and `AUTH`; the `MENU` route is now connected.
+- There is now a runtime current-user session baseline for active accounts.
 
 ## Historical Limitations Still Present
 
 Several early-stage design limitations remain and are tracked in `ToDo.md`:
 
-- No main menu after successful login
+- Menu actions are displayed but not implemented
 - Incomplete access-request details and no approval workflow
 - Partial logging migration
 - Inconsistent naming

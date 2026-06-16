@@ -1,8 +1,8 @@
 # Recruiter Overview
 
-Last synchronized: 2026-06-07.
+Last synchronized: 2026-06-16.
 
-Patient Management System V5.01 is a Java 21 console-based learning and portfolio project. It demonstrates the incremental development of a larger database-backed application with authentication, account security, access-management foundations, and technical documentation.
+Patient Management System V5.01 is a Java 21 console-based learning and portfolio project. It demonstrates the incremental development of a larger database-backed application with authentication, account security, runtime-session modeling, access-management foundations, first role-aware menu routing, and technical documentation.
 
 ## Demonstrated Skills
 
@@ -14,6 +14,8 @@ Patient Management System V5.01 is a Java 21 console-based learning and portfoli
 - BCrypt password and recovery-key hashing
 - Authentication and account-status handling
 - Login attempt auditing and persisted security-policy updates
+- Runtime user-session modeling through `CurrentUser` and `CurrentSession`
+- Early role-aware menu routing for local admin and admin accounts
 - SLF4J and Logback integration through a custom logging facade
 - Markdown and Mermaid documentation
 - Git-based incremental development
@@ -28,6 +30,8 @@ Patient Management System V5.01 is a Java 21 console-based learning and portfoli
 - Recovery-key validation with retry limits and system-account listing
 - Database-backed login attempt history
 - Persisted `locked`, `suspicious`, and `on_quarantine` status changes based on recent failed passwords
+- Active-user session creation with account ID, status, role, system-account flag, and menu-access flag
+- Basic `MENU` routing through `FrontController` and `MenuController`
 - Pending-user department requests
 - Central `LogManager` introduced for categorized application logging
 
@@ -39,16 +43,17 @@ The project is not presented as a finished hospital product. The current stage i
 - Authentication and security policies
 - Recovery boundaries
 - Logging consistency
+- Runtime session behavior
+- Role-aware menu routing
 - Access requests and approval
 - Account activation
-- Main-menu routing
 - Automated tests
 
-Patient records, appointments, treatment, billing, reporting, JavaFX, REST APIs, and deployment tooling are future work.
+Patient records, appointments, treatment, billing, reporting, complete admin workflows, JavaFX, REST APIs, and deployment tooling are future work.
 
 ## Current Engineering Challenges
 
-The repository intentionally exposes active development work rather than hiding unfinished areas. Current priorities include resolving environment-key inconsistencies, completing the logging migration, improving return-based error handling, enforcing recovery scope, and adding tests.
+The repository intentionally exposes active development work rather than hiding unfinished areas. Current priorities include resolving environment-key inconsistencies, completing the logging migration, improving return-based error handling, enforcing recovery scope, making menu selections route to real actions, completing access-request approval, and adding tests.
 
 ## Repository Reading Order
 

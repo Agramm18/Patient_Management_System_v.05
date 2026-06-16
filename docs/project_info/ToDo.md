@@ -1,6 +1,6 @@
 # ToDo
 
-Status date: 2026-06-07.
+Status date: 2026-06-16.
 
 This is the current implementation backlog. It is ordered by dependency and risk rather than by product feature.
 
@@ -8,17 +8,19 @@ This is the current implementation backlog. It is ordered by dependency and risk
 
 ## Current Milestone
 
-Complete and stabilize the authentication and access-management foundation:
+Complete and stabilize the authentication, session, menu-routing, and access-management foundation:
 
 ```text
 configuration
 -> registration
 -> login and security policy
 -> recovery
+-> current-user session
+-> role-aware menu routing
 -> complete access request
 -> approval
 -> activation
--> main menu
+-> usable role menus
 ```
 
 ## Completed Baseline
@@ -37,6 +39,10 @@ configuration
 - [x] Pending-user department request baseline
 - [x] Persisted failed-login status updates
 - [x] Initial SLF4J and Logback integration
+- [x] `CurrentUser` and `CurrentSession` runtime session baseline
+- [x] `FrontController.RequestType.MENU` routing baseline
+- [x] `MenuController` role routing baseline for local admin and admin
+- [x] Admin and local-admin menu display classes
 - [x] Current documentation synchronized
 
 ## Highest Priority Defects
@@ -55,6 +61,14 @@ configuration
 - [ ] Improve email and phone validation.
 - [ ] Return repository success or failure instead of only printing messages.
 
+### Login Session and Status Handling
+
+- [ ] Create a consistent session result for every login status that should be treated as successful.
+- [ ] Decide whether `suspicious` login should create menu access, require password change, or remain blocked.
+- [ ] After a starter-account password change, decide whether the user should be logged in automatically or asked to log in again.
+- [ ] Guard `BootConfigService` against a null `CurrentSession` before calling user session methods.
+- [ ] Prevent success logs from exposing user identity and security state more broadly than needed.
+
 ### Failed-Login Policy
 
 - [ ] Include the current failed attempt when evaluating thresholds.
@@ -70,11 +84,23 @@ configuration
 - [ ] Return success or failure from password update repositories.
 - [ ] Decide whether recovery should also change status, password-change, or menu-access fields.
 
+## Menu and Runtime Routing
+
+- [ ] Make `MenuFlow.chooseOption` return `true` for valid selections.
+- [ ] Store the selected menu option so it can route to a real action.
+- [ ] Implement local-admin menu options.
+- [ ] Implement admin menu options.
+- [ ] Route authorized admin options to service classes.
+- [ ] Define behavior for role IDs other than `1` and `2`.
+- [ ] Decide whether `ServiceController` and `uiController` are needed in the console runtime.
+- [ ] Replace direct `System.exit` calls with controlled application shutdown where practical.
+
 ## Logging Migration
 
 - [ ] Add `src/main/resources/logback.xml`.
 - [ ] Define console and file output policy.
 - [ ] Handle every declared `LogType` in `LogManager.log`.
+- [ ] Add the missing `break` after `AUTH_DEBUG`.
 - [ ] Remove unused loggers and imports from `LogManager`.
 - [ ] Decide whether success events should use `INFO` or a structured event field.
 - [ ] Migrate login, password, repository, and menu diagnostics from `System.out.println`.
@@ -106,15 +132,6 @@ configuration
 - [ ] Apply approved department, job, role, permission, and menu access to the account.
 - [ ] Activate accounts only after approval.
 
-## Runtime Routing
-
-- [ ] Return authenticated-user context from login.
-- [ ] Implement `FrontController.RequestType.MENU`.
-- [ ] Implement `MenuController`.
-- [ ] Route users according to approved access data.
-- [ ] Decide whether `ServiceController` and `uiController` are needed in the console runtime.
-- [ ] Replace direct `System.exit` calls with controlled application shutdown where practical.
-
 ## Testing and Quality
 
 - [ ] Add JUnit dependencies and `src/test/java`.
@@ -123,6 +140,8 @@ configuration
 - [ ] Test account-status routing.
 - [ ] Test failed-login thresholds.
 - [ ] Test recovery retry and target restrictions.
+- [ ] Test current-user session creation.
+- [ ] Test menu routing for local admin and admin users.
 - [ ] Add repository integration tests.
 - [ ] Add Maven Wrapper.
 - [ ] Add formatter and static analysis.
@@ -135,6 +154,7 @@ configuration
 - [ ] Remove unused classes or connect them to the runtime.
 - [ ] Remove unused imports and fields.
 - [ ] Replace inconsistent direct console error handling with shared patterns.
+- [ ] Decide whether empty directories under `src/main/java/app/Services` should be kept.
 
 ## Product Features After Foundation Work
 
@@ -149,9 +169,10 @@ configuration
 
 ## Open Decisions
 
-- Should `suspicious` login be treated as success or require password change?
+- Should `suspicious` login be treated as success, require password change, or stay blocked?
 - Should recovery remain limited to system accounts?
 - Which roles may approve access requests?
 - Should jobs remain strings or move to a dedicated table?
 - Which login-attempt data is the source of truth for security policy?
 - Should application logs be stored only in files, only in the database, or in both?
+- Should the console menu remain the main runtime target before JavaFX or REST work begins?

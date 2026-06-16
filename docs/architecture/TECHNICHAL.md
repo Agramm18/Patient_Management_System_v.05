@@ -1,6 +1,6 @@
 # Technical Overview
 
-Last synchronized: 2026-06-07.
+Last synchronized: 2026-06-16.
 
 ## Technology Stack
 
@@ -23,18 +23,24 @@ Last synchronized: 2026-06-07.
 The active runtime uses a controller-driven console architecture:
 
 ```text
-Main -> BootConfigService -> FrontController -> ConfigController -> AuthController
+Main
+-> BootConfigService
+-> FrontController
+-> ConfigController
+-> AuthController
+-> MenuController when an active user has menu access
 ```
 
-`FrontController` currently routes only `CONFIG` and `AUTH`. The menu, service, UI, and exit request types are reserved but not routed.
+`FrontController` currently routes `CONFIG`, `AUTH`, and `MENU`. The service, UI, and exit request types are reserved but not routed through active switch cases.
 
 The project separates code into:
 
 - Controllers for top-level routing
 - Flows for authentication use cases
-- Services for input collection, validation, and coordination
+- Services for input collection, validation, session creation, and coordination
 - Repositories for JDBC operations
 - CLI classes for user-facing menus and messages
+- Menu classes for early role-aware menu routing
 - Configuration classes for startup, connection values, recovery keys, and logging
 
 ## Database Access
@@ -54,17 +60,45 @@ Current tradeoffs:
 - There is no connection pool or dependency injection.
 - Repositories return inconsistent success values and often print errors directly.
 
-## Authentication and Passwords
+## Authentication, Sessions, and Passwords
 
 Passwords are collected through `System.console()` and stored as BCrypt hashes.
 
 - User-created and recovery passwords use `BCrypt.gensalt(15)`.
-- Starter-account passwords use `BCrypt.gensalt(12)`.
+- Starter-account passwords and recovery-key startup hashes use `BCrypt.gensalt(12)`.
 - Login verification uses `BCrypt.checkpw`.
 - Password rules require at least 10 characters, uppercase, lowercase, number, and special character.
 - Password creation allows three invalid policy attempts before throwing an exception.
 
 A real terminal is required. IDE execution without a terminal-backed console can fail during login, registration password creation, starter password change, or recovery.
+
+For active accounts:
+
+1. `LoginVerification` validates username, password, and account status.
+2. `CollectLoginValues` loads runtime account values from `accounts`.
+3. `CurrentUser` stores username, account ID, status ID, role ID, system-account flag, and menu-access flag.
+4. `CurrentSession` stores the active user for menu routing.
+
+Session handling is still a baseline. It is static, not request-scoped, and it is not yet covered by automated tests.
+
+## Menu Routing
+
+Menu routing is partially implemented after authentication:
+
+1. `BootConfigService` reads `CurrentSession.getCurrentUser()`.
+2. If `hasAccessToMenu()` is true, it routes `FrontController.RequestType.MENU`.
+3. `MenuController` reads the user's role.
+4. Role `1` displays `LocalAdminMenu`.
+5. Role `2` displays `AdminMenu`.
+6. `AdminMenu` provides eight labels for planned administrative actions.
+7. `MenuFlow.chooseOption` validates numeric input against the menu size.
+
+Current limitations:
+
+- `MenuFlow.chooseOption` always returns `false`.
+- `MenuFlow.admin()` is empty.
+- Menu labels do not execute real service workflows yet.
+- Non-admin roles are not routed.
 
 ## Recovery Design
 
@@ -115,11 +149,12 @@ The current attempt is inserted after policy evaluation. The policy therefore ev
 
 Current state:
 
-- Boot, configuration, recovery, and parts of registration use the facade.
+- Boot, configuration, recovery, and parts of authentication use the facade.
 - Other classes still print diagnostic messages directly.
 - No `src/main/resources/logback.xml` exists.
 - Logback therefore uses its default console configuration.
-- `MESSAGE`, `SYSTEM_WARN`, `SYSTEM_DEBUG`, `CONFIG_FAILED`, and some other declared values are not currently handled consistently.
+- `MESSAGE`, `SYSTEM_WARN`, `SYSTEM_DEBUG`, and some other declared values are not currently handled consistently.
+- `AUTH_DEBUG` falls through into `CONFIG_WARN` because it has no `break`.
 - The `ACCESS` logger is declared but not used by the switch.
 
 Logging is an active migration, not a completed subsystem.
@@ -132,9 +167,11 @@ Implemented:
 - BCrypt recovery-key hashes
 - Hidden terminal input
 - Starter-account first password change
+- Active-user session object
 - Database-backed login attempt history
 - Persisted locked, suspicious, and quarantine statuses
 - Recovery-key retry limit
+- First admin and local-admin menu routing after active login
 
 Partially implemented:
 
@@ -142,13 +179,14 @@ Partially implemented:
 - System-account recovery boundary
 - Pending-user access requests
 - Role and department checks
+- Menu routing and service actions
 - Diagnostic logging
 
 Not implemented:
 
 - Complete RBAC enforcement
 - Access-request approval
-- Session or authenticated-user context
+- Complete admin workflows
 - Automated security tests
 - Central exception strategy
 
@@ -172,10 +210,10 @@ Not configured:
 
 ## Current Build Verification
 
-The following command succeeds as of 2026-06-07:
+The following command succeeds as of 2026-06-16:
 
 ```bash
 mvn -DskipTests compile
 ```
 
-There are no tests to execute.
+Maven compiles 73 Java source files. There are no tests to execute.

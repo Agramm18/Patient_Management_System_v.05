@@ -1,6 +1,6 @@
 # Database Setup
 
-Last synchronized: 2026-06-07.
+Last synchronized: 2026-06-16.
 
 This document defines the MySQL schema and reference IDs expected by the current Java implementation.
 

@@ -1,6 +1,6 @@
 # Environment Setup
 
-Last synchronized: 2026-06-07.
+Last synchronized: 2026-06-16.
 
 This document describes the `.env` values used by the current Java implementation.
 

@@ -1,10 +1,10 @@
 # Current Project Status
 
-Last synchronized: 2026-06-07.
+Last synchronized: 2026-06-16.
 
-Patient Management System V5.01 is currently a Java 21 console application focused on configuration, authentication, account security, recovery, and access-request foundations.
+Patient Management System V5.01 is currently a Java 21 console application focused on configuration, authentication, account security, recovery, session creation, first menu routing, and access-request foundations.
 
-The project contains 67 Java source files. The active runtime is:
+The project contains 73 Java source files. The active runtime is:
 
 ```text
 Main
@@ -12,13 +12,17 @@ Main
 -> FrontController
 -> ConfigController
 -> AuthController
+-> LoginFlow or RegistrationFlow or RecoveryFlow
+-> CurrentSession when an active login succeeds
+-> MenuController when the current user has menu access
 ```
 
-Only `CONFIG` and `AUTH` are routed by `FrontController`. `MENU`, `SERVICE`, `UI`, and `EXIT` are reserved request types.
+`FrontController` currently routes `CONFIG`, `AUTH`, and `MENU`. `SERVICE`, `UI`, and `EXIT` remain reserved request types and are not routed.
 
 ## Build State
 
-- `mvn -DskipTests compile` succeeds as of 2026-06-07.
+- `mvn -DskipTests compile` succeeds as of 2026-06-16.
+- Maven compiles 73 Java source files.
 - No `src/test` directory or automated test suite exists.
 - No `src/main/resources` directory or explicit Logback configuration exists.
 - The application must be run from a terminal for hidden password and recovery-key input.
@@ -27,8 +31,8 @@ Only `CONFIG` and `AUTH` are routed by `FrontController`. `MENU`, `SERVICE`, `UI
 
 ### Bootstrap and Configuration
 
-- `Main` creates the shared `Scanner` and starts `BootConfigService`.
-- `BootConfigService` creates all controllers and routes through configuration before authentication.
+- `Main` creates the shared `Scanner`, prints the startup message, displays the loader, and starts `BootConfigService`.
+- `BootConfigService` creates the controller graph and routes through configuration before authentication.
 - Invalid environment values, failed database validation, or invalid `DBManager` initialization stop startup.
 - `EnvValidationService` validates the `.env` file and required values.
 - `SQLValidationService` builds and tests the MySQL JDBC connection.
@@ -46,7 +50,7 @@ Only `CONFIG` and `AUTH` are routed by `FrontController`. `MENU`, `SERVICE`, `UI
 3. Recover System Accounts
 4. Exit
 
-After registration, login, or recovery returns, the authentication menu is shown again.
+After registration, recovery, or a login that does not return an active menu-enabled session, the authentication menu is shown again. After an active login with menu access, `AuthController` returns to `BootConfigService`, which routes `MENU`.
 
 ### Registration
 
@@ -57,7 +61,13 @@ After registration, login, or recovery returns, the authentication menu is shown
 - Creates an account with pending status, intern role, unassigned department, no menu access, and `is_system_account = false`.
 - Registration-related output is being migrated from direct console messages to `LogManager`.
 
-### Login
+Current registration risks:
+
+- If the user changes a field during confirmation, the confirmation flow exits instead of showing the updated summary again.
+- `CreateAccount` can still be called with a null password hash if registration exits before password creation.
+- Username and email uniqueness are enforced by database constraints, not by explicit pre-insert checks.
+
+### Login and Session Creation
 
 - Collects the username through `Scanner`.
 - Collects the password through terminal-backed `System.console()`.
@@ -65,22 +75,45 @@ After registration, login, or recovery returns, the authentication menu is shown
 - Loads the account status from `account_status`.
 - Writes every completed login result to `login_attempts`.
 - Repeats login attempts until `LoginVerification` returns success.
+- For active accounts, `CollectLoginValues` loads account ID, status ID, role ID, system-account flag, and menu-access flag.
+- `CurrentUser` stores the authenticated runtime user.
+- `CurrentSession` stores the current user as a static session object for menu routing.
 
 Current account-status behavior:
 
 | Status | Current behavior |
 | --- | --- |
-| `active` | Login returns success. No main menu is routed yet. |
+| `active` | Creates `CurrentUser`, stores it in `CurrentSession`, and returns success. If `has_access_to_menu = true` and status ID is `1`, the runtime routes to `MenuController`. |
 | `disabled` | Login fails and repeats. |
-| `pending` | Starts the first-login access-request flow and records the result as successful with a reason. |
+| `pending` | Starts the first-login access-request flow and records the result as successful with a reason. It does not create an active session. |
 | `locked` | Login fails and repeats. |
 | `on_quarantine` | Login fails and repeats. |
-| `waiting_for_password_change` | Requires a new password, then activates the account and enables menu access. |
-| `suspicious` | Login returns success with a warning reason. |
+| `waiting_for_password_change` | Requires a new password, then activates the account and enables menu access. A new login is still required before menu routing. |
+| `suspicious` | Login returns success with a warning reason, but does not create a session object. |
+
+### Menu Routing
+
+Menu routing is partially implemented.
+
+- `BootConfigService` reads `CurrentSession.getCurrentUser()` after authentication returns.
+- If the user has menu access, `FrontController` routes `RequestType.MENU`.
+- `MenuController` reads the current user's role.
+- Role `1` routes to `LocalAdminMenu`.
+- Role `2` routes to `AdminMenu`.
+- `AdminMenu` displays eight administrative options.
+- `MenuFlow.chooseOption` validates a selected option against the menu size.
+
+Current menu limitations:
+
+- `MenuFlow.chooseOption` always returns `false`, even for valid input.
+- `MenuFlow.admin()` is empty.
+- `LocalAdminMenu` only displays a header.
+- Admin menu actions are labels only; no service workflows are connected.
+- Roles other than `1` and `2` have no menu routing.
 
 ### Failed-Login Policy
 
-`CountFailedLoginAttempts` counts `INVALID_PASSWORD` records for the account from the previous 24 hours. `ExecutePWSDPolicy` now persists status changes:
+`CountFailedLoginAttempts` counts `INVALID_PASSWORD` records for the account from the previous 24 hours. `ExecutePWSDPolicy` persists status changes:
 
 | Stored failed-password count | Status update |
 | --- | --- |
@@ -132,18 +165,20 @@ Job selection, role selection, approval, rejection, and activation are not conne
 
 ### Logging
 
-The project now includes Logback and a custom `LogManager` facade with category loggers such as `BOOT`, `CONFIG`, `AUTH`, `SECURITY`, `SQL`, `DATABASE`, and `CREDENTIALS`.
+The project includes Logback and a custom `LogManager` facade with category loggers such as `BOOT`, `CONFIG`, `AUTH`, `SECURITY`, `SQL`, `DATABASE`, and `CREDENTIALS`.
 
 Logging migration is partial:
 
 - Boot, configuration, recovery, and parts of registration use `LogManager`.
-- Many login, repository, menu, and password messages still use `System.out.println`.
+- Some login, repository, menu, and password messages still use `System.out.println`.
 - No `logback.xml` exists, so Logback uses its default configuration.
 - Some declared `LogType` values are not handled by the current `LogManager.log` switch and therefore produce no output.
+- `AUTH_DEBUG` does not break before `CONFIG_WARN`, so debug logging falls through into the config warning branch.
 
 ## Current Limitations
 
-- No connected main menu exists after active login.
+- Menu routing exists only for active menu-enabled local admin and admin users.
+- Admin and local-admin menu actions are not implemented.
 - Patient-management product features are not implemented.
 - Registration correction can continue without reconfirmation or password creation.
 - Registration does not perform explicit username or email uniqueness checks before insert.

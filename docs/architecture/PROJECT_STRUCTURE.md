@@ -1,8 +1,8 @@
 # Project Structure
 
-Last synchronized: 2026-06-07.
+Last synchronized: 2026-06-16.
 
-Patient Management System V5.01 is a Java 21 Maven console application. The source tree currently contains 67 Java files organized around bootstrap, controllers, authentication flows, configuration, CLI output, and JDBC repositories.
+Patient Management System V5.01 is a Java 21 Maven console application. The source tree currently contains 73 Java files organized around bootstrap, controllers, authentication flows, runtime session state, configuration, CLI output, menu routing, and JDBC repositories.
 
 ## Root Structure
 
@@ -53,6 +53,7 @@ src/main/java/app/
 |-- Main.java
 |-- Auth/
 |   `-- Flow/
+|       |-- CurrentSession.java
 |       |-- LoginFlow.java
 |       |-- PasswordFlow.java
 |       |-- RecoveryFlow.java
@@ -71,6 +72,7 @@ src/main/java/app/
 |           |       |-- SelectUserForRecovery.java
 |           |       `-- ValidateRecoveryKey.java
 |           |-- LoginService/
+|           |   |-- CurrentUser.java
 |           |   |-- FirstLogin.java
 |           |   |-- LoginInputCollector.java
 |           |   `-- LoginVerification.java
@@ -102,9 +104,12 @@ src/main/java/app/
 |       |   `-- itJobsMenu.java
 |       |-- Departments/
 |       |   `-- DepartmentMenu.java
-|       `-- Program/
-|           |-- AuthMenu.java
-|           `-- roleMenu.java
+|       |-- Program/
+|       |   |-- AuthMenu.java
+|       |   `-- roleMenu.java
+|       `-- ServiceMenus/
+|           |-- AdminMenu.java
+|           `-- LocalAdminMenu.java
 |-- Config/
 |   |-- DBManager.java
 |   |-- EnvValidationService.java
@@ -118,6 +123,8 @@ src/main/java/app/
 |   |-- MenuController.java
 |   |-- ServiceController.java
 |   `-- uiController.java
+|-- Menu/
+|   `-- MenuFlow.java
 `-- Repository/
     |-- AuthRepository/
     |   |-- Management/
@@ -140,31 +147,39 @@ src/main/java/app/
     |   |-- CreateDefaultAccounts.java
     |   `-- SetRecoveryKey.java
     |-- LoginRepository/
-    |   `-- CheckUserInDB.java
+    |   |-- CheckUserInDB.java
+    |   `-- CollectLoginValues.java
     |-- RegistrationRepository/
     |   `-- CreateAccount.java
     `-- logsRepository/
         `-- CollectLogs.java
 ```
 
+Empty package directories currently present:
+
+- `src/main/java/app/Repository/AuthRepository/Config`
+- `src/main/java/app/Services/Admin`
+- `src/main/java/app/Services/LocalAdmin`
+
 ## Package Responsibilities
 
 ### `app`
 
-`Main` creates the shared `Scanner`, prints the startup message, and starts `BootConfigService`.
+`Main` creates the shared `Scanner`, prints the startup message, displays the loader through `BootConfigService`, and starts system configuration.
 
 ### `app.Bootstrap`
 
-`BootConfigService` creates the controller graph, routes to configuration, stops the process when configuration fails, and routes to authentication when configuration succeeds.
+`BootConfigService` creates the controller graph, routes to configuration, stops the process when configuration fails, routes to authentication when configuration succeeds, then routes to `MENU` when `CurrentSession` contains a user with menu access.
 
 ### `app.Controller`
 
-- `FrontController` routes `CONFIG` and `AUTH`.
+- `FrontController` routes `CONFIG`, `AUTH`, and `MENU`.
 - `ConfigController` validates configuration, initializes database access, stores the recovery-key hash, and checks starter accounts.
 - `AuthController` owns the authentication menu loop.
-- `MenuController`, `ServiceController`, and `uiController` are empty placeholders.
+- `MenuController` routes local admin and admin users to the first menu display classes.
+- `ServiceController` and `uiController` are placeholders.
 
-Reserved request types are `MENU`, `SERVICE`, `UI`, and `EXIT`.
+Reserved request types still not routed by active cases are `SERVICE`, `UI`, and `EXIT`.
 
 ### `app.Config`
 
@@ -180,6 +195,7 @@ Reserved request types are `MENU`, `SERVICE`, `UI`, and `EXIT`.
 - `LoginFlow` repeats credential collection, verifies login, and stores login attempts.
 - `PasswordFlow` delegates password creation to `PasswordService`.
 - `RecoveryFlow` validates the recovery key and coordinates password reset.
+- `CurrentSession` stores the current active `CurrentUser` for downstream routing.
 
 ### `app.Auth.Flow.Services`
 
@@ -187,6 +203,7 @@ Reserved request types are `MENU`, `SERVICE`, `UI`, and `EXIT`.
 - `PasswordService` validates passwords and creates BCrypt hashes.
 - `LoginInputCollector` collects username and hidden password input.
 - `LoginVerification` verifies credentials and routes by account status.
+- `CurrentUser` stores active account ID, username, status, role, system-account flag, and menu-access flag.
 - `FirstLogin` creates pending-user access-request groundwork.
 - Recovery services collect, validate, and route recovery input.
 - Management services contain department and role input plus the job placeholder.
@@ -194,12 +211,16 @@ Reserved request types are `MENU`, `SERVICE`, `UI`, and `EXIT`.
 
 ### `app.CLIText`
 
-Contains user-facing console messages and menus. Several job menus remain placeholders.
+Contains user-facing console messages and menus. Several department job menus remain placeholders. `AdminMenu` and `LocalAdminMenu` display the first service-menu screens but do not execute real workflows yet.
+
+### `app.Menu`
+
+`MenuFlow` contains the first menu-option validation groundwork. It does not route selected options to actions yet.
 
 ### `app.Repository`
 
 - `ConfigRepository` manages recovery-key storage and starter accounts.
-- `LoginRepository` reads account credentials and status.
+- `LoginRepository` reads account credentials, status, and current-login values.
 - `RegistrationRepository` inserts registered accounts.
 - `logsRepository` inserts login attempts.
 - `AuthRepository.Management` handles failed-attempt counts, access requests, and assignment checks.
@@ -217,6 +238,8 @@ Main
 -> ConfigController
 -> FrontController(AUTH)
 -> AuthController
+-> FrontController(MENU) when active current user has menu access
+-> MenuController
 ```
 
 ### Configuration
@@ -231,15 +254,28 @@ EnvValidationService
 -> CreateDefaultAccounts when required
 ```
 
-### Login
+### Active Login
 
 ```text
 LoginFlow
 -> LoginInputCollector
 -> LoginVerification
 -> CheckUserInDB
--> status-specific behavior
+-> CollectLoginValues
+-> CurrentUser
+-> CurrentSession
 -> logsRepository.CollectLogs
+```
+
+### Menu Routing
+
+```text
+BootConfigService
+-> CurrentSession.getCurrentUser
+-> FrontController(MENU)
+-> MenuController
+-> LocalAdminMenu or AdminMenu
+-> MenuFlow for option validation
 ```
 
 ### Recovery
@@ -269,7 +305,9 @@ LoginVerification
 ## Structural Notes
 
 - Database access is performed directly by repository classes through static `DBManager`.
+- Runtime session state is currently stored through static `CurrentSession`.
 - Logging migration is partial; direct console diagnostics still exist throughout the source tree.
 - Several names do not follow Java naming conventions.
-- `AccountPolicy`, `CollectUserJob`, `SetNewStatus`, and the three non-auth controllers are placeholders.
+- `AccountPolicy`, `CollectUserJob`, `SetNewStatus`, service directories, `ServiceController`, and `uiController` are placeholders.
 - `SystemAccountRequiresPasswordChange` and `HasAssignedRole` exist but are not part of the active primary flow.
+- `MenuFlow` and service menus are connected only as a first routing baseline.

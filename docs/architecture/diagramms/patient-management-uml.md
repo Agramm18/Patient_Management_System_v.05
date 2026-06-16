@@ -1,17 +1,19 @@
 # Patient Management UML
 
-Last synchronized: 2026-06-07.
+Markdown note synchronized: 2026-06-16.
 
-This diagram shows the active architecture and the most important placeholders in Patient Management System V5.01. The raw Mermaid source is maintained in `patient-management-uml.mmd`.
+The Mermaid diagram block was not resynchronized in this documentation pass. It still needs a separate diagram update for the current `CurrentSession`, `CurrentUser`, `MenuController`, `MenuFlow`, `AdminMenu`, `LocalAdminMenu`, and `CollectLoginValues` structure.
 
-The diagram reflects:
+This diagram shows the architecture and the most important placeholders in Patient Management System V5.01. The raw Mermaid source is maintained in `patient-management-uml.mmd`.
+
+The diagram still reflects the earlier architecture slice:
 
 - Controller-driven configuration and authentication
 - Registration, login, password, recovery, and pending-user flows
 - JDBC repository relationships
 - Persisted failed-login status policy
 - Partial SLF4J and Logback migration
-- Current placeholders and known recovery/access boundaries
+- Earlier placeholders and known recovery/access boundaries
 
 ```mermaid
 classDiagram
