@@ -2,10 +2,14 @@ package app.Bootstrap;
 
 import app.CLIText.DisplayMessages.AuthMSG;
 import app.CLIText.DisplayMessages.LoaderMSG;
+import app.Auth.Flow.Services.LoginService.CurrentUser;
 
 import app.Config.LogManager.LogType;
 import app.Config.LogManager;
 import app.Controller.*;
+
+import app.Auth.Flow.CurrentSession;
+import app.Auth.Flow.Services.LoginService.CurrentUser;
 
 import java.sql.SQLException;
 import java.util.Scanner;
@@ -46,6 +50,13 @@ public class BootConfigService {
             show.msg();
 
             dispatcher.navigateSubController(FrontController.RequestType.AUTH, scanner);
+
+            CurrentUser user = CurrentSession.getCurrentUser();
+
+            if (user.hasAccessToMenu()) {
+                LogManager.log(LogType.AUTH_SUCCESS, "The User have access to use the menu");
+                dispatcher.navigateSubController(FrontController.RequestType.MENU, scanner);
+            }
 
         } catch (RuntimeException error) {
             System.out.println("[ERROR] System Config Failed");
