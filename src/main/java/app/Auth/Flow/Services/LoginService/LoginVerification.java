@@ -9,9 +9,13 @@ import app.Repository.AuthRepository.Management.CountFailedLoginAttempts;
 import app.Repository.AuthRepository.Password.ExecutePWSDPolicy;
 import app.Repository.AuthRepository.Password.UpdateUserPassword;
 import app.Repository.LoginRepository.CheckUserInDB;
+import app.Auth.Flow.Services.LoginService.CurrentUser;
+
+import app.Auth.Flow.CurrentSession;
 
 import app.Config.LogManager;
 import app.Config.LogManager.LogType;
+import app.Repository.LoginRepository.CollectLoginValues;
 
 /*
      This Section Checks the Username and Validate how to proceed after the first Login
@@ -28,6 +32,8 @@ public class LoginVerification {
     private int RETRYS_FOR_SUSPICOUS = 6;
     private int RETRYS_FOR_QUARANTINE = 25;
 
+    private CurrentUser currentUser;
+    private CurrentSession currentSession;
 
     private final CheckUserInDB repository = new CheckUserInDB();
 
@@ -107,6 +113,23 @@ public class LoginVerification {
                 case "active":
                     LogManager.log(LogType.AUTH_INFO, "The User Status is active");
                     System.out.println("[OK] The User account is active");
+
+                    CollectLoginValues sessionObject = new CollectLoginValues();
+                    sessionObject.loginValues(Username);
+
+                    boolean hasAccessToMenu = sessionObject.gethasAccesToMenu();
+                    int accountStatus = sessionObject.getUserStatus();
+                    int accountID = sessionObject.getUserID();
+                    boolean isSystemAccount = sessionObject.isSystemAccount();
+                    int userRole = sessionObject.getUserRole();
+
+                    this.RETRYS = 0;
+
+                    CurrentUser session = new CurrentUser(Username, accountID, hasAccessToMenu, accountStatus, isSystemAccount, userRole);
+                    session.loginResult();
+
+                    CurrentSession.setCurrentUser(session);
+
                     return new CollectLogs(true, null);
                 case "disabled":
                     LogManager.log(LogType.AUTH_INFO, "The User Status is disabled");
@@ -155,8 +178,6 @@ public class LoginVerification {
                     System.out.println("[INFO] You account is set to suspicious maybe you need to change your password");
                     return new CollectLogs(true, "You account is set to suspicious maybe you need to change your password");
             }
-
-            this.RETRYS = 0;
 
             return new CollectLogs(true, null);
 
