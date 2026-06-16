@@ -3,12 +3,15 @@ package app.Controller;
 import app.Auth.Flow.LoginFlow;
 import app.Auth.Flow.RecoveryFlow;
 import app.Auth.Flow.RegistrationFlow;
+import app.Auth.Flow.Services.LoginService.CurrentUser;
 import app.CLIText.Menus.Program.AuthMenu;
 
 import java.util.Scanner;
 
 import app.Config.LogManager;
 import app.Config.LogManager.LogType;
+import app.Auth.Flow.CurrentSession;
+
 
 
 /*
@@ -20,6 +23,7 @@ import app.Config.LogManager.LogType;
 */
 
 public class AuthController {
+    private CurrentUser currentUser;
 
     public void verifyAccountStatus(Scanner scanner) {
         String accountStatusSTR;
@@ -52,11 +56,20 @@ public class AuthController {
                         LogManager.log(LogType.AUTH_INFO, "Starting Login process");
                         LoginFlow login = new LoginFlow();
                         login.user(scanner);
+
+                        CurrentUser user = CurrentSession.getCurrentUser();
+
+                        if (user != null && user.hasAccessToMenu() && user.getAccountStatus() == 1) {
+                            LogManager.log(LogType.AUTH_SUCCESS, "The Login was a success");
+                            return;
+                        }
+
                     } else if (userValue == 3) {
                         System.out.println("[INFO] Starting Recovery process");
                         LogManager.log(LogType.SECURITY_INFO, "Starting Recovery process");
                         RecoveryFlow recover = new RecoveryFlow();
                         recover.SystemAccounts(scanner);
+
                     } else {
                         System.out.println("[OK] The Program will end. Good bye!!");
                         LogManager.log(LogType.SYSTEM_SUCCESS, "The user have chosen to end this program");
@@ -68,9 +81,11 @@ public class AuthController {
             } catch (NumberFormatException numberError) {
                 System.out.println("[ERROR] It seems that you didn't type in a number: " + numberError.getMessage());
                 LogManager.log(LogType.INVALID_INPUT, "The User typed not in a Number");
+
             } catch (IllegalArgumentException error) {
                 System.out.println("[ERROR] Something went wrong: " + error.getMessage());
                 LogManager.log(LogType.INVALID_INPUT, error.getMessage());
+
             }
         }
     }
