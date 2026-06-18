@@ -16,6 +16,7 @@ public class LogManager {
     private static final Logger SQL = LoggerFactory.getLogger("SQL");
     private static final Logger CREDENTIALS = LoggerFactory.getLogger("CREDENTIALS");
     private static final Logger BOOT = LoggerFactory.getLogger("BOOT");
+    private static final Logger MENU = LoggerFactory.getLogger("MENU");
 
     public enum LogType {
         SQL_EXCEPTION,
@@ -60,6 +61,17 @@ public class LogManager {
         SYSTEM_DEBUG,
         SYSTEM_SUCCESS,
 
+        MENU_INFO,
+        MENU_DEBUG,
+        MENU_WARN,
+        MENU_FAILED,
+        MENU_ROUTE_SUCCESS,
+        MENU_SUCCESS,
+
+        MENU_INVALID_OPTION,
+        MENU_OUT_OF_RANGE,
+        MENU_BANK_INPUT,
+
         SECURITY_INFO,
         SECURITY_SUCCESS,
         SECURITY_FAILED,
@@ -100,6 +112,12 @@ public class LogManager {
                 AUTH.info(logMessage);
                 break;
 
+            case MENU_SUCCESS:
+            case MENU_DEBUG:
+            case MENU_INFO:
+                MENU.info(logMessage);
+                break;
+
             //Success Logs
             case SQL_OK:
                 SQL.info(logMessage);
@@ -130,6 +148,11 @@ public class LogManager {
             case SYSTEM_SUCCESS:
                 SYSTEM.info(logMessage);
                 break;
+
+            case MENU_ROUTE_SUCCESS:
+                MENU.info(logMessage);
+                break;
+
             //Error Logs
             case SQL_EXCEPTION:
                 SQL.error(logMessage);
@@ -158,6 +181,13 @@ public class LogManager {
 
             case SQL_ERROR:
                 SQL.error(logMessage);
+                break;
+
+            case MENU_OUT_OF_RANGE:
+            case MENU_BANK_INPUT:
+            case MENU_INVALID_OPTION:
+            case MENU_FAILED:
+                MENU.error(logMessage);
                 break;
 
             //Other Errors
@@ -189,6 +219,10 @@ public class LogManager {
 
             case SQL_WARN:
                 SQL.warn(logMessage);
+                break;
+
+            case MENU_WARN:
+                MENU.warn(logMessage);
                 break;
         }
     }
