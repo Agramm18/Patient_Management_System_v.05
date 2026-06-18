@@ -113,7 +113,7 @@ public class CreateDefaultAccounts {
     private boolean createDefaultAdmin() {
         System.out.println("\n[INFO] Creating Admin");
         String AdminName = dotenv.get("ADMIN_NAME");
-        String AdminPassword = dotenv.get("ADMIN_PWSD_DEFAULT");
+        String AdminPassword = dotenv.get("ADMIN_PASSWORD_DEFAULT");
         String AdminEmail = dotenv.get("ADMIN_EMAIL_DEFAULT");
         String Bootstrap_Key = dotenv.get("BOOTSTRAP_KEY");
         String HashedPassword;
