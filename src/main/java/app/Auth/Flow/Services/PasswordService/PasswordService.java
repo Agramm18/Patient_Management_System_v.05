@@ -31,7 +31,8 @@ import app.Config.LogManager.LogType;
 public class PasswordService {
     String plainPWSD;
     String hashedPWSD;
-    char[] pwsdCHAR;
+    char[] originalPassword;
+    char[] retypedPassword;
     char[] verifyPWSD;
 
     //Password Credentials
@@ -53,7 +54,7 @@ public class PasswordService {
             plainPWSD();
             try {
                 System.out.println("[INFO] Running through validation process and validate if the password is valid");
-                validatePWSD();
+                validatePWSD(this.originalPassword);
                 break;
             } catch (IllegalStateException error) {
                 System.out.println(error.getMessage());
@@ -67,10 +68,14 @@ public class PasswordService {
                     System.out.println("[ERROR] Max retry attempts reached your account will be disabled");
                     throw new IllegalStateException("[INFO] Please reactivate your account via the basic AUTH Menu");
                 }
+            } catch (RuntimeException error) {
+                LogManager.log(LogType.AUTH_FAILED, "The Program was not run via Terminal");
+                System.out.println(error.getMessage());
             }
         }
 
-        retypePWSD(scanner);
+        retypePassword(this.originalPassword, this.retypedPassword);
+
         LogManager.log(LogType.SECURITY_INFO, "Converting Char back to String");
         convertCHARtoString();
         LogManager.log(LogType.SECURITY_INFO, "Hashing entered String value");
@@ -79,20 +84,25 @@ public class PasswordService {
     }
 
     //Collect the Plain Password with invisible Console input
-    private void plainPWSD() {
+     void plainPWSD() throws RuntimeException{
         Console console = System.console();
 
         if (console == null) {
-            throw new IllegalStateException("[WARNING] Please run the program only in the Terminal");
+            throw new RuntimeException ("[WARNING] Please run the program only in the Terminal");
         }
 
         while (true) {
             try {
                 //Create pwsd with invisible user input
-                pwsdCHAR = console.readPassword("[INFO] Please set a password for your account: ");
+                this.originalPassword = console.readPassword("[INFO] Please set a password for your account: ");
+
+                if (this.originalPassword == null) {
+                    throw new IllegalStateException("The Password is empty and can't be validate");
+                }
+
                 break;
 
-            } catch (Exception error) {
+            } catch (RuntimeException error) {
                 LogManager.log(LogType.SECURITY_WARN, "The Program was not run via terminal");
                 System.out.println(error.getMessage());
             }
@@ -100,7 +110,7 @@ public class PasswordService {
     }
 
     //Run through the Password credentials and check if they're all valid
-    private void validatePWSD() {
+     void validatePWSD(char[] password) {
 
         //Password credentials
         boolean hasUpper = false;
@@ -111,16 +121,16 @@ public class PasswordService {
         int failedAttempts = 0;
 
         //Check if the password fit to the credential
-        if (this.pwsdCHAR.length == 0) {
+        if (password.length == 0) {
             throw new IllegalStateException("[ERROR] Your Password can't be empty!");
-        } else if (this.pwsdCHAR.length < 10) {
+        } else if (password.length < 10) {
             throw new IllegalStateException("[ERROR] Your password must bee at least 10 letters long");
         } else {
             fitLength = true;
         }
 
         //Check if the PWSD fit to the credentials if thats the case the default vars will be sett to true
-        for (char c : pwsdCHAR) {
+        for (char c : password) {
             if (Character.isUpperCase(c)) {
                 hasUpper = true;
             }
@@ -150,32 +160,35 @@ public class PasswordService {
         }
     }
 
-    //Force the user to retype the password
-    private void retypePWSD(Scanner scanner) {
+    void retypePassword(char[] original, char[] retyped) {
         Console console = System.console();
 
-        if (console == null) {
-            throw new IllegalStateException("[WARNING] Please run the program only in the Terminal");
-        }
+        retyped = console.readPassword("[INFO] Please retype your password from before: ");
+        validateRetypedPassword(original, retyped);
 
-        this.verifyPWSD = console.readPassword("[INFO] Please retype your password from before: ");
+    }
+
+    //Force the user to retype the password
+    void validateRetypedPassword(char[] original, char[] retyped) {
 
         //Check if the Passwords are match if not the user must retype the password then
-        if (this.verifyPWSD.length == 0 || !Arrays.equals(this.pwsdCHAR, this.verifyPWSD)) {
+        if (retyped.length == 0 || !Arrays.equals(original, retyped)) {
             throw new IllegalArgumentException("[ERROR] The verification password can't be empty and must be equal to the password from before");
         }
 
-        Arrays.fill(verifyPWSD, '\0');
+        Arrays.fill(original, '\0');
+        Arrays.fill(retyped, '\0');
+
         LogManager.log(LogType.SECURITY_SUCCESS, "The password is ok");
         System.out.println("[OK] Your password is correct an fit to all the credentials");
     }
 
     //Convert the Char back to string to get the Value of it
     private void convertCHARtoString() {
-        this.plainPWSD = String.valueOf(pwsdCHAR);
+        this.plainPWSD = String.valueOf(this.originalPassword);
         System.out.println("[OK] Passwords are converted");
         LogManager.log(LogType.SECURITY_INFO, "The password was converted back to string");
-        Arrays.fill(pwsdCHAR, '\0');
+        Arrays.fill(this.originalPassword, '\0');
     }
 
     //Hash the password with bcrypt and the string value
