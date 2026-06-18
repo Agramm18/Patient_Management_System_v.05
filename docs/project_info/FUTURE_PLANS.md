@@ -1,8 +1,8 @@
 # Future Plans
 
-Last synchronized: 2026-06-16.
+Last synchronized: 2026-06-18.
 
-The project is currently building the account, security, session, menu-routing, and access-management foundation required before patient-management features are added.
+The project is currently building the account, security, session, menu-routing, service-routing, and access-management foundation required before patient-management features are added.
 
 ## Immediate Direction
 
@@ -16,20 +16,20 @@ valid registration
 -> account activation
 -> active current-user session
 -> role-aware main menu
--> working admin or local-admin actions
+-> working admin and local-admin service actions
 ```
 
 ## Near-Term Priorities
 
 - Finish the migration to consistent application logging.
 - Fix registration reconfirmation and reject incomplete registration data.
-- Align the admin starter-account password environment key.
 - Add username and email uniqueness checks before registration inserts.
 - Make failed-login thresholds include the current attempt and define reset behavior.
 - Enforce system-account-only recovery or rename the feature to reflect broader recovery.
 - Stabilize `CurrentUser` and `CurrentSession` handling for every successful login path.
-- Make `MenuFlow.chooseOption` return valid results.
-- Connect admin and local-admin menu options to real service workflows.
+- Expand the first admin service action from request listing into request review.
+- Filter and authorize access-request listing.
+- Connect remaining admin and local-admin menu options to real service workflows.
 - Implement job selection and return a selected job value.
 - Implement role selection and return a selected role ID.
 - Store complete access requests.
@@ -41,7 +41,7 @@ valid registration
 - Stable registration, login, recovery, account-status, and session behavior
 - Complete access-request and approval workflow
 - Role, department, permission, and menu-access enforcement
-- Main console menu with usable local-admin and admin actions
+- Main console menu with usable local-admin and admin service actions
 - Patient records and patient search
 - Appointment scheduling
 - Staff and department management

@@ -1,6 +1,6 @@
 # Technical Overview
 
-Last synchronized: 2026-06-16.
+Last synchronized: 2026-06-18.
 
 ## Technology Stack
 
@@ -29,9 +29,10 @@ Main
 -> ConfigController
 -> AuthController
 -> MenuController when an active user has menu access
+-> ServiceController after a menu selection
 ```
 
-`FrontController` currently routes `CONFIG`, `AUTH`, and `MENU`. The service, UI, and exit request types are reserved but not routed through active switch cases.
+`FrontController` currently routes `CONFIG`, `AUTH`, `MENU`, and `SERVICE`. The UI and exit request types are reserved but not routed through active switch cases.
 
 The project separates code into:
 
@@ -40,7 +41,8 @@ The project separates code into:
 - Services for input collection, validation, session creation, and coordination
 - Repositories for JDBC operations
 - CLI classes for user-facing menus and messages
-- Menu classes for early role-aware menu routing
+- Menu classes for early role-aware menu routing and selected-option transfer
+- Service controller and first service repository for admin request listing
 - Configuration classes for startup, connection values, recovery keys, and logging
 
 ## Database Access
@@ -81,9 +83,9 @@ For active accounts:
 
 Session handling is still a baseline. It is static, not request-scoped, and it is not yet covered by automated tests.
 
-## Menu Routing
+## Menu and Service Routing
 
-Menu routing is partially implemented after authentication:
+Menu and service routing are partially implemented after authentication:
 
 1. `BootConfigService` reads `CurrentSession.getCurrentUser()`.
 2. If `hasAccessToMenu()` is true, it routes `FrontController.RequestType.MENU`.
@@ -91,14 +93,21 @@ Menu routing is partially implemented after authentication:
 4. Role `1` displays `LocalAdminMenu`.
 5. Role `2` displays `AdminMenu`.
 6. `AdminMenu` provides eight labels for planned administrative actions.
-7. `MenuFlow.chooseOption` validates numeric input against the menu size.
+7. `MenuFlow.chooseOption` validates numeric input against the menu size and returns the selected integer.
+8. `MenuController` returns `MenuValues(userChoice, userRole)`.
+9. `BootConfigService` routes `FrontController.RequestType.SERVICE`.
+10. `ServiceController` dispatches by role and selected option.
+11. Admin option `1` calls `ShowCurrentRequests.CurrentRequests`.
+
+`ShowCurrentRequests` performs a JDBC join across `access_management`, `accounts`, `departments`, and `roles`, then prints the requesting account, requested department, requested job, and requested role.
 
 Current limitations:
 
-- `MenuFlow.chooseOption` always returns `false`.
-- `MenuFlow.admin()` is empty.
-- Menu labels do not execute real service workflows yet.
+- Local-admin service routing only logs that it started.
+- Admin option `1` only prints request rows; it does not approve, reject, filter by status, or return structured data.
+- Admin options `2` through `8` do not execute service workflows yet.
 - Non-admin roles are not routed.
+- `RouteService` and service subdirectories are placeholders.
 
 ## Recovery Design
 
@@ -144,6 +153,7 @@ The current attempt is inserted after policy evaluation. The policy therefore ev
 - `SQL`
 - `CREDENTIALS`
 - `BOOT`
+- `MENU`
 
 `LogType` values are mapped to logger categories and levels in a switch.
 
@@ -155,7 +165,7 @@ Current state:
 - Logback therefore uses its default console configuration.
 - `MESSAGE`, `SYSTEM_WARN`, `SYSTEM_DEBUG`, and some other declared values are not currently handled consistently.
 - `AUTH_DEBUG` falls through into `CONFIG_WARN` because it has no `break`.
-- The `ACCESS` logger is declared but not used by the switch.
+- The `ACCESS` logger and `systemLogger` field are declared but not used by the switch.
 
 Logging is an active migration, not a completed subsystem.
 
@@ -210,10 +220,14 @@ Not configured:
 
 ## Current Build Verification
 
-The following command succeeds as of 2026-06-16:
+The following command succeeds as of 2026-06-18:
 
 ```bash
 mvn -DskipTests compile
 ```
 
-Maven compiles 73 Java source files. There are no tests to execute.
+Maven compiles 76 Java source files. There are no tests to execute.
+
+Current compiler note:
+
+- Maven warns that `--release 21` is preferred over separate `source` and `target` values for a Java 21 build.

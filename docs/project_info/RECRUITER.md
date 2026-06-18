@@ -1,8 +1,8 @@
 # Recruiter Overview
 
-Last synchronized: 2026-06-16.
+Last synchronized: 2026-06-18.
 
-Patient Management System V5.01 is a Java 21 console-based learning and portfolio project. It demonstrates the incremental development of a larger database-backed application with authentication, account security, runtime-session modeling, access-management foundations, first role-aware menu routing, and technical documentation.
+Patient Management System V5.01 is a Java 21 console-based learning and portfolio project. It demonstrates the incremental development of a larger database-backed application with authentication, account security, runtime-session modeling, access-management foundations, first role-aware menu and service routing, and technical documentation.
 
 ## Demonstrated Skills
 
@@ -16,6 +16,8 @@ Patient Management System V5.01 is a Java 21 console-based learning and portfoli
 - Login attempt auditing and persisted security-policy updates
 - Runtime user-session modeling through `CurrentUser` and `CurrentSession`
 - Early role-aware menu routing for local admin and admin accounts
+- Menu-choice transfer into service routing through `MenuValues`
+- First admin service repository for listing access-management requests
 - SLF4J and Logback integration through a custom logging facade
 - Markdown and Mermaid documentation
 - Git-based incremental development
@@ -32,6 +34,8 @@ Patient Management System V5.01 is a Java 21 console-based learning and portfoli
 - Persisted `locked`, `suspicious`, and `on_quarantine` status changes based on recent failed passwords
 - Active-user session creation with account ID, status, role, system-account flag, and menu-access flag
 - Basic `MENU` routing through `FrontController` and `MenuController`
+- Basic `SERVICE` routing through `FrontController` and `ServiceController`
+- Admin option `1` lists current access-management requests from the database
 - Pending-user department requests
 - Central `LogManager` introduced for categorized application logging
 
@@ -45,6 +49,7 @@ The project is not presented as a finished hospital product. The current stage i
 - Logging consistency
 - Runtime session behavior
 - Role-aware menu routing
+- Service routing
 - Access requests and approval
 - Account activation
 - Automated tests
@@ -53,7 +58,7 @@ Patient records, appointments, treatment, billing, reporting, complete admin wor
 
 ## Current Engineering Challenges
 
-The repository intentionally exposes active development work rather than hiding unfinished areas. Current priorities include resolving environment-key inconsistencies, completing the logging migration, improving return-based error handling, enforcing recovery scope, making menu selections route to real actions, completing access-request approval, and adding tests.
+The repository intentionally exposes active development work rather than hiding unfinished areas. Current priorities include completing the logging migration, improving return-based error handling, enforcing recovery scope, expanding service actions beyond the first access-request listing, completing access-request approval, and adding tests.
 
 ## Repository Reading Order
 

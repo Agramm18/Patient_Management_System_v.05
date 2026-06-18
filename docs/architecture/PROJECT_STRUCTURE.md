@@ -1,8 +1,8 @@
 # Project Structure
 
-Last synchronized: 2026-06-16.
+Last synchronized: 2026-06-18.
 
-Patient Management System V5.01 is a Java 21 Maven console application. The source tree currently contains 73 Java files organized around bootstrap, controllers, authentication flows, runtime session state, configuration, CLI output, menu routing, and JDBC repositories.
+Patient Management System V5.01 is a Java 21 Maven console application. The source tree currently contains 76 Java files organized around bootstrap, controllers, authentication flows, runtime session state, configuration, CLI output, menu routing, first service routing, and JDBC repositories.
 
 ## Root Structure
 
@@ -124,35 +124,41 @@ src/main/java/app/
 |   |-- ServiceController.java
 |   `-- uiController.java
 |-- Menu/
-|   `-- MenuFlow.java
-`-- Repository/
-    |-- AuthRepository/
-    |   |-- Management/
-    |   |   |-- CountFailedLoginAttempts.java
-    |   |   |-- CreateAccessRequest.java
-    |   |   |-- HasAssignedDepartment.java
-    |   |   `-- HasAssignedRole.java
-    |   |-- Password/
-    |   |   |-- ExecutePWSDPolicy.java
-    |   |   |-- SystemAccountRequiresPasswordChange.java
-    |   |   |-- UpdateSystemAccountPassword.java
-    |   |   `-- UpdateUserPassword.java
-    |   |-- Recovery/
-    |   |   |-- FindRecoverableUser.java
-    |   |   |-- GetRecoveryKeyHash.java
-    |   |   `-- SelectUserForRecover.java
-    |   `-- SetNewStatus.java
-    |-- ConfigRepository/
-    |   |-- CheckForDefaultAccounts.java
-    |   |-- CreateDefaultAccounts.java
-    |   `-- SetRecoveryKey.java
-    |-- LoginRepository/
-    |   |-- CheckUserInDB.java
-    |   `-- CollectLoginValues.java
-    |-- RegistrationRepository/
-    |   `-- CreateAccount.java
-    `-- logsRepository/
-        `-- CollectLogs.java
+|   |-- MenuFlow.java
+|   `-- MenuValues.java
+|-- Repository/
+|   |-- AuthRepository/
+|   |   |-- Management/
+|   |   |   |-- CountFailedLoginAttempts.java
+|   |   |   |-- CreateAccessRequest.java
+|   |   |   |-- HasAssignedDepartment.java
+|   |   |   `-- HasAssignedRole.java
+|   |   |-- Password/
+|   |   |   |-- ExecutePWSDPolicy.java
+|   |   |   |-- SystemAccountRequiresPasswordChange.java
+|   |   |   |-- UpdateSystemAccountPassword.java
+|   |   |   `-- UpdateUserPassword.java
+|   |   |-- Recovery/
+|   |   |   |-- FindRecoverableUser.java
+|   |   |   |-- GetRecoveryKeyHash.java
+|   |   |   `-- SelectUserForRecover.java
+|   |   `-- SetNewStatus.java
+|   |-- ConfigRepository/
+|   |   |-- CheckForDefaultAccounts.java
+|   |   |-- CreateDefaultAccounts.java
+|   |   `-- SetRecoveryKey.java
+|   |-- LoginRepository/
+|   |   |-- CheckUserInDB.java
+|   |   `-- CollectLoginValues.java
+|   |-- RegistrationRepository/
+|   |   `-- CreateAccount.java
+|   |-- ServiceRepository/
+|   |   `-- AdminServices/
+|   |       `-- ShowCurrentRequests.java
+|   `-- logsRepository/
+|       `-- CollectLogs.java
+`-- Services/
+    `-- RouteService.java
 ```
 
 Empty package directories currently present:
@@ -169,17 +175,18 @@ Empty package directories currently present:
 
 ### `app.Bootstrap`
 
-`BootConfigService` creates the controller graph, routes to configuration, stops the process when configuration fails, routes to authentication when configuration succeeds, then routes to `MENU` when `CurrentSession` contains a user with menu access.
+`BootConfigService` creates the controller graph, routes to configuration, stops the process when configuration fails, routes to authentication when configuration succeeds, then routes to `MENU` and `SERVICE` when `CurrentSession` contains a user with menu access.
 
 ### `app.Controller`
 
-- `FrontController` routes `CONFIG`, `AUTH`, and `MENU`.
+- `FrontController` routes `CONFIG`, `AUTH`, `MENU`, and `SERVICE`.
 - `ConfigController` validates configuration, initializes database access, stores the recovery-key hash, and checks starter accounts.
 - `AuthController` owns the authentication menu loop.
-- `MenuController` routes local admin and admin users to the first menu display classes.
-- `ServiceController` and `uiController` are placeholders.
+- `MenuController` routes local admin and admin users to the first menu display classes and returns `MenuValues`.
+- `ServiceController` routes by user role and selected menu option. Admin option `1` calls the current access-request listing repository.
+- `uiController` is a placeholder.
 
-Reserved request types still not routed by active cases are `SERVICE`, `UI`, and `EXIT`.
+Reserved request types still not routed by active cases are `UI` and `EXIT`.
 
 ### `app.Config`
 
@@ -211,11 +218,11 @@ Reserved request types still not routed by active cases are `SERVICE`, `UI`, and
 
 ### `app.CLIText`
 
-Contains user-facing console messages and menus. Several department job menus remain placeholders. `AdminMenu` and `LocalAdminMenu` display the first service-menu screens but do not execute real workflows yet.
+Contains user-facing console messages and menus. Several department job menus remain placeholders. `AdminMenu` and `LocalAdminMenu` display the first service-menu screens. The admin menu is now connected to the first service workflow for option `1`; the remaining options are labels only.
 
 ### `app.Menu`
 
-`MenuFlow` contains the first menu-option validation groundwork. It does not route selected options to actions yet.
+`MenuFlow` validates numeric menu input and returns a valid selected option. `MenuValues` carries the selected option and the current user's role from `MenuController` to `ServiceController`.
 
 ### `app.Repository`
 
@@ -226,6 +233,11 @@ Contains user-facing console messages and menus. Several department job menus re
 - `AuthRepository.Management` handles failed-attempt counts, access requests, and assignment checks.
 - `AuthRepository.Password` handles status policy and password updates.
 - `AuthRepository.Recovery` handles recovery-key and target-account queries.
+- `ServiceRepository.AdminServices` contains the first admin service query for listing access-management requests.
+
+### `app.Services`
+
+Contains the first top-level service placeholder. `RouteService` currently has an empty `userChoice` method and is not part of the active runtime path.
 
 ## Runtime Flow
 
@@ -240,6 +252,8 @@ Main
 -> AuthController
 -> FrontController(MENU) when active current user has menu access
 -> MenuController
+-> FrontController(SERVICE)
+-> ServiceController
 ```
 
 ### Configuration
@@ -276,6 +290,10 @@ BootConfigService
 -> MenuController
 -> LocalAdminMenu or AdminMenu
 -> MenuFlow for option validation
+-> MenuValues
+-> FrontController(SERVICE)
+-> ServiceController
+-> ShowCurrentRequests for admin option 1
 ```
 
 ### Recovery
@@ -308,6 +326,6 @@ LoginVerification
 - Runtime session state is currently stored through static `CurrentSession`.
 - Logging migration is partial; direct console diagnostics still exist throughout the source tree.
 - Several names do not follow Java naming conventions.
-- `AccountPolicy`, `CollectUserJob`, `SetNewStatus`, service directories, `ServiceController`, and `uiController` are placeholders.
+- `AccountPolicy`, `CollectUserJob`, `SetNewStatus`, `RouteService`, service directories, and `uiController` are placeholders.
 - `SystemAccountRequiresPasswordChange` and `HasAssignedRole` exist but are not part of the active primary flow.
-- `MenuFlow` and service menus are connected only as a first routing baseline.
+- `MenuFlow`, `MenuValues`, and `ServiceController` are connected as a first menu-to-service routing baseline.

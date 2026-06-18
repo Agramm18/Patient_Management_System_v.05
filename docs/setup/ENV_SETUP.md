@@ -1,6 +1,6 @@
 # Environment Setup
 
-Last synchronized: 2026-06-16.
+Last synchronized: 2026-06-18.
 
 This document describes the `.env` values used by the current Java implementation.
 
@@ -33,7 +33,6 @@ LOCAL_ADMIN_EMAIL=local_admin@example.com
 
 ADMIN_NAME=admin
 ADMIN_PASSWORD_DEFAULT=replace_with_a_strong_starter_password
-ADMIN_PWSD_DEFAULT=replace_with_the_same_starter_password
 ADMIN_EMAIL_DEFAULT=admin@example.com
 
 BOOTSTRAP_KEY=replace_with_a_bootstrap_key
@@ -60,14 +59,10 @@ RECOVERY_KEY=replace_with_a_recovery_key
 
 `DB_PORT` must be numeric. Every other required value must exist and must not be blank.
 
-## Known Admin Password-Key Mismatch
+## Admin Password Key
 
-The current implementation contains an environment-key inconsistency:
-
-- `EnvValidationService` validates `ADMIN_PASSWORD_DEFAULT`.
-- `CreateDefaultAccounts` currently reads `ADMIN_PWSD_DEFAULT` when it creates the admin account.
-
-Until the code is aligned, define both values with the same password. This is a temporary compatibility requirement and is tracked in `../project_info/ToDo.md`.
+`ADMIN_PASSWORD_DEFAULT` is the single required starter password value for the default admin account.
+`EnvValidationService` validates this value, and `CreateDefaultAccounts` reads the same value when it creates the default admin account.
 
 ## Database Values
 
@@ -84,7 +79,7 @@ Older documentation used `DB_PWSD`; that name is not read by the current code.
 Starter-account values are used only when an account with role `1` or role `2` is missing.
 
 - Local admin uses `LOCAL_ADMIN_NAME`, `LOCAL_ADMIN_PASSWORD`, and `LOCAL_ADMIN_EMAIL`.
-- Admin uses `ADMIN_NAME`, `ADMIN_PWSD_DEFAULT`, and `ADMIN_EMAIL_DEFAULT` during creation.
+- Admin uses `ADMIN_NAME`, `ADMIN_PASSWORD_DEFAULT`, and `ADMIN_EMAIL_DEFAULT` during creation.
 - `BOOTSTRAP_KEY` is stored with created starter accounts.
 - Starter passwords are hashed with BCrypt before insert.
 

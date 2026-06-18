@@ -1,6 +1,6 @@
 # About This Project
 
-Last synchronized: 2026-06-16.
+Last synchronized: 2026-06-18.
 
 ## Project Purpose
 
@@ -17,6 +17,8 @@ The project currently concentrates on the foundation required before patient-man
 - Login attempt auditing and account-status policies
 - Runtime session creation for active users
 - Initial role-aware menu routing for local admin and admin accounts
+- First menu-to-service routing baseline
+- Admin access-request listing baseline
 - Pending-user access requests
 - Application-level logging
 
@@ -34,7 +36,7 @@ https://github.com/Agramm18/Patient-Management-System
 
 The current implementation is a Java 21 console application. It is not yet a complete hospital or patient-management product.
 
-The active runtime covers configuration, authentication, session creation for active users, and first menu routing for local admin and admin roles. Patient records, appointments, treatment workflows, billing, reporting, complete admin workflows, JavaFX, REST APIs, and deployment automation are planned but not implemented.
+The active runtime covers configuration, authentication, session creation for active users, first menu routing for local admin and admin roles, and the first admin service action for listing access-management requests. Patient records, appointments, treatment workflows, billing, reporting, complete admin workflows, JavaFX, REST APIs, and deployment automation are planned but not implemented.
 
 ## Learning Goals
 
@@ -47,6 +49,7 @@ The project is used to practice and demonstrate:
 - BCrypt password and recovery-key hashing
 - Role-Based Access Control concepts
 - Runtime session modeling
+- Menu-to-service routing
 - Security policy implementation
 - Logging with SLF4J and Logback
 - Maven dependency management

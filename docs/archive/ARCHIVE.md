@@ -1,6 +1,6 @@
 # Project Archive
 
-Last synchronized: 2026-06-16.
+Last synchronized: 2026-06-18.
 
 This document records completed milestones and superseded project directions. It is historical context, not the current task list.
 
@@ -40,7 +40,8 @@ The project was rebuilt in Java to practice:
 - `FrontController` and request types introduced
 - Configuration and authentication controller routes connected
 - `MENU` route connected for active menu-enabled users
-- Placeholder service and UI controllers reserved
+- `SERVICE` route connected for the first menu-to-service baseline
+- Placeholder UI controller reserved
 
 ### Configuration and Database
 
@@ -104,9 +105,19 @@ The project was rebuilt in Java to practice:
 
 - `MenuController` introduced for role-based menu routing
 - `MenuFlow` introduced for menu option validation groundwork
+- `MenuFlow.chooseOption` now returns the selected valid option
+- `MenuValues` introduced to pass menu choice and user role to service routing
 - Local-admin menu display class introduced
 - Admin menu display class introduced
 - Admin menu now lists the first planned administrative actions
+
+### Service Routing
+
+- `SERVICE` route connected in `FrontController`
+- `BootConfigService` now routes to `SERVICE` after a successful menu selection
+- `ServiceController` introduced as the first role-aware service dispatcher
+- Admin menu option `1` connected to an access-request listing query
+- `ShowCurrentRequests` introduced under `Repository.ServiceRepository.AdminServices`
 
 ### Logging
 
@@ -120,6 +131,7 @@ The project was rebuilt in Java to practice:
 - Documentation organized under `docs/project_info`, `docs/setup`, `docs/architecture`, and `docs/archive`
 - Current status, roadmap, setup, architecture, and Mermaid UML documentation created
 - Documentation synchronized with the session and menu-routing baseline on 2026-06-16
+- Documentation synchronized with the service-routing and admin-request-listing baseline on 2026-06-18
 
 ## Superseded Documentation Notes
 
@@ -132,13 +144,17 @@ The following older statements are no longer current:
 - Repository classes and authentication services were reorganized into more specific subpackages.
 - `Query.sql` is not the complete database setup and is ignored by Git.
 - `FrontController` no longer routes only `CONFIG` and `AUTH`; the `MENU` route is now connected.
+- `SERVICE` is no longer only a reserved route; it is connected for the first menu-to-service baseline.
+- `MenuFlow.chooseOption` no longer returns a fixed invalid value; it returns a validated integer selection.
+- Admin starter-account creation now reads `ADMIN_PASSWORD_DEFAULT`, matching environment validation.
 - There is now a runtime current-user session baseline for active accounts.
 
 ## Historical Limitations Still Present
 
 Several early-stage design limitations remain and are tracked in `ToDo.md`:
 
-- Menu actions are displayed but not implemented
+- Most menu actions are displayed but not implemented
+- The first admin service action lists access-request rows but does not approve or reject them
 - Incomplete access-request details and no approval workflow
 - Partial logging migration
 - Inconsistent naming

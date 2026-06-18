@@ -1,6 +1,6 @@
 # ToDo
 
-Status date: 2026-06-16.
+Status date: 2026-06-18.
 
 This is the current implementation backlog. It is ordered by dependency and risk rather than by product feature.
 
@@ -17,6 +17,7 @@ configuration
 -> recovery
 -> current-user session
 -> role-aware menu routing
+-> service routing
 -> complete access request
 -> approval
 -> activation
@@ -43,14 +44,19 @@ configuration
 - [x] `FrontController.RequestType.MENU` routing baseline
 - [x] `MenuController` role routing baseline for local admin and admin
 - [x] Admin and local-admin menu display classes
+- [x] `MenuFlow.chooseOption` returns a validated selected option
+- [x] `MenuValues` passes menu choice and role into the service layer
+- [x] `FrontController.RequestType.SERVICE` routing baseline
+- [x] `ServiceController` role and choice dispatch baseline
+- [x] Admin option `1` lists current access-management requests
+- [x] Default admin account creation now uses `ADMIN_PASSWORD_DEFAULT`
+- [x] Local setup no longer requires duplicate admin-password environment variables
 - [x] Current documentation synchronized
 
 ## Highest Priority Defects
 
 ### Environment and Starter Accounts
 
-- [ ] Replace the `ADMIN_PWSD_DEFAULT` lookup in `CreateDefaultAccounts` with `ADMIN_PASSWORD_DEFAULT`.
-- [ ] Remove the need for two admin-password variables from local setup.
 - [ ] Add validation or explicit failure when a starter-account password cannot be loaded.
 
 ### Registration Integrity
@@ -86,13 +92,15 @@ configuration
 
 ## Menu and Runtime Routing
 
-- [ ] Make `MenuFlow.chooseOption` return `true` for valid selections.
-- [ ] Store the selected menu option so it can route to a real action.
+- [x] Return the selected admin menu option from `MenuFlow.chooseOption`.
+- [x] Store the selected menu option in `MenuValues`.
 - [ ] Implement local-admin menu options.
-- [ ] Implement admin menu options.
-- [ ] Route authorized admin options to service classes.
+- [ ] Implement admin menu options `2` through `8`.
+- [ ] Expand admin option `1` from raw request listing into a complete review workflow.
+- [ ] Route authorized admin options to dedicated service classes.
+- [ ] Decide the long-term boundary between `ServiceController`, `RouteService`, and `app.Services`.
 - [ ] Define behavior for role IDs other than `1` and `2`.
-- [ ] Decide whether `ServiceController` and `uiController` are needed in the console runtime.
+- [ ] Decide whether `uiController` is needed in the console runtime.
 - [ ] Replace direct `System.exit` calls with controlled application shutdown where practical.
 
 ## Logging Migration
@@ -126,7 +134,10 @@ configuration
 
 ### Approval and Activation
 
-- [ ] List pending requests for authorized administrators.
+- [x] Add a first admin-side access-request listing query.
+- [ ] Filter admin request listing by pending request status when required.
+- [ ] Return structured results from the request listing instead of printing directly in the repository.
+- [ ] List pending requests only for authorized administrators.
 - [ ] Add approve behavior.
 - [ ] Add reject behavior and reject reasons.
 - [ ] Apply approved department, job, role, permission, and menu access to the account.
@@ -155,6 +166,7 @@ configuration
 - [ ] Remove unused imports and fields.
 - [ ] Replace inconsistent direct console error handling with shared patterns.
 - [ ] Decide whether empty directories under `src/main/java/app/Services` should be kept.
+- [ ] Decide whether `RouteService` should be implemented or removed.
 
 ## Product Features After Foundation Work
 

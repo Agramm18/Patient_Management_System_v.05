@@ -1,10 +1,10 @@
 # Current Project Status
 
-Last synchronized: 2026-06-16.
+Last synchronized: 2026-06-18.
 
-Patient Management System V5.01 is currently a Java 21 console application focused on configuration, authentication, account security, recovery, session creation, first menu routing, and access-request foundations.
+Patient Management System V5.01 is currently a Java 21 console application focused on configuration, authentication, account security, recovery, session creation, role-aware menu routing, first service routing, and access-request foundations.
 
-The project contains 73 Java source files. The active runtime is:
+The project contains 76 Java source files. The active runtime is:
 
 ```text
 Main
@@ -15,14 +15,17 @@ Main
 -> LoginFlow or RegistrationFlow or RecoveryFlow
 -> CurrentSession when an active login succeeds
 -> MenuController when the current user has menu access
+-> ServiceController after a menu selection
+-> ShowCurrentRequests when an admin selects option 1
 ```
 
-`FrontController` currently routes `CONFIG`, `AUTH`, and `MENU`. `SERVICE`, `UI`, and `EXIT` remain reserved request types and are not routed.
+`FrontController` currently routes `CONFIG`, `AUTH`, `MENU`, and `SERVICE`. `UI` and `EXIT` remain reserved request types and are not routed through active switch cases.
 
 ## Build State
 
-- `mvn -DskipTests compile` succeeds as of 2026-06-16.
-- Maven compiles 73 Java source files.
+- `mvn -DskipTests compile` succeeds as of 2026-06-18.
+- Maven compiles 76 Java source files.
+- Maven currently warns that `--release 21` would be safer than separate `source` and `target` values.
 - No `src/test` directory or automated test suite exists.
 - No `src/main/resources` directory or explicit Logback configuration exists.
 - The application must be run from a terminal for hidden password and recovery-key input.
@@ -50,7 +53,7 @@ Main
 3. Recover System Accounts
 4. Exit
 
-After registration, recovery, or a login that does not return an active menu-enabled session, the authentication menu is shown again. After an active login with menu access, `AuthController` returns to `BootConfigService`, which routes `MENU`.
+After registration, recovery, or a login that does not return an active menu-enabled session, the authentication menu is shown again. After an active login with menu access, `AuthController` returns to `BootConfigService`, which routes `MENU` and then `SERVICE`.
 
 ### Registration
 
@@ -93,7 +96,7 @@ Current account-status behavior:
 
 ### Menu Routing
 
-Menu routing is partially implemented.
+Menu and service routing are partially implemented.
 
 - `BootConfigService` reads `CurrentSession.getCurrentUser()` after authentication returns.
 - If the user has menu access, `FrontController` routes `RequestType.MENU`.
@@ -101,15 +104,20 @@ Menu routing is partially implemented.
 - Role `1` routes to `LocalAdminMenu`.
 - Role `2` routes to `AdminMenu`.
 - `AdminMenu` displays eight administrative options.
-- `MenuFlow.chooseOption` validates a selected option against the menu size.
+- `MenuFlow.chooseOption` validates a selected option against the menu size and returns the selected integer.
+- `MenuController` returns a `MenuValues` record containing the selected option and user role.
+- `BootConfigService` routes `RequestType.SERVICE` after menu routing.
+- `ServiceController` routes service behavior by role and menu choice.
+- Admin choice `1` calls `ShowCurrentRequests.CurrentRequests`.
+- `ShowCurrentRequests` reads access-management rows and prints account name, requested department, requested job, and requested role.
 
 Current menu limitations:
 
-- `MenuFlow.chooseOption` always returns `false`, even for valid input.
-- `MenuFlow.admin()` is empty.
-- `LocalAdminMenu` only displays a header.
-- Admin menu actions are labels only; no service workflows are connected.
-- Roles other than `1` and `2` have no menu routing.
+- `LocalAdminMenu` only displays a header, and local-admin service routing currently only logs startup.
+- Admin option `1` displays current access-request rows, but does not approve, reject, filter, or return structured results.
+- Admin options `2` through `8` are labels only.
+- Roles other than `1` and `2` throw an unknown-role exception.
+- `RouteService` and the `app.Services.Admin` / `app.Services.LocalAdmin` package directories are placeholders.
 
 ### Failed-Login Policy
 
@@ -165,7 +173,7 @@ Job selection, role selection, approval, rejection, and activation are not conne
 
 ### Logging
 
-The project includes Logback and a custom `LogManager` facade with category loggers such as `BOOT`, `CONFIG`, `AUTH`, `SECURITY`, `SQL`, `DATABASE`, and `CREDENTIALS`.
+The project includes Logback and a custom `LogManager` facade with category loggers such as `BOOT`, `CONFIG`, `AUTH`, `SECURITY`, `SQL`, `DATABASE`, `CREDENTIALS`, and `MENU`.
 
 Logging migration is partial:
 
@@ -174,19 +182,22 @@ Logging migration is partial:
 - No `logback.xml` exists, so Logback uses its default configuration.
 - Some declared `LogType` values are not handled by the current `LogManager.log` switch and therefore produce no output.
 - `AUTH_DEBUG` does not break before `CONFIG_WARN`, so debug logging falls through into the config warning branch.
+- `ACCESS` and `systemLogger` are declared but not used by the current switch.
 
 ## Current Limitations
 
 - Menu routing exists only for active menu-enabled local admin and admin users.
-- Admin and local-admin menu actions are not implemented.
+- Only the first admin service action is connected, and it only lists access-request rows.
+- Local-admin service actions are not implemented.
 - Patient-management product features are not implemented.
 - Registration correction can continue without reconfirmation or password creation.
 - Registration does not perform explicit username or email uniqueness checks before insert.
-- Admin starter-account creation reads a different password key than environment validation.
 - Failed-login threshold counting excludes the current attempt.
 - Recovery selection is not strictly limited to system accounts.
 - Access requests store default job and role values.
 - No admin approval or rejection workflow exists.
+- Current access-request listing is not filtered by pending status.
+- `BootConfigService` still assumes `CurrentSession.getCurrentUser()` is non-null after authentication returns.
 - Logging migration is incomplete.
 - Repository error handling and return values are inconsistent.
 - No automated tests, CI pipeline, Maven Wrapper, formatter, Docker setup, or JavaFX UI exists.

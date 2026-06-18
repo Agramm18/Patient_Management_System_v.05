@@ -1,6 +1,6 @@
 # Database Setup
 
-Last synchronized: 2026-06-16.
+Last synchronized: 2026-06-18.
 
 This document defines the MySQL schema and reference IDs expected by the current Java implementation.
 
@@ -253,6 +253,15 @@ Both accounts:
 - Job `unassigned`
 - Role `9`
 - Default request status `3`
+
+`ShowCurrentRequests` currently reads access-management rows for admin menu option `1`. It joins `access_management`, `accounts`, `departments`, and `roles`, then prints:
+
+- Requesting account name
+- Requested department name
+- Requested job
+- Requested role name
+
+The current query does not filter by `request_status`, so it can display more than only pending requests when older approved or rejected rows exist.
 
 ### Password and Status Updates
 
