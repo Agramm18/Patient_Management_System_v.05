@@ -56,6 +56,12 @@ public class BootConfigService {
             if (user.hasAccessToMenu()) {
                 LogManager.log(LogType.AUTH_SUCCESS, "The User have access to use the menu");
                 dispatcher.navigateSubController(FrontController.RequestType.MENU, scanner);
+
+                dispatcher.navigateSubController(FrontController.RequestType.SERVICE, scanner);
+                LogManager.log(LogType.SYSTEM_INFO, "Started Service Flow");
+
+            } else {
+                throw new IllegalStateException("The User does not have enough rights to use the menu");
             }
 
         } catch (RuntimeException error) {
