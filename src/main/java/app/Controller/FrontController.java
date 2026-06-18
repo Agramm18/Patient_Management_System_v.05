@@ -3,7 +3,7 @@ import java.util.Scanner;
 
 
 import app.Auth.Flow.Services.LoginService.CurrentUser;
-import app.Auth.Flow.CurrentSession;
+import app.Menu.MenuValues;
 
 /*
     This Section is the Frontcontroller which basically Manage the other controllers
@@ -27,6 +27,7 @@ public class FrontController {
     private final MenuController menuController;
     private final ServiceController serviceController;
     private final uiController UIController;
+    private MenuValues menuChoice;
 
     private CurrentUser currentUser;
 
@@ -60,7 +61,11 @@ public class FrontController {
                 return true;
 
             case MENU:
-                menuController.routeMenu(scanner);
+                this.menuChoice = menuController.routeMenu(scanner);
+                return true;
+
+            case SERVICE:
+                serviceController.routeService(this.menuChoice, scanner);
                 return true;
         }
 
