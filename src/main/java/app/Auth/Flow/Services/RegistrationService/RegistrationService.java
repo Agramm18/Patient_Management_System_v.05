@@ -3,6 +3,7 @@ import java.util.Scanner;
 
 import app.Auth.Flow.PasswordFlow;
 
+import app.Auth.Flow.Services.PasswordService.PasswordService;
 import app.Config.LogManager;
 import app.Config.LogManager.LogType;
 import app.Controller.*;
@@ -121,7 +122,7 @@ public class RegistrationService {
 
     //Printing the Results and allowing changes
     private void showCurrentInfo(Scanner scanner) {
-        System.out.println("\n[INFO] Showing your Info");
+        System.out.println("\n[INFO] Current Data");
         System.out.println("[DEBUG] User Name: " + this.userName);
         System.out.println("[DEBUG] Email Address: " + this.emailAddress);
         System.out.println("[DEBUG] Phone Number: " + this.phoneNumber + "\n");
@@ -170,6 +171,15 @@ public class RegistrationService {
                             valueIsRight = scanner.nextLine().toLowerCase();
 
                             if (valueIsRight.equals("y")) {
+
+                                System.out.println("\n[INFO] Current Data");
+                                System.out.println("[DEBUG] User Name: " + this.userName);
+                                System.out.println("[DEBUG] Email Address: " + this.emailAddress);
+                                System.out.println("[DEBUG] Phone Number: " + this.phoneNumber + "\n");
+
+                                PasswordService service = new PasswordService();
+                                service.userPWSD(scanner);
+
                                 return;
                             } else {
                                 setUserName(scanner);
@@ -183,6 +193,15 @@ public class RegistrationService {
                             valueIsRight = scanner.nextLine().toLowerCase();
 
                             if (valueIsRight.equals("y")) {
+
+                                System.out.println("\n[INFO] Current Data");
+                                System.out.println("[DEBUG] User Name: " + this.userName);
+                                System.out.println("[DEBUG] Email Address: " + this.emailAddress);
+                                System.out.println("[DEBUG] Phone Number: " + this.phoneNumber + "\n");
+
+                                PasswordService service = new PasswordService();
+                                service.userPWSD(scanner);
+
                                 return;
                             } else {
                                 setEmailAddress(scanner);
@@ -197,6 +216,13 @@ public class RegistrationService {
                             valueIsRight = scanner.nextLine().toLowerCase();
 
                             if (valueIsRight.equals("y")) {
+                                System.out.println("\n[INFO] Current Data");
+                                System.out.println("[DEBUG] User Name: " + this.userName);
+                                System.out.println("[DEBUG] Email Address: " + this.emailAddress);
+                                System.out.println("[DEBUG] Phone Number: " + this.phoneNumber + "\n");
+
+                                PasswordService service = new PasswordService();
+                                service.userPWSD(scanner);
                                 return;
                             } else {
                                 setEmailAddress(scanner);
