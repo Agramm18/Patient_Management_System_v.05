@@ -1,0 +1,138 @@
+<configuration>
+
+    <!-- Console -->
+
+    <appender name="CONSOLE"
+              class="ch.qos.logback.core.ConsoleAppender">
+
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%level] [%logger] %msg%n</pattern>
+        </encoder>
+
+    </appender>
+
+    <!-- APPENDERS -->
+
+    <appender name="AUTH_FILE" class="ch.qos.logback.core.FileAppender">
+        <file>logs/AUTH.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%level] [%logger] %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="CONFIG_FILE" class="ch.qos.logback.core.FileAppender">
+        <file>logs/CONFIG.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%level] [%logger] %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="SECURITY_FILE" class="ch.qos.logback.core.FileAppender">
+        <file>logs/SECURITY.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%level] [%logger] %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="ACCESS_FILE" class="ch.qos.logback.core.FileAppender">
+        <file>logs/ACCESS.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%level] [%logger] %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="DATABASE_FILE" class="ch.qos.logback.core.FileAppender">
+        <file>logs/DATABASE.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%level] [%logger] %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="SYSTEM_FILE" class="ch.qos.logback.core.FileAppender">
+        <file>logs/SYSTEM.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%level] [%logger] %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="SQL_FILE" class="ch.qos.logback.core.FileAppender">
+        <file>logs/SQL.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%level] [%logger] %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="CREDENTIALS_FILE" class="ch.qos.logback.core.FileAppender">
+        <file>logs/CREDENTIALS.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%level] [%logger] %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="BOOT_FILE" class="ch.qos.logback.core.FileAppender">
+        <file>logs/BOOT.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%level] [%logger] %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="MENU_FILE" class="ch.qos.logback.core.FileAppender">
+        <file>logs/MENU.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%level] [%logger] %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- LOGGER -->
+
+    <logger name="AUTH" level="DEBUG" additivity="false">
+        <appender-ref ref="AUTH_FILE"/>
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <logger name="CONFIG" level="DEBUG" additivity="false">
+        <appender-ref ref="CONFIG_FILE"/>
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <logger name="SECURITY" level="DEBUG" additivity="false">
+        <appender-ref ref="SECURITY_FILE"/>
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <logger name="ACCESS" level="DEBUG" additivity="false">
+        <appender-ref ref="ACCESS_FILE"/>
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <logger name="DATABASE" level="DEBUG" additivity="false">
+        <appender-ref ref="DATABASE_FILE"/>
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <logger name="SYSTEM" level="DEBUG" additivity="false">
+        <appender-ref ref="SYSTEM_FILE"/>
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <logger name="SQL" level="DEBUG" additivity="false">
+        <appender-ref ref="SQL_FILE"/>
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <logger name="CREDENTIALS" level="DEBUG" additivity="false">
+        <appender-ref ref="CREDENTIALS_FILE"/>
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <logger name="BOOT" level="DEBUG" additivity="false">
+        <appender-ref ref="BOOT_FILE"/>
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <logger name="MENU" level="DEBUG" additivity="false">
+        <appender-ref ref="MENU_FILE"/>
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+</configuration>
