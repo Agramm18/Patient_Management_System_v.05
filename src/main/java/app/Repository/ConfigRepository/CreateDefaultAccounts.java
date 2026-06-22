@@ -101,6 +101,29 @@ public class CreateDefaultAccounts {
 
                 return true;
             }
+
+            String sql2 = "SELECT password_hash FROM accounts WHERE id = 1";
+
+            try (Connection connection1 = DBManager.getConnection();
+                 PreparedStatement stmt = connection1.prepareStatement(sql2)) {
+
+                ResultSet rs = stmt.executeQuery();
+
+                if (rs.next()) {
+                    String DB_PASSWORD = rs.getString("password_hash");
+
+                    if (DB_PASSWORD.isBlank()) {
+                        throw new IllegalStateException("[ERROR] The Password in the DB is NULL");
+                    }
+                }
+
+            } catch (IllegalStateException error) {
+                LogManager.log(LogType.AUTH_FAILED, "The Password in the DB is Null/Empty");
+                System.out.println(error.getMessage());
+                return false;
+            }
+
+
             return false;
 
         } catch (SQLException error) {
@@ -159,6 +182,27 @@ public class CreateDefaultAccounts {
                 LogManager.log(LogType.SQL_WARN, "A default Admin account exists in the DB");
                 LogManager.log(LogType.SQL_OK, "Rows effected " + rows);
                 return true;
+            }
+
+            String sql2 = "SELECT password_hash FROM accounts WHERE id = 2";
+
+            try (Connection connection1 = DBManager.getConnection();
+                PreparedStatement stmt = connection1.prepareStatement(sql2)) {
+
+                    ResultSet rs = stmt.executeQuery();
+
+                    if (rs.next()) {
+                        String DB_PASSWORD = rs.getString("password_hash");
+
+                        if (DB_PASSWORD.isBlank()) {
+                            throw new IllegalStateException("[ERROR] The Password in the DB is NULL");
+                        }
+                    }
+
+            } catch (IllegalStateException error) {
+                    LogManager.log(LogType.AUTH_FAILED, "The Password in the DB is Null/Empty");
+                    System.out.println(error.getMessage());
+                    return false;
             }
 
             return false;
