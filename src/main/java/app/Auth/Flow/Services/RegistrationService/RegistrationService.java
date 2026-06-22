@@ -157,16 +157,54 @@ public class RegistrationService {
                     changeValue = scanner.nextInt();
                     scanner.nextLine();
 
-                    if (changeValue == 0) {
-                        throw new IllegalArgumentException("The Value can't be 0 or empty please try again");
-                    } else if (changeValue == 1) {
-                        setUserName(scanner);
-                    } else if (changeValue == 2) {
-                        setEmailAddress(scanner);
-                    } else if (changeValue == 3) {
-                        setPhoneNumber(scanner);
-                    } else if (changeValue > 3) {
-                        throw new IllegalArgumentException("The Value is out of range please try again");
+                while (true) {
+
+                         String valueIsRight;
+
+                        if (changeValue == 0) {
+                            throw new IllegalArgumentException("The Value can't be 0 or empty please try again");
+                        } else if (changeValue == 1) {
+                            setUserName(scanner);
+                            System.out.println("Is the Username Right?´ Y/N: " + userName);
+
+                            valueIsRight = scanner.nextLine().toLowerCase();
+
+                            if (valueIsRight.equals("y")) {
+                                return;
+                            } else {
+                                setUserName(scanner);
+                            }
+
+                        } else if (changeValue == 2) {
+                            setEmailAddress(scanner);
+
+                            System.out.println("Is the Email Address Right? Y/N: " + emailAddress);
+
+                            valueIsRight = scanner.nextLine().toLowerCase();
+
+                            if (valueIsRight.equals("y")) {
+                                return;
+                            } else {
+                                setEmailAddress(scanner);
+                            }
+
+
+                        } else if (changeValue == 3) {
+                            setPhoneNumber(scanner);
+
+                            System.out.println("Is the Phone Number Right?: Y/N: " + phoneNumber);
+
+                            valueIsRight = scanner.nextLine().toLowerCase();
+
+                            if (valueIsRight.equals("y")) {
+                                return;
+                            } else {
+                                setEmailAddress(scanner);
+                            }
+
+                        } else if (changeValue > 3) {
+                            throw new IllegalArgumentException("The Value is out of range please try again");
+                        }
                     }
                 }
                 break;
