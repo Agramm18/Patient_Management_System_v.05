@@ -27,6 +27,11 @@ public class RegistrationService {
     private String emailAddress;
     private String phoneNumber;
     private String hashedPWSD;
+    private int atINdexEmail;
+    private String domain;
+    private int tldIndex;
+    private String tld;
+    private String domainName;
 
     public void userAccunt(Scanner scanner) {
         setUserName(scanner);
@@ -35,29 +40,39 @@ public class RegistrationService {
         showCurrentInfo(scanner);
     }
 
-    private void setUserName(Scanner scanner) {
+     void setUserName(Scanner scanner) {
         LogManager.log(LogManager.LogType.AUTH_INFO, "Starting Username Setup");
         String defaultUserName;
 
+         System.out.println("[INFO] Please Enter your UserName");
+
         while (true) {
             try {
-                System.out.println("[INFO] Please Enter your UserName");
+
                 defaultUserName =  scanner.nextLine();
 
-                if (defaultUserName.isBlank()) {
-                    throw new IllegalArgumentException("This field can't be empty please try again");
-                } else if (defaultUserName.length() < 5 || defaultUserName.length() > 20) {
-                    throw new IllegalArgumentException("The Username can't be shorter than 5 or longer than 20 letters please try again");
-                } else {
-                    LogManager.log(LogType.AUTH_SUCCESS, "The UserName is now set");
-                    this.userName = defaultUserName;
-                    break;
-                }
+                validateUsername(defaultUserName);
+
+                LogManager.log(LogType.AUTH_SUCCESS, "The UserName is now set");
+                this.userName = defaultUserName;
+                break;
+
             } catch (IllegalArgumentException error) {
                 System.out.println(error.getMessage());
                 LogManager.log(LogType.INVALID_INPUT, error.getMessage());
             }
 
+        }
+    }
+
+    //Validation Method so Testing is possible
+    void validateUsername(String defaultUsername) throws IllegalArgumentException {
+        if (defaultUsername.isBlank()) {
+            throw new IllegalArgumentException("This field can't be empty please try again");
+        }
+
+        if (defaultUsername.length() < 5 || defaultUsername.length() > 20) {
+            throw new IllegalArgumentException("The Username can't be shorter than 5 or longer than 20 letters please try again");
         }
     }
 
@@ -71,23 +86,65 @@ public class RegistrationService {
                 System.out.println("Please enter your E-Mail Address");
                 userEmail = scanner.nextLine();
 
-                if (userEmail.isBlank()) {
-                    throw new IllegalArgumentException("This field can't be empty please try again");
-                } else if (userEmail.length() >= 254) {
-                    throw new IllegalArgumentException("The E-Mail can't be longer than 254 signs");
-                } else if (!userEmail.contains("@")) {
-                    throw new IllegalArgumentException("It seems the @ sign is missing please try again");
-                } else {
-                    LogManager.log(LogType.AUTH_SUCCESS, "Your Email Address is set");
-                    this.emailAddress = userEmail;
-                    break;
-                }
+                validateEmailAddress(userEmail);
+
+                LogManager.log(LogType.AUTH_SUCCESS, "Your Email Address is set");
+                this.emailAddress = userEmail;
+                break;
+
             } catch (IllegalArgumentException error) {
                 System.out.println(error.getMessage());
                 LogManager.log(LogType.INVALID_INPUT, error.getMessage());
             }
         }
+    }
 
+    //Validation Method so testing is possible
+    void validateEmailAddress(String userEmail) throws IllegalArgumentException {
+
+        if (userEmail == null || userEmail.isBlank()) {
+            throw new IllegalArgumentException("This field can't be empty please try again");
+        }
+
+        if (userEmail.length() > 254) {
+            throw new IllegalArgumentException("The E-Mail can't be longer than 254 signs");
+        }
+
+        if (userEmail.length() <= 5) {
+            throw new IllegalArgumentException("It seems your Email is too short");
+        }
+
+        this.atINdexEmail = userEmail.indexOf('@');
+
+        if (this.atINdexEmail == -1) {
+            throw new IllegalArgumentException("Invalid Email Format It seems the @ sign is missing");
+        }
+
+        if (this.atINdexEmail == 0) {
+            throw new IllegalArgumentException("Invalid Email Format The Content before the @ can't be empty");
+        }
+
+        this.domain = userEmail.substring(this.atINdexEmail + 1);
+
+        if (this.domain.isBlank()) {
+            throw new IllegalArgumentException("Invalid Email Format The Domain can't be Empty");
+        }
+
+        this.tldIndex = this.domain.lastIndexOf('.');
+
+        if (this.tldIndex == -1) {
+            throw new IllegalArgumentException("Invalid Email Format the Domain must contain at least one .");
+        }
+
+        if (this.tldIndex == this.domain.length() - 1) {
+            throw new IllegalArgumentException("Invalid Email Format the E-Mail does not contain a TLD-Domain like .com, .org etc.");
+        }
+
+        this.domainName = this.domain.substring(0, this.tldIndex);
+
+        if (this.domainName.isBlank()) {
+            throw new IllegalArgumentException("Invalid Email Format The Domain Name can't be empty");
+        }
     }
 
     //Set the Phonenumber and validate if the Phone Number is valid
