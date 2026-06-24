@@ -1,10 +1,10 @@
 # ToDo
 
-Status date: 2026-06-18.
+Status date: 2026-06-24.
 
 This is the current implementation backlog. It is ordered by dependency and risk rather than by product feature.
 
-`mvn -DskipTests compile` currently succeeds. No automated tests exist.
+`mvn test` currently succeeds with 53 tests: 11 PasswordService tests and 42 RegistrationService validation tests.
 
 ## Current Milestone
 
@@ -22,6 +22,7 @@ configuration
 -> approval
 -> activation
 -> usable role menus
+-> logging and test coverage hardening
 ```
 
 ## Completed Baseline
@@ -51,20 +52,34 @@ configuration
 - [x] Admin option `1` lists current access-management requests
 - [x] Default admin account creation now uses `ADMIN_PASSWORD_DEFAULT`
 - [x] Local setup no longer requires duplicate admin-password environment variables
-- [x] Current documentation synchronized
+- [x] Environment setup documentation uses current keys: `DB_PASSWORD`, `LOCAL_ADMIN_PASSWORD`, and `ADMIN_PASSWORD_DEFAULT`
+- [x] JUnit 5 and Surefire test baseline
+- [x] `src/test/java` test structure
+- [x] PasswordService validation, retype, and terminal-fallback unit tests
+- [x] RegistrationService validation tests for username, email, phone number, confirmation state, and correction choices
+- [x] `mvn test` passes with 53 tests
+- [x] `src/main/resources/logback.xml` baseline with console and per-category file appenders
+- [x] Generated log files and the `logs/` directory are ignored by `.gitignore`
+- [x] Registration correction flow displays updated values before continuing
+- [x] Current TODO synchronized
 
 ## Highest Priority Defects
 
 ### Environment and Starter Accounts
 
-- [ ] Add validation or explicit failure when a starter-account password cannot be loaded.
+- [x] Add validation or explicit failure when a starter-account password cannot be loaded.
+- [ ] Add clear startup diagnostics for legacy `.env` keys such as `DB_PWSD`, `LOCAL_ADMIN_PWSD`, and `ADMIN_PWSD_DEFAULT`.
+- [ ] Replace hard-coded starter-account IDs in password-hash fallback checks with role or account lookup.
+- [ ] Make starter-account creation failures distinguish duplicate accounts, missing password hashes, and database errors.
 
 ### Registration Integrity
 
-- [ ] Re-show and reconfirm registration data after a field is changed.
+- [ ] Rework registration correction so every changed field returns to one full confirmation step.
+- [ ] Store the password hash in `RegistrationService.hashedPWSD` after the correction branch runs `PasswordService`.
 - [ ] Prevent `CreateAccount` from running with a null or blank password hash.
 - [ ] Add explicit username and email uniqueness checks.
-- [ ] Improve email and phone validation.
+- [ ] Improve remaining email validation edge cases beyond the current structural checks.
+- [ ] Review phone validation boundaries after the libphonenumber-based baseline.
 - [ ] Return repository success or failure instead of only printing messages.
 
 ### Login Session and Status Handling
@@ -105,11 +120,13 @@ configuration
 
 ## Logging Migration
 
-- [ ] Add `src/main/resources/logback.xml`.
-- [ ] Define console and file output policy.
+- [x] Add `src/main/resources/logback.xml`.
+- [x] Define initial console and per-category file output policy.
+- [ ] Add log-file retention or rotation policy.
+- [x] Ensure generated `logs/` output stays out of source control.
 - [ ] Handle every declared `LogType` in `LogManager.log`.
 - [ ] Add the missing `break` after `AUTH_DEBUG`.
-- [ ] Remove unused loggers and imports from `LogManager`.
+- [ ] Remove unused loggers and imports from `LogManager`, including `ACCESS`, `systemLogger`, and `com.google.protobuf.Message`.
 - [ ] Decide whether success events should use `INFO` or a structured event field.
 - [ ] Migrate login, password, repository, and menu diagnostics from `System.out.println`.
 - [ ] Keep user-facing CLI messages separate from diagnostic logs.
@@ -145,9 +162,17 @@ configuration
 
 ## Testing and Quality
 
-- [ ] Add JUnit dependencies and `src/test/java`.
-- [ ] Unit-test password validation.
-- [ ] Unit-test registration validation and reconfirmation.
+- [x] Add JUnit dependencies and `src/test/java`.
+- [x] Unit-test password validation.
+- [x] Unit-test password retype validation.
+- [x] Unit-test terminal fallback behavior for password input.
+- [x] Unit-test RegistrationService username validation.
+- [x] Unit-test RegistrationService email validation.
+- [x] Unit-test RegistrationService phone-number validation.
+- [x] Unit-test RegistrationService registration-state and correction-choice validation.
+- [x] Verify current suite with `mvn test`.
+- [ ] Add tests for registration correction so changed fields still produce a stored password hash.
+- [ ] Unit-test registration reconfirmation and full correction flow.
 - [ ] Test account-status routing.
 - [ ] Test failed-login thresholds.
 - [ ] Test recovery retry and target restrictions.
@@ -155,6 +180,7 @@ configuration
 - [ ] Test menu routing for local admin and admin users.
 - [ ] Add repository integration tests.
 - [ ] Add Maven Wrapper.
+- [ ] Configure Maven with `--release 21` instead of separate `source` and `target` values.
 - [ ] Add formatter and static analysis.
 - [ ] Add CI after the initial test suite exists.
 
@@ -167,6 +193,8 @@ configuration
 - [ ] Replace inconsistent direct console error handling with shared patterns.
 - [ ] Decide whether empty directories under `src/main/java/app/Services` should be kept.
 - [ ] Decide whether `RouteService` should be implemented or removed.
+- [ ] Synchronize `README.md` and `docs/project_info/CURRENT_STATUS.md` with the current automated tests and Logback setup.
+- [ ] Clean duplicate `.gitignore` patterns once the ignore policy is finalized.
 
 ## Product Features After Foundation Work
 
@@ -188,3 +216,5 @@ configuration
 - Which login-attempt data is the source of truth for security policy?
 - Should application logs be stored only in files, only in the database, or in both?
 - Should the console menu remain the main runtime target before JavaFX or REST work begins?
+- Should starter-account fallback validation use role lookup, configured names, or fixed system-account IDs?
+- Should Logback keep separate files per category or move to rolling combined files?
