@@ -8,6 +8,10 @@ import app.Config.LogManager;
 import app.Config.LogManager.LogType;
 import app.Controller.*;
 
+import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.Phonenumber;
+
 /*
     This is the Basic Registration for a User
 
@@ -32,6 +36,7 @@ public class RegistrationService {
     private int tldIndex;
     private String tld;
     private String domainName;
+    private Phonenumber.PhoneNumber libNumber;
 
     public void userAccunt(Scanner scanner) {
         setUserName(scanner);
@@ -71,7 +76,7 @@ public class RegistrationService {
             throw new IllegalArgumentException("This field can't be empty please try again");
         }
 
-        if (defaultUsername.length() < 5 || defaultUsername.length() > 20) {
+        if (defaultUsername.length() <= 5 || defaultUsername.length() >= 20) {
             throw new IllegalArgumentException("The Username can't be shorter than 5 or longer than 20 letters please try again");
         }
     }
@@ -106,7 +111,7 @@ public class RegistrationService {
             throw new IllegalArgumentException("This field can't be empty please try again");
         }
 
-        if (userEmail.length() > 254) {
+        if (userEmail.length() >= 254) {
             throw new IllegalArgumentException("The E-Mail can't be longer than 254 signs");
         }
 
@@ -159,21 +164,55 @@ public class RegistrationService {
                 System.out.println("\n[INFO] Please enter your Phone Number");
                 userPhone = scanner.nextLine();
 
-                if (userPhone.isBlank()) {
-                    throw new IllegalArgumentException("This field can't be empty please try again");
-                } else if (userPhone.length() > 15) {
-                    throw new IllegalArgumentException("Your phone number can't be longer than 15 please try again");
-                } else if (userPhone.charAt(0) != '+') {
-                    throw new IllegalArgumentException("The Format is invalid please try again");
-                } else {
-                    LogManager.log(LogType.AUTH_SUCCESS, "The Number is Valid an will be set");
-                    this.phoneNumber = userPhone;
-                    break;
-                }
+                validatePhoneNumber(userPhone);
+
+                LogManager.log(LogType.AUTH_SUCCESS, "The Number is Valid an will be set");
+                this.phoneNumber = userPhone;
+                break;
+
             } catch (IllegalArgumentException error) {
                 System.out.println(error.getMessage());
                 LogManager.log(LogType.INVALID_INPUT, "Something went wrong: " + error.getMessage());
             }
+        }
+    }
+
+    void validatePhoneNumber(String userPhone) throws IllegalArgumentException {
+        if (userPhone == null || userPhone.isBlank()) {
+            throw new IllegalArgumentException("This field can't be empty please try again");
+        }
+
+        if (userPhone.length() > 16) {
+            throw new IllegalArgumentException("Your Phone Number can't be longer or be equal than 15 please try again");
+        }
+
+        if (userPhone.length() <=5) {
+            throw new IllegalArgumentException("Your Phone Number is to short your Phone Number can't be shorter than or be equal to 5");
+        }
+
+        if (userPhone.charAt(0) != '+') {
+            throw new IllegalArgumentException("Invalid Format the Phone Number needs one + at the start");
+        }
+
+        if (userPhone.matches(".*\\p{L}.*")) {
+            throw new IllegalArgumentException("Invalid Format Your Phone Number can't contain Letters");
+        }
+
+        if (!userPhone.matches("^\\+\\d+$")) {
+            throw new IllegalArgumentException("Invalid Format Your Phone Number can't contain other Special letters and more than 1 +");
+        }
+
+        //Load Library to validate if the Country Code for the phone number is valid
+        PhoneNumberUtil util = PhoneNumberUtil.getInstance();
+
+        try {
+            this.libNumber = util.parse(userPhone, null);
+        } catch (NumberParseException error) {
+            throw new IllegalArgumentException("The Country Code in your Phone Number is Invalid");
+        }
+
+        if (!util.isValidNumber(this.libNumber)) {
+            throw new IllegalArgumentException("The Format for the Phone Number is Invalid");
         }
     }
 
@@ -192,11 +231,9 @@ public class RegistrationService {
                 System.out.println("\nINFO] Is the Data correct? Y/N]\n");
                 registrationState = scanner.nextLine().trim().toLowerCase();
 
-                if (registrationState.isBlank()) {
-                    throw new IllegalArgumentException("This field can't be empty please try again");
-                } else if (!registrationState.equals("y") && !registrationState.equals("n")) {
-                    throw new IllegalArgumentException("Only y for yes or n for n are valid please try again");
-                } else if (registrationState.equals("y")) {
+                validateRegistrationState(registrationState);
+
+                if (registrationState.equals("y")) {
 
                     LogManager.log(LogType.AUTH_SUCCESS, "Basic Registration Credentials Successfully collected");
 
@@ -217,15 +254,17 @@ public class RegistrationService {
 
                 while (true) {
 
-                         String valueIsRight;
+                        String valueIsRight;
 
-                        if (changeValue == 0) {
-                            throw new IllegalArgumentException("The Value can't be 0 or empty please try again");
-                        } else if (changeValue == 1) {
+                        validateChangeValue(changeValue);
+
+                        if (changeValue == 1) {
                             setUserName(scanner);
                             System.out.println("Is the Username Right?´ Y/N: " + userName);
 
                             valueIsRight = scanner.nextLine().toLowerCase();
+
+                            validateValueIsRight(valueIsRight);
 
                             if (valueIsRight.equals("y")) {
 
@@ -234,8 +273,8 @@ public class RegistrationService {
                                 System.out.println("[DEBUG] Email Address: " + this.emailAddress);
                                 System.out.println("[DEBUG] Phone Number: " + this.phoneNumber + "\n");
 
-                                PasswordService service = new PasswordService();
-                                service.userPWSD(scanner);
+                                PasswordFlow execute = new PasswordFlow();
+                                execute.policy(scanner);
 
                                 return;
                             } else {
@@ -249,6 +288,8 @@ public class RegistrationService {
 
                             valueIsRight = scanner.nextLine().toLowerCase();
 
+                            validateValueIsRight(valueIsRight);
+
                             if (valueIsRight.equals("y")) {
 
                                 System.out.println("\n[INFO] Current Data");
@@ -256,8 +297,8 @@ public class RegistrationService {
                                 System.out.println("[DEBUG] Email Address: " + this.emailAddress);
                                 System.out.println("[DEBUG] Phone Number: " + this.phoneNumber + "\n");
 
-                                PasswordService service = new PasswordService();
-                                service.userPWSD(scanner);
+                                PasswordFlow execute = new PasswordFlow();
+                                execute.policy(scanner);
 
                                 return;
                             } else {
@@ -265,28 +306,29 @@ public class RegistrationService {
                             }
 
 
-                        } else if (changeValue == 3) {
+                        } else {
                             setPhoneNumber(scanner);
 
                             System.out.println("Is the Phone Number Right?: Y/N: " + phoneNumber);
 
                             valueIsRight = scanner.nextLine().toLowerCase();
 
+                            validateValueIsRight(valueIsRight);
+
                             if (valueIsRight.equals("y")) {
                                 System.out.println("\n[INFO] Current Data");
                                 System.out.println("[DEBUG] User Name: " + this.userName);
                                 System.out.println("[DEBUG] Email Address: " + this.emailAddress);
                                 System.out.println("[DEBUG] Phone Number: " + this.phoneNumber + "\n");
 
-                                PasswordService service = new PasswordService();
-                                service.userPWSD(scanner);
+                                PasswordFlow execute = new PasswordFlow();
+                                execute.policy(scanner);
+
                                 return;
                             } else {
-                                setEmailAddress(scanner);
+                                setPhoneNumber(scanner);
                             }
 
-                        } else if (changeValue > 3) {
-                            throw new IllegalArgumentException("The Value is out of range please try again");
                         }
                     }
                 }
@@ -295,6 +337,38 @@ public class RegistrationService {
                 System.out.println(error.getMessage());
                 LogManager.log(LogType.INVALID_INPUT, error.getMessage());
             }
+        }
+    }
+
+    void validateRegistrationState(String registrationState) throws IllegalArgumentException {
+        if (registrationState.isBlank()) {
+            throw new IllegalArgumentException("This field can't be empty please try again");
+        }
+
+        if (!registrationState.equals("y") && !registrationState.equals("n")) {
+            throw new IllegalArgumentException("Only y for yes or n for n are valid please try again");
+        }
+
+    }
+
+    void validateChangeValue(int changeValue) throws IllegalArgumentException {
+        if (changeValue < 1) {
+            throw new IllegalArgumentException("The Value can't be less than 1");
+        }
+
+        if (changeValue > 3) {
+            throw new IllegalArgumentException("The value can't be higher than 3");
+        }
+    }
+
+    void validateValueIsRight(String valueIsRight) throws IllegalArgumentException{
+
+        if (valueIsRight.isBlank()) {
+            throw new IllegalArgumentException("This value can't be empty");
+        }
+
+        if (!valueIsRight.equals("y") && !valueIsRight.equals("n")) {
+            throw new IllegalArgumentException("Only y or n are permitted values");
         }
     }
 
