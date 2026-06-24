@@ -41,6 +41,24 @@ public class RegistrationServiceTest {
         assertEquals("The Username can't be shorter than 5 or longer than 20 letters please try again", ex.getMessage());
     }
 
+    @Test
+    void testUsernameIsToLongInRange() {
+        RegistrationService service = new RegistrationService();
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> service.validateUsername("JavaBackendDev2026Ax"));
+
+        assertEquals("The Username can't be shorter than 5 or longer than 20 letters please try again", ex.getMessage());
+    }
+
+    @Test
+    void testUsernameIsToShortInRange() {
+        RegistrationService service = new RegistrationService();
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> service.validateUsername("test"));
+
+        assertEquals("The Username can't be shorter than 5 or longer than 20 letters please try again", ex.getMessage());
+    }
+
     //Test EmailAddress
 
     @Test
@@ -69,10 +87,28 @@ public class RegistrationServiceTest {
     }
 
     @Test
+    void testEmailToShortInRange() {
+        RegistrationService service = new RegistrationService();
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> service.validateEmailAddress("exa@e"));
+
+        assertEquals("It seems your Email is too short", ex.getMessage());
+    }
+
+    @Test
     void testEmailToLong() {
         RegistrationService service = new RegistrationService();
 
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> service.validateEmailAddress("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@example.com"));
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> service.validateEmailAddress("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@example.com"));
+
+        assertEquals("The E-Mail can't be longer than 254 signs", ex.getMessage());
+    }
+
+    @Test
+    void testEmailToLongInRange() {
+        RegistrationService service = new RegistrationService();
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> service.validateEmailAddress("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@example.com"));
 
         assertEquals("The E-Mail can't be longer than 254 signs", ex.getMessage());
     }
@@ -94,6 +130,7 @@ public class RegistrationServiceTest {
 
         assertEquals("Invalid Email Format The Content before the @ can't be empty", ex.getMessage());
     }
+
     @Test
     void testEmptyDomain() {
         RegistrationService service = new RegistrationService();
@@ -167,6 +204,15 @@ public class RegistrationServiceTest {
     }
 
     @Test
+    void testToShortPhoneNumberInRange() {
+        RegistrationService service = new RegistrationService();
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> service.validatePhoneNumber("+1234"));
+
+        assertEquals("Your Phone Number is to short your Phone Number can't be shorter than or be equal to 5", ex.getMessage());
+    }
+
+    @Test
     void tessDoesNotContainPlus() {
         RegistrationService service = new RegistrationService();
 
@@ -211,7 +257,122 @@ public class RegistrationServiceTest {
         assertEquals("Invalid Format Your Phone Number can't contain other Special letters and more than 1 +", ex.getMessage());
     }
 
+    @Test
+    void testNumberHasAnInvalidCountryCode() {
+        RegistrationService service = new RegistrationService();
 
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> service.validatePhoneNumber("+999123456789"));
 
+        assertEquals("The Country Code in your Phone Number is Invalid", ex.getMessage());
+    }
+
+    //Test Registration State
+
+    @Test
+    void testValidRegistrationStateTrue() {
+        RegistrationService service = new RegistrationService();
+
+        assertDoesNotThrow(() -> service.validateRegistrationState("y"));
+    }
+
+    @Test
+    void testValidRegistrationStateFalse() {
+        RegistrationService service = new RegistrationService();
+
+        assertDoesNotThrow(() -> service.validateRegistrationState("n"));
+    }
+
+    @Test
+    void testEmptyRegistrationState() {
+        RegistrationService service = new RegistrationService();
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> service.validateRegistrationState(""));
+
+        assertEquals("This field can't be empty please try again", ex.getMessage());
+    }
+
+    @Test
+    void testInvalidRegistrationState() {
+        RegistrationService service = new RegistrationService();
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> service.validateRegistrationState("test"));
+
+        assertEquals("Only y for yes or n for n are valid please try again", ex.getMessage());
+    }
+
+    //Change Value
+
+    @Test
+    void testValidChangeValueOne() {
+        RegistrationService service = new RegistrationService();
+
+        assertDoesNotThrow(() -> service.validateChangeValue(1));
+    }
+
+    @Test
+    void testValidChangeValueTwo() {
+        RegistrationService service = new RegistrationService();
+
+        assertDoesNotThrow(() -> service.validateChangeValue(2));
+    }
+
+    @Test
+    void testValidChangeValueThree() {
+        RegistrationService service = new RegistrationService();
+
+        assertDoesNotThrow(() -> service.validateChangeValue(3));
+    }
+
+    @Test
+    void testMoreThanThreeChangeValue() {
+        RegistrationService service = new RegistrationService();
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> service.validateChangeValue(4));
+
+        assertEquals("The value can't be higher than 3", ex.getMessage());
+    }
+
+    @Test
+    void testLessThanOneChangeValue() {
+        RegistrationService service = new RegistrationService();
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> service.validateChangeValue(0));
+
+        assertEquals("The Value can't be less than 1", ex.getMessage());
+    }
+
+    //Test valueIsRight
+
+    @Test
+    void testValueIsRightIsTrue() {
+        RegistrationService service = new RegistrationService();
+
+        assertDoesNotThrow(() -> service.validateValueIsRight("y"));
+    }
+
+    @Test
+    void testValueIsRightIsFalse() {
+        RegistrationService service = new RegistrationService();
+
+        assertDoesNotThrow(() -> service.validateValueIsRight("n"));
+    }
+
+    @Test
+    void testValueIsRightIsEmpty()  {
+        RegistrationService service = new RegistrationService();
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> service.validateValueIsRight(""));
+
+        assertEquals("This value can't be empty", ex.getMessage());
+    }
+
+    @Test
+    void testValueIsRightIsNotYesOrNo() {
+        RegistrationService service = new RegistrationService();
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> service.validateValueIsRight("test"));
+
+        assertEquals("Only y or n are permitted values", ex.getMessage());
+    }
 
 }
