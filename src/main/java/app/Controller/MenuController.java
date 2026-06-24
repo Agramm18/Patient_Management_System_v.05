@@ -1,15 +1,13 @@
 package app.Controller;
 
 import app.Auth.Flow.Services.LoginService.CurrentUser;
-import app.CLIText.Menus.ServiceMenus.AdminMenu;
-import app.CLIText.Menus.ServiceMenus.LocalAdminMenu;
+import app.CLIText.Menus.ServiceMenus.ParrentMenus.AdminMenu;
+import app.CLIText.Menus.ServiceMenus.ParrentMenus.LocalAdminMenu;
 import app.Config.LogManager;
 import app.Config.LogManager.LogType;
 import app.Auth.Flow.CurrentSession;
 import app.Menu.MenuFlow;
 
-import app.Config.LogManager;
-import app.Config.LogManager.LogType;
 import app.Menu.MenuValues;
 
 import java.util.Scanner;
@@ -30,7 +28,7 @@ public class MenuController {
             case 1:
                 LogManager.log(LogType.AUTH_INFO, "The user has granted access to the local admin menu");
                 new LocalAdminMenu().localAdminMenu();
-                return new MenuValues(0, user.getRole());
+                return new MenuValues(0, user.getRole(), 0);
 
             case 2:
                 LogManager.log(LogType.AUTH_INFO, "The user has granted access to the admin menu");
@@ -40,8 +38,10 @@ public class MenuController {
 
                 this.MAX_OPTIONS = adminMenu.getMenuSize();
 
-                int Choice = route.chooseOption(scanner, this.MAX_OPTIONS);
-                MenuValues menuChoice = new MenuValues(Choice, user.getRole());
+                //The sub menu should be called here like choice = 1 -> request sub menu and this valude should be routed to the service controller
+
+                int childKontext = route.chooseOption(scanner, this.MAX_OPTIONS);
+                MenuValues menuChoice = new MenuValues(2, user.getRole(), childKontext);
 
                 return menuChoice;
         }

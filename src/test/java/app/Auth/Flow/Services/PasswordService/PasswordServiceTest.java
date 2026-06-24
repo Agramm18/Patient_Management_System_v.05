@@ -112,4 +112,5 @@ public class PasswordServiceTest {
         assertEquals("[ERROR] The verification password can't be empty and must be equal to the password from before", ex.getMessage());
     }
 
+    
 }

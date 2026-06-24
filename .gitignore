@@ -25,3 +25,7 @@ target/
 
 # SQL
 *.sql
+
+*.log
+
+logs/

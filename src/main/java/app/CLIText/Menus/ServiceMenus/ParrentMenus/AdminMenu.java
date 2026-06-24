@@ -1,4 +1,4 @@
-package app.CLIText.Menus.ServiceMenus;
+package app.CLIText.Menus.ServiceMenus.ParrentMenus;
 
 import app.Auth.Flow.CurrentSession;
 import app.Auth.Flow.Services.LoginService.CurrentUser;
@@ -19,14 +19,11 @@ public class AdminMenu {
         System.out.println("Please choose one of the following options\n");
 
         List<String> menuItems = List.of(
-            "View current requests",
-            "Load request flow",
-            "View all active user",
-            "View all locked user",
-            "View all quarantined user",
-            "View all suspicious user",
-            "Activate User",
-            "Disable User"
+            "Requests",
+             "User",
+            "Security",
+            "Logs",
+            "Logout"
         );
 
         for (int i = 0; i < menuItems.size(); i++) {

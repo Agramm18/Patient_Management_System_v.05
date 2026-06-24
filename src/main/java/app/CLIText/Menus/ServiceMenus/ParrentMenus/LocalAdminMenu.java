@@ -1,4 +1,4 @@
-package app.CLIText.Menus.ServiceMenus;
+package app.CLIText.Menus.ServiceMenus.ParrentMenus;
 
 import app.Config.LogManager;
 import app.Config.LogManager.LogType;

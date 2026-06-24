@@ -34,9 +34,9 @@ public class ServiceController {
 
         switch (choice) {
             case 1:
-                LogManager.log(LogType.SYSTEM_INFO, "The admin have chosen to see the current access requests");
-                ShowCurrentRequests show = new ShowCurrentRequests();
-                show.CurrentRequests();
+                LogManager.log(LogType.MENU_INFO, "The Admin have chosen to start the Request Service");
+                
+
                 break;
         }
 
