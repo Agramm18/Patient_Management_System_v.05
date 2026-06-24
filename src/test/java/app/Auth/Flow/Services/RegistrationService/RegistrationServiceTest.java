@@ -129,4 +129,89 @@ public class RegistrationServiceTest {
 
         assertEquals("Invalid Email Format The Domain Name can't be empty", ex.getMessage());
     }
+
+    //Test Phone Number
+
+    @Test
+    void testValidPhoneNumber() {
+        RegistrationService service = new RegistrationService();
+
+        assertDoesNotThrow(() -> service.validatePhoneNumber("+491725231824"));
+    }
+
+    @Test
+    void testEmptyPhoneNumber() {
+        RegistrationService service = new RegistrationService();
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> service.validatePhoneNumber(""));
+
+        assertEquals("This field can't be empty please try again", ex.getMessage());
+    }
+
+    @Test
+    void testToLongPhoneNumber() {
+        RegistrationService service = new RegistrationService();
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> service.validatePhoneNumber("+123456789521458745965445656554656"));
+
+        assertEquals("Your Phone Number can't be longer or be equal than 15 please try again", ex.getMessage());
+    }
+
+    @Test
+    void testToShortPhoneNumber() {
+        RegistrationService service = new RegistrationService();
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> service.validatePhoneNumber("+12"));
+
+        assertEquals("Your Phone Number is to short your Phone Number can't be shorter than or be equal to 5", ex.getMessage());
+    }
+
+    @Test
+    void tessDoesNotContainPlus() {
+        RegistrationService service = new RegistrationService();
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> service.validatePhoneNumber("01725231824"));
+
+        assertEquals("Invalid Format the Phone Number needs one + at the start", ex.getMessage());
+    }
+
+    @Test
+    void testNumberContainsUpperLetters() {
+        RegistrationService service = new RegistrationService();
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> service.validatePhoneNumber("+4912752A31"));
+
+        assertEquals("Invalid Format Your Phone Number can't contain Letters", ex.getMessage());
+    }
+
+    @Test
+    void testNumberContainsLowerLetters() {
+        RegistrationService service = new RegistrationService();
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> service.validatePhoneNumber("+4912752a31"));
+
+        assertEquals("Invalid Format Your Phone Number can't contain Letters", ex.getMessage());
+    }
+
+    @Test
+    void testNumberContainsTwoPlus() {
+        RegistrationService service = new RegistrationService();
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> service.validatePhoneNumber("+491725213+899"));
+
+        assertEquals("Invalid Format Your Phone Number can't contain other Special letters and more than 1 +", ex.getMessage());
+    }
+
+    @Test
+    void testNumberContainsAnotherSpecialLetter() {
+        RegistrationService service = new RegistrationService();
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> service.validatePhoneNumber("+491725213!899"));
+
+        assertEquals("Invalid Format Your Phone Number can't contain other Special letters and more than 1 +", ex.getMessage());
+    }
+
+
+
+
 }
