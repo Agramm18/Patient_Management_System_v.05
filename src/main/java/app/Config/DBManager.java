@@ -19,10 +19,6 @@ public final class DBManager {
     private static String sqlPassword;
     private static String sqlURL;
 
-    private DBManager() {
-
-    }
-
     public static boolean initialize(
             String user,
             String password,
@@ -46,7 +42,6 @@ public final class DBManager {
         }
 
     }
-
 
     public static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(
