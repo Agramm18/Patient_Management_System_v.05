@@ -1,13 +1,17 @@
 package app.Controller;
-import java.util.Scanner;
 
+//Log Import
 import app.Config.LogManager;
 import app.Config.LogManager.LogType;
 
+//File Imports
 import app.Repository.ConfigRepository.CheckForDefaultAccounts;
 import app.Repository.ConfigRepository.SetRecoveryKey;
-import io.github.cdimascio.dotenv.Dotenv;
 import app.Config.*;
+
+//Libary Imports
+import io.github.cdimascio.dotenv.Dotenv;
+import java.util.Scanner;
 
 /*
     This Section is a controller that routes the user to the Auth Process
@@ -18,28 +22,26 @@ import app.Config.*;
 */
 
 public class ConfigController {
-    private EnvValidationService envValidationService;
-    private SQLValidationService sqlValidationService;
 
     public boolean execute(Scanner scanner) {
 
-        System.out.println("[INFO] Running Config Env & Build SQL Connection as Entrypoint for the System");
-        System.out.println("[INFO] Please note if anything is invalid in the .env config or SQL config the whole System will crash");
-
         LogManager.log(LogType.CONFIG_INFO, "Running Config Env & Build SQL Connection as Entrypoint for the System");
 
-        EnvValidationService configurate = new EnvValidationService();
-        boolean isValid = configurate.envStatus();
+        //Check if the .env values are all valid and if the .env file even exists
+        EnvValidationService envValidationService = new EnvValidationService();
+        boolean isValid = envValidationService.envStatus();
 
         if (isValid) {
-            SQLValidationService build = new SQLValidationService(configurate);
-            boolean connectionIsValid = build.DBConnection();
+            //Build a SQL connection to the Database
+            SQLValidationService sqlValidationService = new SQLValidationService(envValidationService);
+            boolean connectionIsValid = sqlValidationService.DBConnection();
 
+            //If the connection is valid a global connection will be created so it's callable
             if (connectionIsValid) {
                 boolean globalConnectionIsValid = DBManager.initialize(
-                        build.getSQLUser(),
-                        build.getSqlPWSD(),
-                        build.getSqlURL()
+                        sqlValidationService.getSQLUser(),
+                        sqlValidationService.getSqlPWSD(),
+                        sqlValidationService.getSqlURL()
                 );
 
                 if (!globalConnectionIsValid) {
@@ -54,18 +56,20 @@ public class ConfigController {
             return false;
         }
 
+        //Load setup to recover system accounts
         Dotenv dotenv = Dotenv.load();
-        HandleRecoveryKey collect = new HandleRecoveryKey(dotenv);
-        collect.plainKey();
-        collect.hashedKey();
+        HandleRecoveryKey handleRecoveryKey = new HandleRecoveryKey(dotenv);
+        handleRecoveryKey.plainKey();
+        handleRecoveryKey.hashedKey();
 
-        String recoveryKey = collect.getRecoveryKeyHashed();
+        String recoveryKey = handleRecoveryKey.getRecoveryKeyHashed();
 
-        SetRecoveryKey insert = new SetRecoveryKey();
-        insert.keyValue(recoveryKey);
+        //Check if The required system accounts even exist if not they will automatically create
+        SetRecoveryKey setRecoveryKey = new SetRecoveryKey();
+        setRecoveryKey.keyValue(recoveryKey);
 
-        CheckForDefaultAccounts CheckStatus = new CheckForDefaultAccounts();
-        return CheckStatus.dbAccounts();
+        CheckForDefaultAccounts checkForDefaultAccounts = new CheckForDefaultAccounts();
+        return checkForDefaultAccounts.dbAccounts();
 
     }
 }
