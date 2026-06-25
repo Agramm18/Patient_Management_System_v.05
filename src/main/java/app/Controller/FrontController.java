@@ -25,8 +25,9 @@ public class FrontController {
     private final AuthController authController;
     private final ConfigController configController;
     private final MenuController menuController;
+    private final SubMenuController subMenuController;
     private final ServiceController serviceController;
-    private final uiController UIController;
+    private final UIController UIController;
     private MenuValues menuChoice;
 
     private CurrentUser currentUser;
@@ -41,16 +42,17 @@ public class FrontController {
         EXIT
     }
 
-    public FrontController(AuthController authController, ConfigController configController, MenuController menuController, ServiceController serviceController, uiController UIController) {
+    public FrontController(AuthController authController, ConfigController configController, MenuController menuController, SubMenuController subMenuController, ServiceController serviceController, UIController UIController) {
         this.authController = authController;
         this.configController = configController;
         this.menuController = menuController;
+        this.subMenuController = subMenuController;
         this.serviceController = serviceController;
         this.UIController = UIController;
     }
 
     //Handle UseCase via RequestType
-    public boolean navigateSubController(RequestType request, Scanner scanner) {
+    public boolean callController(RequestType request, Scanner scanner) {
 
         switch (request) {
             case CONFIG:
