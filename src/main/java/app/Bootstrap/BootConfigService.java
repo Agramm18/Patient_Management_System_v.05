@@ -9,9 +9,7 @@ import app.Config.LogManager;
 import app.Controller.*;
 
 import app.Auth.Flow.CurrentSession;
-import app.Auth.Flow.Services.LoginService.CurrentUser;
 
-import java.sql.SQLException;
 import java.util.Scanner;
 
 public class BootConfigService {
@@ -21,20 +19,21 @@ public class BootConfigService {
         show.message();
     }
 
-    public void SystemConfig(Scanner scanner) {
+    public void systemConfig(Scanner scanner) {
         AuthController auth = new AuthController();
         ConfigController config = new ConfigController();
         MenuController menu = new MenuController();
+        SubMenuController subMenu = new SubMenuController();
         ServiceController service = new ServiceController();
-        uiController ui = new uiController();
+        UIController ui = new UIController();
 
-        FrontController dispatcher = new FrontController(auth, config, menu, service, ui);
+        FrontController dispatcher = new FrontController(auth, config, menu, subMenu, service, ui);
 
         LogManager.log(LogType.BOOT_INFO, "Starting Boot Process");
         LogManager.log(LogType.BOOT_INFO, "Running Controller classes");
 
         try {
-            boolean configOK = dispatcher.navigateSubController(FrontController.RequestType.CONFIG, scanner);
+            boolean configOK = dispatcher.callController(FrontController.RequestType.CONFIG, scanner);
 
             if (!configOK) {
                 throw new RuntimeException("System config failed");
@@ -49,15 +48,20 @@ public class BootConfigService {
             AuthMSG show = new AuthMSG();
             show.msg();
 
-            dispatcher.navigateSubController(FrontController.RequestType.AUTH, scanner);
+            dispatcher.callController(FrontController.RequestType.AUTH, scanner);
 
             CurrentUser user = CurrentSession.getCurrentUser();
 
-            if (user.hasAccessToMenu()) {
-                LogManager.log(LogType.AUTH_SUCCESS, "The User have access to use the menu");
-                dispatcher.navigateSubController(FrontController.RequestType.MENU, scanner);
+            if (user == null) {
+                LogManager.log(LogType.AUTH_FAILED, "No User Session where found");
+                throw new IllegalStateException("[WARN] No User in this session could be found");
+            }
 
-                dispatcher.navigateSubController(FrontController.RequestType.SERVICE, scanner);
+            if (user.hasAccessToMenu()) {
+                LogManager.log(LogType.AUTH_SUCCESS, "The User have access to the menu");
+                dispatcher.callController(FrontController.RequestType.MENU, scanner);
+
+                dispatcher.callController(FrontController.RequestType.SERVICE, scanner);
                 LogManager.log(LogType.SYSTEM_INFO, "Started Service Flow");
 
             } else {
