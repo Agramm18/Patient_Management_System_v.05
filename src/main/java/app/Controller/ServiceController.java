@@ -1,9 +1,8 @@
 package app.Controller;
 
 import app.Menu.MenuValues;
-import app.Config.LogManager;
-import app.Config.LogManager.LogType;
-import app.Repository.ServiceRepository.AdminServices.ShowCurrentRequests;
+import app.Logging.LogManager;
+import app.Logging.Enums.ProgrammState.*;
 
 import java.util.Scanner;
 
@@ -25,20 +24,11 @@ public class ServiceController {
 
 
     private void startLocalAdminService(MenuValues values, Scanner scanner) {
-        LogManager.log(LogType.SYSTEM_INFO, "Starting LocalAdmin Service");
+        LogManager.system(SystemState.INFO, "Starting LocalAdmin Service");
     }
 
     private void startAdminService(MenuValues values, Scanner scanner) {
-        LogManager.log(LogType.SYSTEM_INFO, "Starting Admin Service");
-        int choice = values.userChoice();
-
-        switch (choice) {
-            case 1:
-                LogManager.log(LogType.MENU_INFO, "The Admin have chosen to start the Request Service");
-                
-
-                break;
-        }
+        LogManager.system(SystemState.INFO, "Starting Admin Service");
 
     }
 }

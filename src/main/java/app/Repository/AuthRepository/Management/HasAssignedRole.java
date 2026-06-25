@@ -6,8 +6,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 
-import app.Config.LogManager;
-import app.Config.LogManager.LogType;
+import app.Logging.LogManager;
+import app.Logging.Enums.ProgrammState.*;
 
 /*
     In this Section the Code from the User will be checked
@@ -33,7 +33,7 @@ public class HasAssignedRole {
                 String userRole = rs.getString("user_role");
 
                 if (userRole.equals("unassigned")) {
-                    LogManager.log(LogType.AUTH_INFO, "The User don't have an assigned role");
+                    LogManager.auth(AuthState.INFO, "The User don't have an assigned role");
                     System.out.println("[INFO] You do not have a role assigned");
                     System.out.println("\n[INFO] Please choose one of the following roles");
                     return false;
@@ -47,11 +47,11 @@ public class HasAssignedRole {
             throw new IllegalStateException("[ERROR] User was not found");
 
         } catch (SQLException error ){
-            LogManager.log(LogType.SQL_EXCEPTION, error.getMessage());
+            LogManager.sql(SqlState.ERROR, error.getMessage());
             System.out.println(error.getMessage());
             return false;
         } catch (IllegalStateException error) {
-            LogManager.log(LogType.USERNAME_NOT_FOUND, error.getMessage());
+            LogManager.account(AccountState.USERNAME_NOT_FOUND, error.getMessage());
             System.out.println(error.getMessage());
             return false;
         }

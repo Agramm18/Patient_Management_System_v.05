@@ -4,8 +4,8 @@ import java.util.Scanner;
 import app.CLIText.Menus.Program.roleMenu;
 
 
-import app.Config.LogManager;
-import app.Config.LogManager.LogType;
+import app.Logging.LogManager;
+import app.Logging.Enums.ProgrammState.*;
 
 /*
     This part of the Code is for the Role handling
@@ -46,7 +46,7 @@ public class CollectUserRole {
                     if (selectedRole < 1 || selectedRole > 10) {
                         throw new IllegalArgumentException("[ERROR] The chosen value is out of range the value can't be less than 1 or higher than 10");
                     } else {
-                        LogManager.log(LogType.AUTH_SUCCESS, "The User have choose the role: " + selectedRole);
+                        LogManager.auth(AuthState.SUCCESS, "The User have choose the role: " + selectedRole);
                     }
                 }
 
@@ -54,12 +54,12 @@ public class CollectUserRole {
 
 
             } catch (NumberFormatException error) {
-                LogManager.log(LogType.INVALID_INPUT, error.getMessage());
+                LogManager.other(OtherState.INVALID_INPUT, error.getMessage());
                 System.out.println("[ERROR] Please type in a valid number");
             }
 
             catch (IllegalArgumentException error) {
-                LogManager.log(LogType.INVALID_INPUT, error.getMessage());
+                LogManager.other(OtherState.INVALID_INPUT, error.getMessage());
                 System.out.println(error.getMessage());
             }
         }

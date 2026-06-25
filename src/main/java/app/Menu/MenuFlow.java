@@ -1,16 +1,14 @@
 package app.Menu;
 import java.util.Scanner;
 
-import app.Auth.Flow.CurrentSession;
-
-import app.Config.LogManager;
-import app.Config.LogManager.LogType;
+import app.Logging.LogManager;
+import app.Logging.Enums.ProgrammState.*;
 
 public class MenuFlow {
 
     public int chooseOption(Scanner scanner, int MAX_OPTIONS) {
 
-        LogManager.log(LogType.MENU_INFO, "Starting Menu Choice Collector");
+        LogManager.menu(MenuState.INFO, "Starting Menu Choice Collector");
 
         while (true) {
             try {
@@ -25,16 +23,16 @@ public class MenuFlow {
                         throw new IllegalArgumentException("The number can't be less than 0 or higher than " + MAX_OPTIONS);
                     }
 
-                    LogManager.log(LogType.MENU_SUCCESS, "The User choose Option: " + userChoiceInt);
+                    LogManager.menu(MenuState.SUCCESS, "The User choose Option: " + userChoiceInt);
                     return userChoiceInt;
                 }
 
             } catch (NumberFormatException error) {
                 System.out.println(error.getMessage());
-                LogManager.log(LogType.INVALID_INPUT, error.getMessage());
+                LogManager.other(OtherState.INVALID_INPUT, error.getMessage());
             } catch (IllegalArgumentException error) {
                 System.out.println(error.getMessage());
-                LogManager.log(LogType.INVALID_INPUT, error.getMessage());
+                LogManager.other(OtherState.INVALID_INPUT, error.getMessage());
             }
         }
     }

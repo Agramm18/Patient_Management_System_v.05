@@ -8,8 +8,8 @@ import app.CLIText.Menus.DepartmentJobs.*;
 import app.Repository.AuthRepository.Management.HasAssignedDepartment;
 import app.Repository.AuthRepository.Management.CreateAccessRequest;
 
-import app.Config.LogManager;
-import app.Config.LogManager.LogType;
+import app.Logging.LogManager;
+import app.Logging.Enums.ProgrammState.*;
 
 /*
     In this class the first login is handled if the User status is pending in the DB accounts
@@ -34,12 +34,12 @@ public class FirstLogin {
 
     public void firstSetup(String Username, Scanner scanner) {
 
-        LogManager.log(LogType.AUTH_INFO, "Starting default User Setup for first login");
+        LogManager.auth(AuthState.INFO, "Starting default User Setup for first login");
 
         DepartmentMenu show = new DepartmentMenu();
         show.departments();
 
-        LogManager.log(LogType.AUTH_INFO, "Starting Department Selection");
+        LogManager.auth(AuthState.INFO, "Starting Department Selection");
 
         System.out.println("\n[INFO] Please setup an Department");
 
@@ -48,7 +48,7 @@ public class FirstLogin {
 
         int department = choose.getSelectedDepartment();
 
-        LogManager.log(LogType.AUTH_INFO, "The User have choose the Department: " + department);
+        LogManager.auth(AuthState.INFO, "The User have choose the Department: " + department);
 
         switch (department) {
             case 1:

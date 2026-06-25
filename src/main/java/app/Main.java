@@ -14,7 +14,7 @@ public class Main {
 
         BootConfigService run = new BootConfigService();
         run.displayLoader();
-        run.SystemConfig(scanner);
+        run.systemConfig(scanner);
 
     }
 }

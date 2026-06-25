@@ -5,8 +5,8 @@ import java.sql.*;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.mindrot.jbcrypt.BCrypt;
 
-import app.Config.LogManager;
-import app.Config.LogManager.LogType;
+import app.Logging.LogManager;
+import app.Logging.Enums.ProgrammState.*;
 
 /*
     In this Section the default Accounts for the Local Admin and Admin are created
@@ -49,7 +49,7 @@ public class CreateDefaultAccounts {
 
     private boolean createLocalDefaultAdmin() {
 
-        LogManager.log(LogType.CONFIG_INFO, "Creating Local Admin");
+        LogManager.config(ConfigState.INFO, "Creating Local Admin");
 
         String LocalAdminName = dotenv.get("LOCAL_ADMIN_NAME");
         String LocalAdminPassword = dotenv.get("LOCAL_ADMIN_PASSWORD");
@@ -68,9 +68,9 @@ public class CreateDefaultAccounts {
         boolean isSystemAccount = true;
 
 
-        LogManager.log(LogType.CONFIG_INFO, "Hashing Password");
+        LogManager.config(ConfigState.INFO, "Hashing Password");
         HashedLocalPassword = BCrypt.hashpw(LocalAdminPassword, BCrypt.gensalt(12));
-        LogManager.log(LogType.CONFIG_SUCCESS, "Local Admin Password is successfully Hashed");
+        LogManager.config(ConfigState.SUCCESS, "Local Admin Password is successfully Hashed");
 
         String sql = "INSERT INTO accounts (account_name, email, user_role, password_hash, bootstrap_key, account_status, user_job, permission, requires_password_change, department, has_access_to_menu, recovery_key_id, is_system_account) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -95,9 +95,9 @@ public class CreateDefaultAccounts {
             int rows = statement.executeUpdate();
 
             if (rows > 0) {
-                LogManager.log(LogType.CONFIG_SUCCESS, "Local Admin is created");
-                LogManager.log(LogType.SQL_WARN, "A default Local Admin exists in the DB");
-                LogManager.log(LogType.SQL_OK, "Rows effected " + rows);
+                LogManager.config(ConfigState.SUCCESS, "Local Admin is created");
+                LogManager.sql(SqlState.WARN, "A default Local Admin exists in the DB");
+                LogManager.sql(SqlState.SUCCESS, "Rows effected " + rows);
 
                 return true;
             }
@@ -118,7 +118,7 @@ public class CreateDefaultAccounts {
                 }
 
             } catch (IllegalStateException error) {
-                LogManager.log(LogType.AUTH_FAILED, "The Password in the DB is Null/Empty");
+                LogManager.auth(AuthState.FAILED, "The Password in the DB is Null/Empty");
                 System.out.println(error.getMessage());
                 return false;
             }
@@ -128,7 +128,7 @@ public class CreateDefaultAccounts {
 
         } catch (SQLException error) {
             System.out.println(error.getMessage());
-            LogManager.log(LogType.CONFIG_FAILED, error.getMessage());
+            LogManager.config(ConfigState.FAILED, error.getMessage());
             return false;
         }
     }
@@ -150,9 +150,9 @@ public class CreateDefaultAccounts {
         int recovery_id = 1;
         boolean isSystemAccount = true;
 
-        LogManager.log(LogType.SECURITY_INFO, "Hashing Password");
+        LogManager.security(SecurityState.INFO, "Hashing Password");
         HashedPassword = BCrypt.hashpw(AdminPassword, BCrypt.gensalt(12));
-        LogManager.log(LogType.SECURITY_SUCCESS, "Admin Password is successfully hashed");
+        LogManager.security(SecurityState.SUCCESS, "Admin Password is successfully hashed");
 
 
         String sql = "INSERT INTO accounts (account_name, email, user_role, password_hash, bootstrap_key, account_status, user_job, permission, requires_password_change, department, has_access_to_menu, recovery_key_id, is_system_account) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -178,9 +178,9 @@ public class CreateDefaultAccounts {
             int rows = statement.executeUpdate();
 
             if (rows > 0) {
-                LogManager.log(LogType.CONFIG_SUCCESS, "Admin is created");
-                LogManager.log(LogType.SQL_WARN, "A default Admin account exists in the DB");
-                LogManager.log(LogType.SQL_OK, "Rows effected " + rows);
+                LogManager.config(ConfigState.SUCCESS, "Admin is created");
+                LogManager.sql(SqlState.WARN, "A default Admin account exists in the DB");
+                LogManager.sql(SqlState.SUCCESS, "Rows effected " + rows);
                 return true;
             }
 
@@ -200,7 +200,7 @@ public class CreateDefaultAccounts {
                     }
 
             } catch (IllegalStateException error) {
-                    LogManager.log(LogType.AUTH_FAILED, "The Password in the DB is Null/Empty");
+                    LogManager.auth(AuthState.FAILED, "The Password in the DB is Null/Empty");
                     System.out.println(error.getMessage());
                     return false;
             }
@@ -208,8 +208,8 @@ public class CreateDefaultAccounts {
             return false;
         } catch (SQLException error) {
             System.out.println(error.getMessage());
-            LogManager.log(LogType.SQL_DEBUG, "Failed to create a default Admin");
-            LogManager.log(LogType.SQL_EXCEPTION, error.getMessage());
+            LogManager.sql(SqlState.DEBUG, "Failed to create a default Admin");
+            LogManager.sql(SqlState.ERROR, error.getMessage());
             return false;
         }
     }

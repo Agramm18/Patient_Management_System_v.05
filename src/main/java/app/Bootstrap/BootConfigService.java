@@ -4,8 +4,8 @@ import app.CLIText.DisplayMessages.AuthMSG;
 import app.CLIText.DisplayMessages.LoaderMSG;
 import app.Auth.Flow.Services.LoginService.CurrentUser;
 
-import app.Config.LogManager.LogType;
-import app.Config.LogManager;
+import app.Logging.LogManager;
+import app.Logging.Enums.ProgrammState.*;
 import app.Controller.*;
 
 import app.Auth.Flow.CurrentSession;
@@ -29,8 +29,8 @@ public class BootConfigService {
 
         FrontController dispatcher = new FrontController(auth, config, menu, subMenu, service, ui);
 
-        LogManager.log(LogType.BOOT_INFO, "Starting Boot Process");
-        LogManager.log(LogType.BOOT_INFO, "Running Controller classes");
+        LogManager.boot(BootState.INFO, "Starting Boot Process");
+        LogManager.boot(BootState.INFO, "Running Controller classes");
 
         try {
             boolean configOK = dispatcher.callController(FrontController.RequestType.CONFIG, scanner);
@@ -42,8 +42,8 @@ public class BootConfigService {
             System.out.println("[OK] The System Config was a success");
             System.out.println("[INFO] Starting Authentication phase");
 
-            LogManager.log(LogType.CONFIG_SUCCESS, "System Config was a success");
-            LogManager.log(LogType.SYSTEM_INFO, "Starting Authentication phase");
+            LogManager.config(ConfigState.SUCCESS, "System Config was a success");
+            LogManager.config(ConfigState.INFO, "Starting Authentication phase");
 
             AuthMSG show = new AuthMSG();
             show.msg();
@@ -53,16 +53,15 @@ public class BootConfigService {
             CurrentUser user = CurrentSession.getCurrentUser();
 
             if (user == null) {
-                LogManager.log(LogType.AUTH_FAILED, "No User Session where found");
+                LogManager.auth(AuthState.INFO, "No User Session where found");
                 throw new IllegalStateException("[WARN] No User in this session could be found");
             }
 
             if (user.hasAccessToMenu()) {
-                LogManager.log(LogType.AUTH_SUCCESS, "The User have access to the menu");
+                LogManager.menu(MenuState.SUCCESS, "The User have access to the menu");
                 dispatcher.callController(FrontController.RequestType.MENU, scanner);
 
                 dispatcher.callController(FrontController.RequestType.SERVICE, scanner);
-                LogManager.log(LogType.SYSTEM_INFO, "Started Service Flow");
 
             } else {
                 throw new IllegalStateException("The User does not have enough rights to use the menu");
@@ -70,7 +69,7 @@ public class BootConfigService {
 
         } catch (RuntimeException error) {
             System.out.println("[ERROR] System Config Failed");
-            LogManager.log(LogType.CONFIG_FAILED, error.getMessage());
+            LogManager.system(SystemState.WARN,  error.getMessage());
             System.exit(1);
         }
     }

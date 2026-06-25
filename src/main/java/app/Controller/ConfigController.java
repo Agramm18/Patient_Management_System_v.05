@@ -1,8 +1,8 @@
 package app.Controller;
 
 //Log Import
-import app.Config.LogManager;
-import app.Config.LogManager.LogType;
+import app.Logging.LogManager;
+import app.Logging.Enums.ProgrammState.*;
 
 //File Imports
 import app.Repository.ConfigRepository.CheckForDefaultAccounts;
@@ -25,7 +25,7 @@ public class ConfigController {
 
     public boolean execute(Scanner scanner) {
 
-        LogManager.log(LogType.CONFIG_INFO, "Running Config Env & Build SQL Connection as Entrypoint for the System");
+        LogManager.config(ConfigState.INFO, "Running Config Env & Build SQL Connection as Entrypoint for the System");
 
         //Check if the .env values are all valid and if the .env file even exists
         EnvValidationService envValidationService = new EnvValidationService();
@@ -34,13 +34,13 @@ public class ConfigController {
         if (isValid) {
             //Build a SQL connection to the Database
             SQLValidationService sqlValidationService = new SQLValidationService(envValidationService);
-            boolean connectionIsValid = sqlValidationService.DBConnection();
+            boolean connectionIsValid = sqlValidationService.dbConnection();
 
             //If the connection is valid a global connection will be created so it's callable
             if (connectionIsValid) {
                 boolean globalConnectionIsValid = DBManager.initialize(
-                        sqlValidationService.getSQLUser(),
-                        sqlValidationService.getSqlPWSD(),
+                        sqlValidationService.getSqlUser(),
+                        sqlValidationService.getSqlPassword(),
                         sqlValidationService.getSqlURL()
                 );
 

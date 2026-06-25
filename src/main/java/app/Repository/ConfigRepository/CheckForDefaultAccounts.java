@@ -4,8 +4,8 @@ import app.Config.DBManager;
 
 import java.sql.*;
 
-import app.Config.LogManager;
-import app.Config.LogManager.LogType;
+import app.Logging.LogManager;
+import app.Logging.Enums.ProgrammState.*;
 
 
 /*
@@ -31,9 +31,9 @@ public class CheckForDefaultAccounts {
         DefaultAccountsMSG display = new DefaultAccountsMSG();
         display.msg();
 
-        LogManager.log(LogType.CONFIG_INFO, "Checking if a Admin or a Local Admin exists in the DB");
-        LogManager.log(LogType.CONFIG_INFO, "If none of the roles exists a default LocalAdmin will be added");
-        LogManager.log(LogType.CONFIG_INFO, "If either one of these exists the other default role will be added");
+        LogManager.config(ConfigState.INFO, "Checking if a Admin or a Local Admin exists in the DB");
+        LogManager.config(ConfigState.INFO, "If none of the roles exists a default LocalAdmin will be added");
+        LogManager.config(ConfigState.INFO, "If either one of these exists the other default role will be added");
 
         checkLocalAdmin();
         checkAdmin();
@@ -43,7 +43,7 @@ public class CheckForDefaultAccounts {
 
     public void checkLocalAdmin() {
 
-        LogManager.log(LogType.SQL_INFO, "Checking for an Local Admin in the DB");
+        LogManager.sql(SqlState.INFO, "Checking for an Local Admin in the DB");
 
         int role = 1;
 
@@ -58,22 +58,22 @@ public class CheckForDefaultAccounts {
             ResultSet result = statement.executeQuery();
 
             if(result.next()) {
-                LogManager.log(LogType.CONFIG_SUCCESS, "Local Admin exist");
+                LogManager.config(ConfigState.SUCCESS, "Local Admin exist");
                 this.localAdminExist = true;
 
             } else {
-                LogManager.log(LogType.USERNAME_NOT_FOUND, "No Local Admin exist in the DB");
+                LogManager.account(AccountState.USERNAME_NOT_FOUND, "No Local Admin exist in the DB");
                 this.localAdminExist = false;
             }
 
         } catch (SQLException error) {
             System.out.println(error.getMessage());
-            LogManager.log(LogType.SQL_EXCEPTION, error.getMessage());
+            LogManager.sql(SqlState.ERROR, error.getMessage());
         }
     }
 
     public void checkAdmin() {
-        LogManager.log(LogType.CONFIG_INFO, "Checking for an Admin in the DB");
+        LogManager.config(ConfigState.INFO, "Checking for an Admin in the DB");
         int role = 2;
         String sql = "SELECT ID FROM accounts WHERE user_role = ? LIMIT 1";
 
@@ -86,16 +86,16 @@ public class CheckForDefaultAccounts {
             ResultSet result = statement.executeQuery();
 
             if (result.next()) {
-                LogManager.log(LogType.CONFIG_SUCCESS, "Admin exists in the DB");
+                LogManager.config(ConfigState.SUCCESS, "Admin exists in the DB");
                 this.adminExists = true;
             } else {
-                LogManager.log(LogType.USERNAME_NOT_FOUND, "No Admin Account exists in the DB");
+                LogManager.account(AccountState.USERNAME_NOT_FOUND, "No Admin Account exists in the DB");
                 this.adminExists = false;
             }
 
         } catch (SQLException error) {
             System.out.println(error.getMessage());
-            LogManager.log(LogType.SQL_EXCEPTION, error.getMessage());
+            LogManager.sql(SqlState.ERROR, error.getMessage());
         }
     }
 
@@ -104,19 +104,19 @@ public class CheckForDefaultAccounts {
         CreateDefaultAccounts create = new CreateDefaultAccounts();
 
         if (this.adminExists && this.localAdminExist) {
-            LogManager.log(LogType.CONFIG_SUCCESS, "Both starter Accounts exists in the DB");
+            LogManager.config(ConfigState.SUCCESS, "Both starter Accounts exists in the DB");
             return true;
         }
 
         else if (this.adminExists) {
-            LogManager.log(LogType.CONFIG_INFO, "The Default Local Admin will be created");
+            LogManager.config(ConfigState.INFO, "The Default Local Admin will be created");
             return create.defaultAccounts(true, false);
 
         } else if (this.localAdminExist) {
-            LogManager.log(LogType.CONFIG_INFO, "The Default Admin will be created");
+            LogManager.config(ConfigState.INFO, "The Default Admin will be created");
             return create.defaultAccounts(false, true);
         } else {
-            LogManager.log(LogType.CONFIG_INFO, "Both the Local Admin and Admin will be created");
+            LogManager.config(ConfigState.INFO, "Both the Local Admin and Admin will be created");
             return create.defaultAccounts(true, true);
         }
     }

@@ -5,8 +5,8 @@ import java.io.Console;
 import java.util.Arrays;
 import java.util.Scanner;
 
-import app.Config.LogManager;
-import app.Config.LogManager.LogType;
+import app.Logging.LogManager;
+import app.Logging.Enums.ProgrammState.*;
 
 public class ValidateRecoveryKey {
     private char[] invisibleInput;
@@ -28,9 +28,9 @@ public class ValidateRecoveryKey {
                 if (this.invisibleInput == null || this.invisibleInput.length == 0) {
                     throw new IllegalArgumentException("The password can't be empty please try again");
                 } else {
-                    LogManager.log(LogType.SECURITY_INFO, "Convert your Password as String");
+                    LogManager.security(SecurityState.INFO, "Convert your Password as String");
                     String convertedPassword = String.valueOf(this.invisibleInput);
-                    LogManager.log(LogType.SQL_INFO, "Giving the Password to your Database");
+                    LogManager.sql(SqlState.INFO, "Giving the Password to your Database");
                     this.passwordStringValue = convertedPassword;
                 }
 
@@ -40,10 +40,10 @@ public class ValidateRecoveryKey {
 
             } catch (IllegalArgumentException error) {
                 System.out.println(error.getMessage());
-                LogManager.log(LogType.INVALID_INPUT, error.getMessage());
+                LogManager.other(OtherState.INVALID_INPUT, error.getMessage());
             } catch (IllegalStateException error) {
                 System.out.println(error.getMessage());
-                LogManager.log(LogType.SYSTEM_WARN, error.getMessage());
+                LogManager.system(SystemState.WARN, error.getMessage());
             }
         }
     }

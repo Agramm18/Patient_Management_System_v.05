@@ -4,8 +4,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-import app.Config.LogManager;
-import app.Config.LogManager.LogType;
+import app.Logging.LogManager;
+import app.Logging.Enums.ProgrammState.*;
 
 public class SQLValidationService {
     private final EnvValidationService env;
@@ -26,11 +26,11 @@ public class SQLValidationService {
         String dbPassword = env.getPassword();
 
         System.out.println("[INFO] Building Global SQL Connection");
-        LogManager.log(LogType.CONFIG_INFO, "Building Global importable SQL Connection");
+        LogManager.config(ConfigState.INFO, "Building Global importable SQL Connection");
         String URL = "jdbc:mysql://" + host + ":" + port + "/" + dbName; //MySQL Connector URL
 
         System.out.println("[DEBUG] SQL URL: " + URL);
-        LogManager.log(LogType.SQL_DEBUG, "URL: " + URL);
+        LogManager.sql(SqlState.DEBUG, "URL: " + URL);
 
         //Routing Class variables to method variables
         this.sqlUser = dbUser;
@@ -39,11 +39,11 @@ public class SQLValidationService {
 
         try (Connection connection = DriverManager.getConnection(URL, dbUser, dbPassword)) {
             System.out.println("[OK] SQL is connected successfully");
-            LogManager.log(LogType.SQL_OK, "The Database connection established successfully ");
+            LogManager.sql(SqlState.SUCCESS, "The Database connection established successfully ");
             return true;
         } catch (SQLException error) {
             System.out.println("[ERROR] Something wen wrong with the SQL");
-            LogManager.log(LogType.SQL_EXCEPTION, error.getMessage());
+            LogManager.sql(SqlState.ERROR, error.getMessage());
             return false;
         }
     }

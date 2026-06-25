@@ -4,8 +4,8 @@ import java.util.Scanner;
 import java.io.Console;
 import java.util.Arrays;
 
-import app.Config.LogManager;
-import app.Config.LogManager.LogType;
+import app.Logging.LogManager;
+import app.Logging.Enums.ProgrammState.*;
 
 /*
     In this Section The User and PWSD will be collected and Stored via the getter
@@ -35,7 +35,7 @@ public class LoginInputCollector {
                     break;
                 }
             } catch (IllegalArgumentException error) {
-                LogManager.log(LogType.INVALID_INPUT, error.getMessage());
+                LogManager.other(OtherState.INVALID_INPUT, error.getMessage());
                 System.out.println(error.getMessage());
             }
         }
@@ -64,16 +64,16 @@ public class LoginInputCollector {
                     } else {
                         System.out.println("[OK] Entered password is valid\n");
                         this.enteredPWSD = convertedPWSD;
-                        LogManager.log(LogType.AUTH_INFO, "The Login Password is valid");
+                        LogManager.auth(AuthState.INFO, "The Login Password is valid");
                         break;
                     }
                 }
             } catch (IllegalArgumentException error) {
                 System.out.println(error.getMessage());
-                LogManager.log(LogType.INVALID_INPUT, error.getMessage());
+                LogManager.other(OtherState.INVALID_INPUT, error.getMessage());
             } catch(IllegalStateException error) {
                 System.out.println(error.getMessage());
-                LogManager.log(LogType.SYSTEM_WARN, error.getMessage());
+                LogManager.system(SystemState.WARN, error.getMessage());
             }
         }
     }

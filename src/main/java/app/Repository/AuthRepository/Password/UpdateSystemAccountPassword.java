@@ -6,8 +6,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 
-import app.Config.LogManager;
-import app.Config.LogManager.LogType;
+import app.Logging.LogManager;
+import app.Logging.Enums.ProgrammState.*;
 
 public class UpdateSystemAccountPassword {
 
@@ -24,14 +24,14 @@ public class UpdateSystemAccountPassword {
             int rows = stmt.executeUpdate();
 
             if (rows > 0) {
-                LogManager.log(LogType.SQL_OK, "The Password from the System Account " + Username + " is Updated");
+                LogManager.sql(SqlState.SUCCESS, "The Password from the System Account " + Username + " is Updated");
                 System.out.println("\n[OK] The Password from the System Account " + Username + " is updated");
-                LogManager.log(LogType.SQL_OK, "Rows Affected: " + rows);
+                LogManager.sql(SqlState.SUCCESS, "Rows Affected: " + rows);
                 System.out.println("[INFO] Rows affected: " + rows);
             }
 
         } catch (SQLException error) {
-            LogManager.log(LogType.SQL_EXCEPTION, error.getMessage());
+            LogManager.sql(SqlState.ERROR, error.getMessage());
             System.out.println(error.getMessage());
         }
     }

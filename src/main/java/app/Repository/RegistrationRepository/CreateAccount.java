@@ -1,14 +1,13 @@
 package app.Repository.RegistrationRepository;
 
 import app.Config.DBManager;
-import app.Config.LogManager;
+import app.Logging.LogManager;
+import app.Logging.Enums.ProgrammState.*;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import app.Config.LogManager;
-import app.Config.LogManager.LogType;
 
 
 /*
@@ -42,7 +41,7 @@ public class CreateAccount {
             createUser(Username, Email, PhoneNumber, HashedPWSD);
         } catch (SQLException error) {
             System.out.println("Something went wrong: " + error.getMessage());
-            LogManager.log(LogType.SQL_EXCEPTION, error.getMessage());
+            LogManager.sql(SqlState.ERROR, error.getMessage());
         }
 
     }
@@ -74,12 +73,12 @@ public class CreateAccount {
 
             if (rows > 0) {
                 System.out.println("\n[OK] User Is Created");
-                LogManager.log(LogType.AUTH_SUCCESS, "User is created");
+                LogManager.auth(AuthState.SUCCESS, "User is created");
                 System.out.println("[INFO] Rows effected: " + rows);
-                LogManager.log(LogType.SQL_INFO, "rows effected: " + rows);
+                LogManager.sql(SqlState.INFO, "rows effected: " + rows);
             }
         } catch (SQLException error) {
-            LogManager.log(LogType.SQL_EXCEPTION, error.getMessage());
+            LogManager.sql(SqlState.ERROR, error.getMessage());
             System.out.println(error.getMessage());
         }
     }

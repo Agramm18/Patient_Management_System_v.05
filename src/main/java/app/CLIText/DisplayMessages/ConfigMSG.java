@@ -1,7 +1,7 @@
 package app.CLIText.DisplayMessages;
 
-import app.Config.LogManager;
-import app.Config.LogManager.LogType;
+import app.Logging.LogManager;
+import app.Logging.Enums.ProgrammState.*;
 
 public class ConfigMSG {
 
@@ -13,6 +13,6 @@ public class ConfigMSG {
         System.out.println("   Establishing SQL connection");
         System.out.println("==================================================\n");
 
-        LogManager.log(LogType.MESSAGE, "Load .env files");
+        LogManager.config(ConfigState.INFO, "Load .env files");
     }
 }

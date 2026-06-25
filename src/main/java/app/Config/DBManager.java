@@ -4,8 +4,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-import app.Config.LogManager;
-import app.Config.LogManager.LogType;
+import app.Logging.LogManager;
+import app.Logging.Enums.ProgrammState.*;
 /*
  This section is the DB Manager who collects the Username, PWSD and Url from the SQL Connection
 
@@ -24,20 +24,20 @@ public final class DBManager {
             String password,
             String url
     ) {
-        LogManager.log(LogType.SQL_INFO, "Building global DB Connection");
-        LogManager.log(LogType.SQL_INFO, "Save global DB runtime config");
-        LogManager.log(LogType.SQL_INFO, "Set DB Config");
+        LogManager.sql(SqlState.INFO, "Building global DB Connection");
+        LogManager.sql(SqlState.INFO, "Save global DB runtime config");
+        LogManager.sql(SqlState.INFO, "Set DB Config");
 
         sqlUser = user;
         sqlPassword = password;
         sqlURL = url;
 
         if (user == null || user.isBlank() || password == null || password.isBlank() || sqlURL == null || sqlURL.isBlank()) {
-            LogManager.log(LogType.SQL_ERROR, "Something went wrong or is missing");
+            LogManager.sql(SqlState.ERROR, "Something went wrong or is missing");
             return false;
         } else {
             System.out.println("[OK] Global SQL Connection was a success");
-            LogManager.log(LogType.SQL_OK, "The Global SQL Connection was a success");
+            LogManager.sql(SqlState.SUCCESS, "The Global SQL Connection was a success");
             return true;
         }
 

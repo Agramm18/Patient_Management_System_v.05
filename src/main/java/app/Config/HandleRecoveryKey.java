@@ -1,7 +1,7 @@
 package app.Config;
 
-import app.Config.LogManager;
-import app.Config.LogManager.LogType;
+import app.Logging.LogManager;
+import app.Logging.Enums.ProgrammState.*;
 
 import io.github.cdimascio.dotenv.Dotenv;
 import org.mindrot.jbcrypt.BCrypt;
@@ -17,12 +17,12 @@ public class HandleRecoveryKey {
     }
 
     public void plainKey() {
-        LogManager.log(LogType.SECURITY_INFO, "Collecting recovery from .env file");
+        LogManager.security(SecurityState.INFO, "Collecting recovery from .env file");
         this.recoveryKeyPlain= dotenv.get("RECOVERY_KEY");
     }
 
     public void hashedKey() {
-        LogManager.log(LogType.SECURITY_INFO, "Hashing Plain key to an unreadable format");
+        LogManager.security(SecurityState.INFO, "Hashing Plain key to an unreadable format");
         this.recoveryKeyHashed = BCrypt.hashpw(this.recoveryKeyPlain, BCrypt.gensalt(12));
     }
 

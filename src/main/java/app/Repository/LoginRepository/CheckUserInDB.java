@@ -1,9 +1,8 @@
 package app.Repository.LoginRepository;
 
 import app.Config.DBManager;
-import app.Config.LogManager;
-import app.Config.LogManager.LogType;
-import app.Controller.*;
+import app.Logging.LogManager;
+import app.Logging.Enums.ProgrammState.*;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
@@ -35,16 +34,16 @@ public class CheckUserInDB {
 
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    LogManager.log(LogType.SQL_OK, "The Username exist in the DB");
+                    LogManager.sql(SqlState.SUCCESS, "The Username exist in the DB");
                     System.out.println("[OK] Username exists in the DB\n");
                     return true;
                 }
-                LogManager.log(LogType.USERNAME_NOT_FOUND, "The User does not exist in the DB");
+                LogManager.account(AccountState.USERNAME_NOT_FOUND, "The User does not exist in the DB");
                 System.out.println("[ERROR] This username does not exist\n");
                 return false;
             }
         } catch (SQLException error) {
-            LogManager.log(LogType.SQL_EXCEPTION, error.getMessage());
+            LogManager.sql(SqlState.ERROR, error.getMessage());
             System.out.println(error.getMessage());
         }
 
@@ -68,12 +67,12 @@ public class CheckUserInDB {
                     boolean matchesUserInput = BCrypt.checkpw(pwsd, storedHASH);
 
                     if (matchesUserInput) {
-                        LogManager.log(LogType.SECURITY_SUCCESS, "The Password is Correct");
+                        LogManager.security(SecurityState.SUCCESS, "The Password is Correct");
                         System.out.println("[OK] Password is correct\n");
                         return true;
                     }
 
-                    LogManager.log(LogType.SECURITY_FAILED, "The Password is incorrect");
+                    LogManager.security(SecurityState.FAILED, "The Password is incorrect");
                     System.out.println("[ERROR] Password is incorrect\n");
                     return false;
                 }
@@ -98,14 +97,14 @@ public class CheckUserInDB {
 
             if (rs.next()) {
                 accountStatus = rs.getString("status");
-                LogManager.log(LogType.CONFIG_INFO, "Current account status: " + accountStatus);
+                LogManager.config(ConfigState.INFO, "Current account status: " + accountStatus);
                 System.out.println("[INFO] Current Account Status: " + accountStatus);
                 return accountStatus;
             }
 
         } catch (SQLException error) {
             System.out.println("[ERROR] Failed to check sql call");
-            LogManager.log(LogType.SQL_EXCEPTION, error.getMessage());
+            LogManager.sql(SqlState.ERROR, error.getMessage());
         }
 
         return null;

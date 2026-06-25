@@ -1,7 +1,7 @@
 package app.Auth.Flow.Services.LoginService;
 
-import app.Config.LogManager;
-import app.Config.LogManager.LogType;
+import app.Logging.LogManager;
+import app.Logging.Enums.ProgrammState.*;
 
 public class CurrentUser {
 
@@ -27,14 +27,14 @@ public class CurrentUser {
     }
 
     public void loginResult() {
-        LogManager.log(LogType.AUTH_INFO, "Created successfully Login Session object");
+        LogManager.auth(AuthState.INFO, "Created successfully Login Session object");
 
-        LogManager.log(LogType.AUTH_SUCCESS, "Username: " + this.userName);
-        LogManager.log(LogType.AUTH_SUCCESS, "Username by ID: " + this.userID);
-        LogManager.log(LogType.AUTH_SUCCESS, "Account Status: " + this.accountStatus);
-        LogManager.log(LogType.AUTH_SUCCESS, "User has access to Menu: " + this.hasAccessToMenu);
-        LogManager.log(LogType.AUTH_SUCCESS, "Is System Account " + this.isSystemAccount);
-        LogManager.log(LogType.AUTH_SUCCESS, "User Role: " + this.role);
+        LogManager.auth(AuthState.SUCCESS, "Username: " + this.userName);
+        LogManager.auth(AuthState.SUCCESS, "Username by ID: " + this.userID);
+        LogManager.auth(AuthState.SUCCESS, "Account Status: " + this.accountStatus);
+        LogManager.auth(AuthState.SUCCESS, "User has access to Menu: " + this.hasAccessToMenu);
+        LogManager.auth(AuthState.SUCCESS, "Is System Account " + this.isSystemAccount);
+        LogManager.auth(AuthState.SUCCESS, "User Role: " + this.role);
     }
 
     public int getUserID() {

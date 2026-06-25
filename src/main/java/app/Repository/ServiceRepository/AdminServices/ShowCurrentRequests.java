@@ -1,7 +1,7 @@
 package app.Repository.ServiceRepository.AdminServices;
 
-import app.Config.LogManager;
-import app.Config.LogManager.LogType;
+import app.Logging.LogManager;
+import app.Logging.Enums.ProgrammState.*;
 
 import app.Config.DBManager;
 import java.sql.Connection;
@@ -44,7 +44,7 @@ public class ShowCurrentRequests {
             }
 
         } catch (SQLException error) {
-            LogManager.log(LogType.SQL_EXCEPTION, error.getMessage());
+            LogManager.sql(SqlState.ERROR, error.getMessage());
             System.out.println(error.getMessage());
         }
     }

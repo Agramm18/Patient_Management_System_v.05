@@ -9,8 +9,8 @@ import app.Auth.Flow.Services.PasswordService.PasswordService;
 import app.Repository.AuthRepository.Recovery.GetRecoveryKeyHash;
 import app.Repository.AuthRepository.Recovery.SelectUserForRecover;
 import app.Repository.AuthRepository.Password.UpdateSystemAccountPassword;
-import app.Config.LogManager;
-import app.Config.LogManager.LogType;
+import app.Logging.LogManager;
+import app.Logging.Enums.ProgrammState.*;
 
 public class RecoveryFlow {
     private int RETRY_COUNT = 0;
@@ -56,7 +56,7 @@ public class RecoveryFlow {
                     break;
                 } else {
                     this.RETRY_COUNT++;
-                    LogManager.log(LogManager.LogType.SECURITY_INFO, "Total Retry: " + this.RETRY_COUNT);
+                    LogManager.security(SecurityState.INFO, "Total Retry: " + this.RETRY_COUNT);
                     if (this.RETRY_COUNT >= this.MAX_RETRYS) {
                         throw new IllegalStateException("Retry limit reached please try again");
                     }
@@ -64,10 +64,10 @@ public class RecoveryFlow {
                 }
             } catch (IllegalArgumentException error) {
                 System.out.println(error.getMessage());
-                LogManager.log(LogManager.LogType.INVALID_INPUT, error.getMessage());
+                LogManager.other(OtherState.INVALID_INPUT, error.getMessage());
             } catch(IllegalStateException error) {
                 System.out.println(error.getMessage());
-                LogManager.log(LogManager.LogType.SECURITY_WARN, error.getMessage());
+                LogManager.security(SecurityState.WARN, error.getMessage());
                 break;
             }
         }

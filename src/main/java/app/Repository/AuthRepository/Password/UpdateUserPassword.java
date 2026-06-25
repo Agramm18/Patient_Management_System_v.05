@@ -5,8 +5,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import app.Config.LogManager;
-import app.Config.LogManager.LogType;
+import app.Logging.LogManager;
+import app.Logging.Enums.ProgrammState.*;
 
 public class UpdateUserPassword {
 
@@ -22,9 +22,9 @@ public class UpdateUserPassword {
             int rows = stmt.executeUpdate();
 
             if (rows > 0) {
-                LogManager.log(LogType.SECURITY_SUCCESS, "The password where changed successfully");
-                LogManager.log(LogType.AUTH_INFO, "The DB Value for requrires_password_change will be set to false");
-                LogManager.log(LogType.SQL_INFO, "Rows affected: " + rows);
+                LogManager.security(SecurityState.SUCCESS, "The password where changed successfully");
+                LogManager.auth(AuthState.INFO, "The DB Value for requrires_password_change will be set to false");
+                LogManager.sql(SqlState.INFO, "Rows affected: " + rows);
 
                 System.out.println("\n[OK Password is changed successfully]");
                 System.out.println("[INFO] The DB Value for requrires_password_change will be set to false");
@@ -36,11 +36,11 @@ public class UpdateUserPassword {
             }
 
         } catch (SQLException error) {
-            LogManager.log(LogType.SQL_EXCEPTION, error.getMessage());
+            LogManager.sql(SqlState.ERROR, error.getMessage());
             System.out.println(error.getMessage());
             return false;
         } catch (IllegalStateException error) {
-            LogManager.log(LogType.USERNAME_NOT_FOUND, error.getMessage());
+            LogManager.account(AccountState.USERNAME_NOT_FOUND, error.getMessage());
             System.out.println(error.getMessage());
         }
         return false;
@@ -62,7 +62,7 @@ public class UpdateUserPassword {
             }
 
         } catch (SQLException error) {
-            LogManager.log(LogType.SQL_EXCEPTION, error.getMessage());
+            LogManager.sql(SqlState.ERROR, error.getMessage());
             System.out.println(error.getMessage());
         }
     }

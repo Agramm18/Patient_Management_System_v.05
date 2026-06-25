@@ -7,8 +7,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 
-import app.Config.LogManager;
-import app.Config.LogManager.LogType;
+import app.Logging.LogManager;
+import app.Logging.Enums.ProgrammState.*;
 
 public class CountFailedLoginAttempts {
 
@@ -22,7 +22,7 @@ public class CountFailedLoginAttempts {
 
     private int CountUser() {
 
-        LogManager.log(LogType.SECURITY_INFO, "Checking Failed PWSD Attempts in 24 hours");
+        LogManager.security(SecurityState.INFO, "Checking Failed PWSD Attempts in 24 hours");
         System.out.println("[INFO] Checking for Failed PWSD in 24 Hours");
 
         String sql = "SELECT COUNT(*) AS failed_count FROM login_attempts WHERE account_id=? AND failure_reason='INVALID_PASSWORD' AND created_at >= NOW() - INTERVAL 24 HOUR";
@@ -41,7 +41,7 @@ public class CountFailedLoginAttempts {
             }
 
         } catch (SQLException error) {
-            LogManager.log(LogType.SQL_EXCEPTION, error.getMessage());
+            LogManager.sql(SqlState.ERROR, error.getMessage());
             System.out.println(error.getMessage());
             return 0;
         }
@@ -63,7 +63,7 @@ public class CountFailedLoginAttempts {
             }
 
         } catch (SQLException error) {
-            LogManager.log(LogType.SQL_EXCEPTION, error.getMessage());
+            LogManager.sql(SqlState.ERROR, error.getMessage());
             System.out.println(error.getMessage());
         }
     }

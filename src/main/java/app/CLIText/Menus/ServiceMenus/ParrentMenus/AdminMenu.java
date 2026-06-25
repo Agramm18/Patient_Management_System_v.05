@@ -2,9 +2,9 @@ package app.CLIText.Menus.ServiceMenus.ParrentMenus;
 
 import app.Auth.Flow.CurrentSession;
 import app.Auth.Flow.Services.LoginService.CurrentUser;
-import app.Config.LogManager;
+import app.Logging.LogManager;
+import app.Logging.Enums.ProgrammState.*;
 
-import app.Config.LogManager.LogType;
 
 import java.util.List;
 
@@ -12,7 +12,7 @@ public class AdminMenu {
     private int menuSize;
 
     public void showMenu() {
-        LogManager.log(LogType.AUTH_SUCCESS, "Routed successfully into the admin menu");
+        LogManager.auth(AuthState.SUCCESS, "Routed successfully into the admin menu");
         CurrentUser user = CurrentSession.getCurrentUser();
 
         System.out.println("\nWelcome Admin: " + user.getUserName());

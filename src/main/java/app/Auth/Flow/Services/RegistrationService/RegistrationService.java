@@ -3,10 +3,8 @@ import java.util.Scanner;
 
 import app.Auth.Flow.PasswordFlow;
 
-import app.Auth.Flow.Services.PasswordService.PasswordService;
-import app.Config.LogManager;
-import app.Config.LogManager.LogType;
-import app.Controller.*;
+import app.Logging.LogManager;
+import app.Logging.Enums.ProgrammState.*;
 
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
@@ -46,7 +44,7 @@ public class RegistrationService {
     }
 
      void setUserName(Scanner scanner) {
-        LogManager.log(LogManager.LogType.AUTH_INFO, "Starting Username Setup");
+        LogManager.auth(AuthState.INFO, "Starting Username Setup");
         String defaultUserName;
 
          System.out.println("[INFO] Please Enter your UserName");
@@ -58,13 +56,13 @@ public class RegistrationService {
 
                 validateUsername(defaultUserName);
 
-                LogManager.log(LogType.AUTH_SUCCESS, "The UserName is now set");
+                LogManager.auth(AuthState.SUCCESS, "The UserName is now set");
                 this.userName = defaultUserName;
                 break;
 
             } catch (IllegalArgumentException error) {
                 System.out.println(error.getMessage());
-                LogManager.log(LogType.INVALID_INPUT, error.getMessage());
+                LogManager.other(OtherState.INVALID_INPUT, error.getMessage());
             }
 
         }
@@ -83,7 +81,7 @@ public class RegistrationService {
 
     //Set The Email Address and validate if the Email Address is valid
     private void setEmailAddress(Scanner scanner) {
-        LogManager.log(LogType.AUTH_INFO, "Starting E-Mail Address Setup");
+        LogManager.auth(AuthState.INFO, "Starting E-Mail Address Setup");
         String userEmail;
 
         while (true) {
@@ -93,13 +91,13 @@ public class RegistrationService {
 
                 validateEmailAddress(userEmail);
 
-                LogManager.log(LogType.AUTH_SUCCESS, "Your Email Address is set");
+                LogManager.auth(AuthState.SUCCESS, "Your Email Address is set");
                 this.emailAddress = userEmail;
                 break;
 
             } catch (IllegalArgumentException error) {
                 System.out.println(error.getMessage());
-                LogManager.log(LogType.INVALID_INPUT, error.getMessage());
+                LogManager.other(OtherState.INVALID_INPUT, error.getMessage());
             }
         }
     }
@@ -154,8 +152,8 @@ public class RegistrationService {
 
     //Set the Phonenumber and validate if the Phone Number is valid
     private void setPhoneNumber(Scanner scanner) {
-        LogManager.log(LogType.AUTH_INFO, "Starting Phone Number Setup");
-        LogManager.log(LogType.AUTH_INFO, "Number Format: +49123456789");
+        LogManager.auth(AuthState.INFO, "Starting Phone Number Setup");
+        LogManager.auth(AuthState.INFO, "Number Format: +49123456789");
 
         String userPhone;
 
@@ -166,13 +164,13 @@ public class RegistrationService {
 
                 validatePhoneNumber(userPhone);
 
-                LogManager.log(LogType.AUTH_SUCCESS, "The Number is Valid an will be set");
+                LogManager.auth(AuthState.SUCCESS, "The Number is Valid an will be set");
                 this.phoneNumber = userPhone;
                 break;
 
             } catch (IllegalArgumentException error) {
                 System.out.println(error.getMessage());
-                LogManager.log(LogType.INVALID_INPUT, "Something went wrong: " + error.getMessage());
+                LogManager.other(OtherState.INVALID_INPUT, "Something went wrong: " + error.getMessage());
             }
         }
     }
@@ -235,7 +233,7 @@ public class RegistrationService {
 
                 if (registrationState.equals("y")) {
 
-                    LogManager.log(LogType.AUTH_SUCCESS, "Basic Registration Credentials Successfully collected");
+                    LogManager.auth(AuthState.SUCCESS, "Basic Registration Credentials Successfully collected");
 
                     //If everything is valid the password flow runs through the registration
                     PasswordFlow execute = new PasswordFlow();
@@ -335,7 +333,7 @@ public class RegistrationService {
                 break;
             } catch (IllegalArgumentException error) {
                 System.out.println(error.getMessage());
-                LogManager.log(LogType.INVALID_INPUT, error.getMessage());
+                LogManager.other(OtherState.INVALID_INPUT, error.getMessage());
             }
         }
     }

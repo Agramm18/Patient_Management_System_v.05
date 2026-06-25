@@ -9,12 +9,11 @@ import app.Repository.AuthRepository.Management.CountFailedLoginAttempts;
 import app.Repository.AuthRepository.Password.ExecutePWSDPolicy;
 import app.Repository.AuthRepository.Password.UpdateUserPassword;
 import app.Repository.LoginRepository.CheckUserInDB;
-import app.Auth.Flow.Services.LoginService.CurrentUser;
 
 import app.Auth.Flow.CurrentSession;
 
-import app.Config.LogManager;
-import app.Config.LogManager.LogType;
+import app.Logging.LogManager;
+import app.Logging.Enums.ProgrammState.*;
 import app.Repository.LoginRepository.CollectLoginValues;
 
 /*
@@ -56,12 +55,12 @@ public class LoginVerification {
             boolean userValid = repository.checkUserInDB(Username);
 
             if (!userValid) {
-                LogManager.log(LogType.USERNAME_NOT_FOUND, "The Username " + Username + " Where not found");
+                LogManager.account(AccountState.USERNAME_NOT_FOUND, "The Username " + Username + " Where not found");
                 return new CollectLogs(false, "USERNAME_NOT_FOUND");
             }
 
             System.out.println("[OK] The User exists continue with password check");
-            LogManager.log(LogType.AUTH_INFO, "The User " + Username + "exists continue with password check");
+            LogManager.auth(AuthState.INFO, "The User " + Username + "exists continue with password check");
             boolean passwordOK = repository.checkPWSD(PWSD, Username);
 
             if (!passwordOK) {
@@ -69,19 +68,19 @@ public class LoginVerification {
                 System.out.println("[INFO] Please Notice if retry >=5 your account will be locked");
                 System.out.println("[INFO] If you have 25 Failed Passwords the Accounts will be set to quarantine");
 
-                LogManager.log(LogType.SECURITY_WARN, "The User entered a wrong Password");
+                LogManager.security(SecurityState.WARN, "The User entered a wrong Password");
 
                 System.out.println("\n[WARNING] Invalid Password detected");
 
                 this.RETRYS++;
 
-                LogManager.log(LogType.SECURITY_WARN, "Failed Passwords: " + this.RETRYS);
+                LogManager.security(SecurityState.WARN, "Failed Passwords: " + this.RETRYS);
                 System.out.println("[INFO] Failed Passwords: " + this.RETRYS + "\n");
 
                 CountFailedLoginAttempts count = new CountFailedLoginAttempts();
                 int failedAttempts = count.Logs(Username);
 
-                LogManager.log(LogType.SECURITY_WARN, "Failed Passwords in 24 Hours: " + failedAttempts);
+                LogManager.security(SecurityState.WARN, "Failed Passwords in 24 Hours: " + failedAttempts);
                 System.out.println("\n[INFO] FAILED PWSD Im 24 Hours: " + failedAttempts + "\n");
 
                 ExecutePWSDPolicy changeStatusTo = new ExecutePWSDPolicy();
@@ -111,7 +110,7 @@ public class LoginVerification {
 
             switch (userStatus) {
                 case "active":
-                    LogManager.log(LogType.AUTH_INFO, "The User Status is active");
+                    LogManager.auth(AuthState.INFO, "The User Status is active");
                     System.out.println("[OK] The User account is active");
 
                     CollectLoginValues sessionObject = new CollectLoginValues();
@@ -132,11 +131,11 @@ public class LoginVerification {
 
                     return new CollectLogs(true, null);
                 case "disabled":
-                    LogManager.log(LogType.AUTH_INFO, "The User Status is disabled");
+                    LogManager.auth(AuthState.INFO, "The User Status is disabled");
                     System.out.println("[WARNING] This account is Locked an must be activated by an administrator");
                     return new CollectLogs(false, "Account is Locked");
                 case "pending":
-                    LogManager.log(LogType.AUTH_INFO, "The User Status is pending");
+                    LogManager.auth(AuthState.INFO, "The User Status is pending");
                     System.out.println("[INFO] This account is not fully activated");
 
                     FirstLogin run = new FirstLogin();
@@ -144,15 +143,15 @@ public class LoginVerification {
 
                     return new CollectLogs(true, "Must be authorized");
                 case "locked":
-                    LogManager.log(LogType.AUTH_INFO, "The User Status is locked");
+                    LogManager.auth(AuthState.INFO, "The User Status is locked");
                     System.out.println("[WARNING] This account is locked and must be activated by an administrator");
                     return new CollectLogs(false, "Account is locked");
                 case "on_quarantine":
-                    LogManager.log(LogType.AUTH_INFO, "The User Status is on_quarantine");
+                    LogManager.auth(AuthState.INFO, "The User Status is on_quarantine");
                     System.out.println("[FATAL] This account is on quarantine and must be checked");
                     return new CollectLogs(false, "Account is on quarantine based on malicious activities");
                 case "waiting_for_password_change":
-                    LogManager.log(LogType.AUTH_INFO, "The User Status is waiting_for_password_change");
+                    LogManager.auth(AuthState.INFO, "The User Status is waiting_for_password_change");
                     System.out.println("\n[INFO] First Login for a System Account recognized");
                     System.out.println("[INFO] Please change your current password to continue\n");
 
@@ -167,14 +166,14 @@ public class LoginVerification {
                     boolean changeSuccess = change.dbValues(Username, hashedPWSD);
 
                     if (changeSuccess) {
-                        LogManager.log(LogType.SECURITY_INFO, "The password was changed successfully");
+                        LogManager.security(SecurityState.INFO, "The password was changed successfully");
                         return new CollectLogs(true, "password is changed successfully");
                     } else {
                         return new CollectLogs(false, "something went wrong with the password change");
                     }
 
                 case "suspicious":
-                    LogManager.log(LogType.AUTH_INFO, "The User Status is suspicious");
+                    LogManager.auth(AuthState.INFO, "The User Status is suspicious");
                     System.out.println("[INFO] You account is set to suspicious maybe you need to change your password");
                     return new CollectLogs(true, "You account is set to suspicious maybe you need to change your password");
             }
@@ -182,7 +181,7 @@ public class LoginVerification {
             return new CollectLogs(true, null);
 
         } catch (SQLException error) {
-            LogManager.log(LogType.SQL_EXCEPTION, error.getMessage());
+            LogManager.sql(SqlState.ERROR, error.getMessage());
             System.out.println("[ERROR] SQL error during login: " + error.getMessage());
             return new CollectLogs(false, "SQL_EXCEPTION");
         }

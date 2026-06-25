@@ -6,8 +6,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 
-import app.Config.LogManager;
-import app.Config.LogManager.LogType;
+import app.Logging.LogManager;
+import app.Logging.Enums.ProgrammState.*;
 
 public class SelectUserForRecover {
 
@@ -22,17 +22,17 @@ public class SelectUserForRecover {
 
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
-                        LogManager.log(LogType.RECOVERY_SUCCESS, "The Username exist and can be changed");
+                        LogManager.recovery(RecoveryState.SUCCESS, "The Username exist and can be changed");
                         return true;
                     } else {
-                        LogManager.log(LogType.RECOVERY_FAILED, "The Username does not exist in the DB");
+                        LogManager.recovery(RecoveryState.FAILED, "The Username does not exist in the DB");
                         return false;
                     }
                 }
 
         } catch (SQLException error) {
             System.out.println(error.getMessage());
-            LogManager.log(LogType.SQL_EXCEPTION, error.getMessage());
+            LogManager.sql(SqlState.ERROR, error.getMessage());
             return false;
         }
     }

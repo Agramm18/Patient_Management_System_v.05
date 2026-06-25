@@ -4,10 +4,9 @@ import app.Config.DBManager;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.ResultSet;
 
-import app.Config.LogManager;
-import app.Config.LogManager.LogType;
+import app.Logging.LogManager;
+import app.Logging.Enums.ProgrammState.*;
 
 public class ExecutePWSDPolicy {
 
@@ -24,14 +23,14 @@ public class ExecutePWSDPolicy {
             int rows = stmt.executeUpdate();
 
             if (rows > 0) {
-                LogManager.log(LogType.AUTH_INFO, "The Account was locked because of to many password attempts in 24 hours");
-                LogManager.log(LogType.SQL_INFO, "Rows affected: " + rows);
+                LogManager.auth(AuthState.INFO, "The Account was locked because of to many password attempts in 24 hours");
+                LogManager.sql(SqlState.INFO, "Rows affected: " + rows);
                 System.out.println("[OK] Account is locked");
                 System.out.println("[INFO] Rows affected: " + rows);
             }
 
         } catch (SQLException error) {
-            LogManager.log(LogType.SQL_EXCEPTION, error.getMessage());
+            LogManager.sql(SqlState.ERROR, error.getMessage());
             System.out.println(error.getMessage());
         }
     }
@@ -48,15 +47,15 @@ public class ExecutePWSDPolicy {
             int rows = stmt.executeUpdate();
 
             if (rows > 0) {
-                LogManager.log(LogType.AUTH_INFO, "The Account was set to quarantine because of to many password attempts in 24 hours");
-                LogManager.log(LogType.SQL_INFO, "Rows affected: " + rows);
+                LogManager.auth(AuthState.INFO, "The Account was set to quarantine because of to many password attempts in 24 hours");
+                LogManager.sql(SqlState.INFO, "Rows affected: " + rows);
 
                 System.out.println("[OK] Account is locked");
                 System.out.println("[INFO] Rows affected: " + rows);
             }
 
         } catch (SQLException error) {
-            LogManager.log(LogType.SQL_EXCEPTION, error.getMessage());
+            LogManager.sql(SqlState.ERROR, error.getMessage());
             System.out.println(error.getMessage());
         }
     }
@@ -73,15 +72,15 @@ public class ExecutePWSDPolicy {
             int rows = stmt.executeUpdate();
 
             if (rows > 0) {
-                LogManager.log(LogType.AUTH_INFO, "The Account was set to suspicious because of to many password attempts in 24 hours");
-                LogManager.log(LogType.SQL_INFO, "Rows affected: " + rows);
+                LogManager.auth(AuthState.INFO, "The Account was set to suspicious because of to many password attempts in 24 hours");
+                LogManager.sql(SqlState.INFO, "Rows affected: " + rows);
 
                 System.out.println("[OK] Account is locked");
                 System.out.println("[INFO] Rows affected: " + rows);
             }
 
         } catch (SQLException error) {
-            LogManager.log(LogType.SQL_EXCEPTION, error.getMessage());
+            LogManager.sql(SqlState.ERROR, error.getMessage());
             System.out.println(error.getMessage());
         }
     }

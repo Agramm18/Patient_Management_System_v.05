@@ -2,16 +2,14 @@ package app.Repository.ConfigRepository;
 
 import app.Config.DBManager;
 import java.sql.*;
-import io.github.cdimascio.dotenv.Dotenv;
-import org.mindrot.jbcrypt.BCrypt;
 
-import app.Config.LogManager;
-import app.Config.LogManager.LogType;
+import app.Logging.LogManager;
+import app.Logging.Enums.ProgrammState.*;
 
 public class SetRecoveryKey {
 
     public void keyValue(String recoveryKey) {
-        LogManager.log(LogType.CONFIG_INFO, "Put the Recovery Key into the DB");
+        LogManager.config(ConfigState.INFO, "Put the Recovery Key into the DB");
         String sql = "INSERT INTO recovery_keys (id, recovery_key_hash) VALUES (1, ?)" +
                 "ON DUPLICATE  KEY UPDATE  recovery_key_hash = VALUES(recovery_key_hash)";
 
@@ -23,13 +21,13 @@ public class SetRecoveryKey {
             int rows = stmt.executeUpdate();
 
             if (rows > 0) {
-                LogManager.log(LogType.RECOVERY_SUCCESS, "The recovery key where entered successful");
-                LogManager.log(LogType.SQL_INFO, "Rows affected: " + rows);
+                LogManager.recovery(RecoveryState.SUCCESS, "The recovery key where entered successful");
+                LogManager.sql(SqlState.INFO, "Rows affected: " + rows);
             }
 
         } catch (SQLException error) {
             System.out.println(error.getMessage());
-            LogManager.log(LogType.SQL_EXCEPTION, error.getMessage());
+            LogManager.sql(SqlState.ERROR, error.getMessage());
         }
     }
 }

@@ -7,8 +7,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 
-import app.Config.LogManager;
-import app.Config.LogManager.LogType;
+import app.Logging.LogManager;
+import app.Logging.Enums.ProgrammState.*;
 /*
     In this Section the Access Management is Handled
 
@@ -32,14 +32,14 @@ public class CreateAccessRequest {
         if (this.requestedBy > 0) {
             insertData();
         } else {
-            LogManager.log(LogType.USERNAME_NOT_FOUND, "The User " + Username + " was not found in the DB");
+            LogManager.account(AccountState.USERNAME_NOT_FOUND, "The User " + Username + " was not found in the DB");
             System.out.println("[ERROR] No valid account by the Username " + Username + "Where found");
         }
     }
 
     private void collectUser(String username) {
         System.out.println("[INFO] Collect User Request");
-        LogManager.log(LogType.AUTH_INFO, "Collect User Request from: " + username);
+        LogManager.auth(AuthState.INFO, "Collect User Request from: " + username);
 
         String sql = "SELECT id FROM accounts WHERE account_name = ?";
 
@@ -53,23 +53,23 @@ public class CreateAccessRequest {
                 if (rs.next()) {
                     this.requestedBy = rs.getInt("id");
 
-                    LogManager.log(LogType.SQL_OK, "The Username is Successfully collected");
+                    LogManager.sql(SqlState.SUCCESS, "The Username is Successfully collected");
                     System.out.println("[OK] Username is Successfully Collected");
-                    LogManager.log(LogType.AUTH_INFO, "Requested by id: " + this.requestedBy);
+                    LogManager.auth(AuthState.INFO, "Requested by id: " + this.requestedBy);
                     System.out.println("[INFO] Requested by Account id: " + this.requestedBy);
                 } else {
-                    LogManager.log(LogType.USERNAME_NOT_FOUND, "The User was not found");
+                    LogManager.account(AccountState.USERNAME_NOT_FOUND, "The User was not found");
                     System.out.println("[ERROR] No account found with this username");
                 }
             }
         catch (SQLException error) {
-            LogManager.log(LogType.SQL_EXCEPTION, error.getMessage());
+            LogManager.sql(SqlState.ERROR, error.getMessage());
             System.out.println(error.getMessage());
         }
     }
 
     private void insertData() {
-        LogManager.log(LogType.SQL_OK, "The Request where saved");
+        LogManager.sql(SqlState.SUCCESS, "The Request where saved");
         System.out.println("\n[INFO] Request where saved");
 
         String sql = "INSERT INTO access_management (requested_by, requested_department, requested_job, requested_role) VALUES (?, ?, ?, ?)";
@@ -85,9 +85,9 @@ public class CreateAccessRequest {
             int rows = stmt.executeUpdate();
 
             if (rows > 0) {
-                LogManager.log(LogType.SQL_OK, "The Table updated successfully");
-                LogManager.log(LogType.SQL_OK, "Table updated successfully");
-                LogManager.log(LogType.SQL_INFO, "Rows affected: " + rows);
+                LogManager.sql(SqlState.SUCCESS, "The Table updated successfully");
+                LogManager.sql(SqlState.SUCCESS, "Table updated successfully");
+                LogManager.sql(SqlState.INFO, "Rows affected: " + rows);
             }
         } catch (SQLException error) {
             System.out.println(error.getMessage());

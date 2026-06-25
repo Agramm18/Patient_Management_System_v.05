@@ -1,5 +1,5 @@
 package app.Controller;
 
-public class uiController {
+public class UIController {
 
 }

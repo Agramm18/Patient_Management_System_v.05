@@ -2,8 +2,8 @@ package app.Auth.Flow.Services.AuthSecurityService.Recovery;
 import java.util.Scanner;
 
 
-import app.Config.LogManager;
-import app.Config.LogManager.LogType;
+import app.Logging.LogManager;
+import app.Logging.Enums.ProgrammState.*;
 
 
 public class SelectUserForRecovery {
@@ -26,7 +26,7 @@ public class SelectUserForRecovery {
 
             } catch(IllegalArgumentException error) {
                 System.out.println(error.getMessage());
-                LogManager.log(LogType.INVALID_INPUT, error.getMessage());
+                LogManager.other(OtherState.INVALID_INPUT, error.getMessage());
             }
         }
     }

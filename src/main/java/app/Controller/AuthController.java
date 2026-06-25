@@ -8,8 +8,8 @@ import app.CLIText.Menus.Program.AuthMenu;
 
 import java.util.Scanner;
 
-import app.Config.LogManager;
-import app.Config.LogManager.LogType;
+import app.Logging.LogManager;
+import app.Logging.Enums.ProgrammState.*;
 import app.Auth.Flow.CurrentSession;
 
 
@@ -28,7 +28,7 @@ public class AuthController {
     public void verifyAccountStatus(Scanner scanner) {
         String accountStatusSTR;
         System.out.println("[INFO] Running through the Authentication process");
-        LogManager.log(LogType.AUTH_INFO, "Running through the Authentication process");
+        LogManager.auth(AuthState.INFO, "Running through the Authentication process");
 
         while (true) {
             try {
@@ -47,32 +47,32 @@ public class AuthController {
                         throw new IllegalArgumentException("The value can't be less than 1 or higher than 4");
                     } else if (userValue == 1) {
                         System.out.println("[INFO] Starting Registration process");
-                        LogManager.log(LogType.AUTH_INFO, "Starting Registration process");
+                        LogManager.auth(AuthState.INFO, "Starting Registration process");
                         RegistrationFlow register = new RegistrationFlow();
                         register.user(scanner);
 
                     } else if (userValue == 2) {
                         System.out.println("[INFO] Starting Login process");
-                        LogManager.log(LogType.AUTH_INFO, "Starting Login process");
+                        LogManager.auth(AuthState.INFO, "Starting Login process");
                         LoginFlow login = new LoginFlow();
                         login.user(scanner);
 
                         CurrentUser user = CurrentSession.getCurrentUser();
 
                         if (user != null && user.hasAccessToMenu() && user.getAccountStatus() == 1) {
-                            LogManager.log(LogType.AUTH_SUCCESS, "The Login was a success");
+                            LogManager.auth(AuthState.SUCCESS, "The Login was a success");
                             return;
                         }
 
                     } else if (userValue == 3) {
                         System.out.println("[INFO] Starting Recovery process");
-                        LogManager.log(LogType.SECURITY_INFO, "Starting Recovery process");
+                        LogManager.security(SecurityState.INFO, "Starting Recovery process");
                         RecoveryFlow recover = new RecoveryFlow();
                         recover.SystemAccounts(scanner);
 
                     } else {
                         System.out.println("[OK] The Program will end. Good bye!!");
-                        LogManager.log(LogType.SYSTEM_SUCCESS, "The user have chosen to end this program");
+                        LogManager.system(SystemState.SUCCESS, "The user have chosen to end this program");
                         System.exit(0);
                         break;
                     }
@@ -80,11 +80,11 @@ public class AuthController {
 
             } catch (NumberFormatException numberError) {
                 System.out.println("[ERROR] It seems that you didn't type in a number: " + numberError.getMessage());
-                LogManager.log(LogType.INVALID_INPUT, "The User typed not in a Number");
+                LogManager.other(OtherState.INVALID_INPUT, "The User typed not in a Number");
 
             } catch (IllegalArgumentException error) {
                 System.out.println("[ERROR] Something went wrong: " + error.getMessage());
-                LogManager.log(LogType.INVALID_INPUT, error.getMessage());
+                LogManager.other(OtherState.INVALID_INPUT, error.getMessage());
 
             }
         }

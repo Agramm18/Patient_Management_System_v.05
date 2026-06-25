@@ -2,10 +2,11 @@ package app.Config;
 
 import app.CLIText.DisplayMessages.ConfigMSG;
 
+import app.Logging.LogManager;
+import app.Logging.Enums.ProgrammState.*;
 import io.github.cdimascio.dotenv.Dotenv;
 import java.io.File;
 import java.io.FileNotFoundException;
-import app.Config.LogManager.LogType;
 
 /*
     In this Section happens the .env Check
@@ -39,8 +40,8 @@ public class EnvValidationService {
             }
             System.out.println("[OK] The .env file exists in the Project root");
 
-            LogManager.log(LogType.CONFIG_SUCCESS, "It seems that the .env file exists");
-            LogManager.log(LogType.CONFIG_INFO, "Continue with the value check");
+            LogManager.config(ConfigState.SUCCESS, "It seems that the .env file exists");
+            LogManager.config(ConfigState.INFO, "Continue with the value check");
 
             boolean paramValid = validateEnvParameters();
 
@@ -49,13 +50,13 @@ public class EnvValidationService {
             }
 
             System.out.println("[OK] The .env values are all valid");
-            LogManager.log(LogType.CONFIG_SUCCESS, "The .env values are all valid");
+            LogManager.config(ConfigState.SUCCESS, "The .env values are all valid");
             return true;
 
         } catch (FileNotFoundException | IllegalStateException error) {
             System.out.println("[ERROR] It seems that the .env File is Missing in the Root");
             System.out.println("[ERROR] Please add a .env file in the Project root" + error.getMessage());
-            LogManager.log(LogType.CONFIG_FAILED, error.getMessage());
+            LogManager.config(ConfigState.FAILED, error.getMessage());
             return false;
         }
     }
@@ -102,11 +103,11 @@ public class EnvValidationService {
 
         } catch (NumberFormatException error) {
             System.out.println("[ERROR] It seems that you do not typed in a number");
-            LogManager.log(LogType.CONFIG_FAILED, error.getMessage());
+            LogManager.config(ConfigState.FAILED, error.getMessage());
             return false;
         } catch (IllegalStateException error) {
             System.out.println("[ERROR] It seems that something is wrong with your .env value \n " + error.getMessage());
-            LogManager.log(LogType.CONFIG_FAILED, error.getMessage());
+            LogManager.config(ConfigState.FAILED, error.getMessage());
             return false;
         }
     }
@@ -119,7 +120,7 @@ public class EnvValidationService {
         this.dbUser = user;
         this.dbPassword = dbPassword;
         System.out.println("[OK] All .env values are set successfully");
-        LogManager.log(LogType.CONFIG_SUCCESS, "The .env values are set successfully");
+        LogManager.config(ConfigState.SUCCESS, "The .env values are set successfully");
     }
 
     //Getter Methods to collect values

@@ -6,8 +6,8 @@ import java.io.Console;
 import java.util.Arrays;
 import java.util.Scanner;
 
-import app.Config.LogManager;
-import app.Config.LogManager.LogType;
+import app.Logging.LogManager;
+import app.Logging.Enums.ProgrammState.*;
 /*
     This section handles the Password Validation & Creation
 
@@ -46,7 +46,7 @@ public class PasswordService {
 
     //Parrent Method to call other methods
     public void userPWSD(Scanner scanner) {
-        LogManager.log(LogType.SECURITY_INFO, "Starting Password creation");
+        LogManager.security(SecurityState.INFO, "Starting Password creation");
         System.out.println("[INFO] Running through password creation");
         System.out.println("[INFO] Creating plain text PWSD");
 
@@ -60,27 +60,27 @@ public class PasswordService {
                 System.out.println(error.getMessage());
                 this.retryCount++;
                 System.out.println("[INFO] Retry Count: " + this.retryCount);
-                LogManager.log(LogType.SECURITY_WARN, "Retry Count: " + this.retryCount);
-                LogManager.log(LogType.INVALID_INPUT, error.getMessage());
+                LogManager.security(SecurityState.WARN, "Retry Count: " + this.retryCount);
+                LogManager.other(OtherState.INVALID_INPUT, error.getMessage());
 
                 if (this.retryCount >= MAX_RETRY_COUNT) {
-                    LogManager.log(LogType.SECURITY_WARN, "The user typed in to many wrong passwords");
+                    LogManager.security(SecurityState.WARN, "The user typed in to many wrong passwords");
                     System.out.println("[ERROR] Max retry attempts reached your account will be disabled");
                     throw new IllegalStateException("[INFO] Please reactivate your account via the basic AUTH Menu");
                 }
             } catch (RuntimeException error) {
-                LogManager.log(LogType.AUTH_FAILED, "The Program was not run via Terminal");
+                LogManager.auth(AuthState.FAILED, "The Program was not run via Terminal");
                 System.out.println(error.getMessage());
             }
         }
 
         retypePassword(this.originalPassword, this.retypedPassword);
 
-        LogManager.log(LogType.SECURITY_INFO, "Converting Char back to String");
+        LogManager.security(SecurityState.INFO, "Converting Char back to String");
         convertCHARtoString();
-        LogManager.log(LogType.SECURITY_INFO, "Hashing entered String value");
+        LogManager.security(SecurityState.INFO, "Hashing entered String value");
         PlainToHash();
-        LogManager.log(LogType.SECURITY_SUCCESS, "The Password was hashed successfully");
+        LogManager.security(SecurityState.SUCCESS, "The Password was hashed successfully");
     }
 
     //Collect the Plain Password with invisible Console input
@@ -103,7 +103,7 @@ public class PasswordService {
                 break;
 
             } catch (RuntimeException error) {
-                LogManager.log(LogType.SECURITY_WARN, "The Program was not run via terminal");
+                LogManager.security(SecurityState.WARN, "The Program was not run via terminal");
                 System.out.println(error.getMessage());
             }
         }
@@ -179,7 +179,7 @@ public class PasswordService {
         Arrays.fill(original, '\0');
         Arrays.fill(retyped, '\0');
 
-        LogManager.log(LogType.SECURITY_SUCCESS, "The password is ok");
+        LogManager.security(SecurityState.SUCCESS, "The password is ok");
         System.out.println("[OK] Your password is correct an fit to all the credentials");
     }
 
@@ -187,7 +187,7 @@ public class PasswordService {
     private void convertCHARtoString() {
         this.plainPWSD = String.valueOf(this.originalPassword);
         System.out.println("[OK] Passwords are converted");
-        LogManager.log(LogType.SECURITY_INFO, "The password was converted back to string");
+        LogManager.security(SecurityState.INFO, "The password was converted back to string");
         Arrays.fill(this.originalPassword, '\0');
     }
 
