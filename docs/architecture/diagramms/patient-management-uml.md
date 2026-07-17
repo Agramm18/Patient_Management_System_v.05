@@ -1,22 +1,22 @@
 # Patient Management Program Flow
 
-Markdown note synchronized: 2026-06-18.
+Last synchronized: 2026-07-18.
 
-The current Mermaid source is maintained in `patient-management-uml.mmd`.
+The renderable Mermaid source is maintained in `patient-management-uml.mmd`.
 
-This diagram is an activity / program-flow diagram with an additional class and public-method map. The upper part keeps the runtime control flow readable; the lower part lists the relevant classes and public methods grouped by responsibility.
+The diagram reflects the current connected runtime and distinguishes it from classes that are present but not invoked. It covers:
 
-- program start through `Main` and `BootConfigService`
-- system configuration checks and abort points
-- authentication menu loop
-- registration, login, recovery, and pending-user setup branches
-- login status handling and retry behavior
-- active session creation
-- menu routing by role
-- menu-choice transfer through `MenuValues`
-- current `ServiceController` routing baseline
-- admin option `1` access-request listing through `ShowCurrentRequests`
-- remaining service placeholders such as `RouteService`
-- all relevant runtime classes and public methods, grouped by package responsibility
+- Startup through `Main`, `BootConfigService`, and `FrontController`
+- `.env`, `EnvSetup`, JDBC, recovery-key, and starter-account configuration
+- Registration and current password/hash risks
+- Login verification, status routing, login-attempt persistence, and threshold timing
+- Active `CurrentUser` and `CurrentSession` creation
+- Pending-user department requests with default job and role values
+- Recovery-key retry behavior and the unrestricted final account lookup
+- Local-admin and five-option admin parent menus
+- `MenuValues` parent, role, and unused child context
+- Current role-based `ServiceController` handlers, which only log startup
+- Disconnected `SubMenuController`, `RequestMenu`, `ShowCurrentRequests`, and `RouteService`
+- Typed logging, Logback output, and the 53-test validation baseline
 
-Open `patient-management-uml.mmd` in a Mermaid-capable viewer to render the full flow.
+Open `patient-management-uml.mmd` in a Mermaid-capable editor or viewer to render the full diagram.

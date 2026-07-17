@@ -1,13 +1,16 @@
 # Project Structure
 
-Last synchronized: 2026-06-18.
+Last synchronized: 2026-07-18.
 
-Patient Management System V5.01 is a Java 21 Maven console application. The source tree currently contains 76 Java files organized around bootstrap, controllers, authentication flows, runtime session state, configuration, CLI output, menu routing, first service routing, and JDBC repositories.
+Patient Management System V5.01 is a Java 21 Maven console application. The repository currently contains 89 production Java files, two test classes, a Logback resource, Maven Wrapper scripts, and Markdown and Mermaid documentation.
 
 ## Root Structure
 
 ```text
-Patient_Management_V5.01/
+Patient_Management_System_v.05/
+|-- .mvn/
+|   `-- wrapper/
+|       `-- maven-wrapper.properties
 |-- docs/
 |   |-- architecture/
 |   |   |-- diagramms/
@@ -27,24 +30,27 @@ Patient_Management_V5.01/
 |       |-- DB_SETUP.md
 |       `-- ENV_SETUP.md
 |-- src/
-|   `-- main/
-|       `-- java/
-|           `-- app/
-|-- target/
+|   |-- main/
+|   |   |-- java/app/
+|   |   `-- resources/logback.xml
+|   `-- test/
+|       `-- java/app/Auth/Flow/Services/
 |-- .env
 |-- .gitignore
+|-- mvnw
+|-- mvnw.cmd
 |-- pom.xml
-|-- Query.sql
 `-- README.md
 ```
 
 Important root notes:
 
-- `pom.xml` targets Java 21 and defines runtime dependencies.
+- `pom.xml` targets Java 21 and defines runtime and test dependencies.
+- Maven Wrapper 3.3.4 is configured to use Maven 3.9.16.
 - `.env` is local runtime configuration and is ignored by Git.
-- `Query.sql` is an ignored local scratch file, not the canonical database schema.
-- `target/` contains generated Maven output.
-- There is currently no `src/test` or `src/main/resources` directory.
+- `logs/`, `*.log`, `target/`, and `*.sql` are generated or local paths ignored by Git.
+- `src/main/resources/logback.xml` defines console and file logging.
+- `src/test/java` contains 53 passing JUnit 5 tests across two test classes.
 
 ## Source Tree
 
@@ -108,13 +114,16 @@ src/main/java/app/
 |       |   |-- AuthMenu.java
 |       |   `-- roleMenu.java
 |       `-- ServiceMenus/
-|           |-- AdminMenu.java
-|           `-- LocalAdminMenu.java
+|           `-- ParrentMenus/
+|               |-- AdminMenu.java
+|               |-- LocalAdminMenu.java
+|               `-- ChildMenus/
+|                   `-- AdminChilds/RequestMenu.java
 |-- Config/
 |   |-- DBManager.java
+|   |-- EnvSetup.java
 |   |-- EnvValidationService.java
 |   |-- HandleRecoveryKey.java
-|   |-- LogManager.java
 |   `-- SQLValidationService.java
 |-- Controller/
 |   |-- AuthController.java
@@ -122,7 +131,22 @@ src/main/java/app/
 |   |-- FrontController.java
 |   |-- MenuController.java
 |   |-- ServiceController.java
-|   `-- uiController.java
+|   |-- SubMenuController.java
+|   `-- UIController.java
+|-- Logging/
+|   |-- LogManager.java
+|   `-- Enums/
+|       `-- ProgrammState/
+|           |-- AccountState.java
+|           |-- AuthState.java
+|           |-- BootState.java
+|           |-- ConfigState.java
+|           |-- MenuState.java
+|           |-- OtherState.java
+|           |-- RecoveryState.java
+|           |-- SecurityState.java
+|           |-- SqlState.java
+|           `-- SystemState.java
 |-- Menu/
 |   |-- MenuFlow.java
 |   `-- MenuValues.java
@@ -161,11 +185,19 @@ src/main/java/app/
     `-- RouteService.java
 ```
 
-Empty package directories currently present:
+## Test Tree
 
-- `src/main/java/app/Repository/AuthRepository/Config`
-- `src/main/java/app/Services/Admin`
-- `src/main/java/app/Services/LocalAdmin`
+```text
+src/test/java/app/Auth/Flow/Services/
+|-- PasswordService/
+|   `-- PasswordServiceTest.java
+`-- RegistrationService/
+    `-- RegistrationServiceTest.java
+```
+
+- `PasswordServiceTest` contains 11 tests for terminal fallback, password rules, and retype validation.
+- `RegistrationServiceTest` contains 42 tests for username, email, phone, and confirmation/correction validation.
+- Repository integration and complete authentication-flow tests do not exist yet.
 
 ## Package Responsibilities
 
@@ -175,26 +207,31 @@ Empty package directories currently present:
 
 ### `app.Bootstrap`
 
-`BootConfigService` creates the controller graph, routes to configuration, stops the process when configuration fails, routes to authentication when configuration succeeds, then routes to `MENU` and `SERVICE` when `CurrentSession` contains a user with menu access.
+`BootConfigService` creates the controller graph, routes to configuration, stops the process when configuration fails, routes to authentication when configuration succeeds, verifies `CurrentSession`, and then routes to `MENU` and `SERVICE` for an active user with menu access.
 
 ### `app.Controller`
 
-- `FrontController` routes `CONFIG`, `AUTH`, `MENU`, and `SERVICE`.
+- `FrontController` routes `CONFIG`, `AUTH`, `MENU`, and `SERVICE` through `callController`.
 - `ConfigController` validates configuration, initializes database access, stores the recovery-key hash, and checks starter accounts.
 - `AuthController` owns the authentication menu loop.
-- `MenuController` routes local admin and admin users to the first menu display classes and returns `MenuValues`.
-- `ServiceController` routes by user role and selected menu option. Admin option `1` calls the current access-request listing repository.
-- `uiController` is a placeholder.
+- `MenuController` displays the local-admin or admin parent menu and returns `MenuValues`.
+- `ServiceController` dispatches by user role, but both current role handlers only log startup.
+- `SubMenuController` is injected into `FrontController` but is empty and has no request route.
+- `UIController` is an empty placeholder.
 
 Reserved request types still not routed by active cases are `UI` and `EXIT`.
 
 ### `app.Config`
 
-- `EnvValidationService` validates `.env` and stores database values.
+- `EnvSetup` stores and validates all 13 required environment values, including a database port range of 1 through 65535.
+- `EnvValidationService` validates `.env`, creates `EnvSetup`, and exposes database values.
 - `SQLValidationService` builds and tests the JDBC URL.
 - `DBManager` stores global runtime database values and opens connections.
 - `HandleRecoveryKey` reads and hashes `RECOVERY_KEY`.
-- `LogManager` maps application log types to named SLF4J loggers.
+
+### `app.Logging`
+
+`LogManager` exposes typed logging methods for boot, authentication, configuration, security, SQL, system, recovery, menu, account, and other input events. Ten enums under `Logging.Enums.ProgrammState` define the accepted states. `src/main/resources/logback.xml` configures console and per-category file appenders.
 
 ### `app.Auth.Flow`
 
@@ -206,7 +243,7 @@ Reserved request types still not routed by active cases are `UI` and `EXIT`.
 
 ### `app.Auth.Flow.Services`
 
-- `RegistrationService` collects and validates profile data.
+- `RegistrationService` collects and validates profile data, including libphonenumber-based international phone validation.
 - `PasswordService` validates passwords and creates BCrypt hashes.
 - `LoginInputCollector` collects username and hidden password input.
 - `LoginVerification` verifies credentials and routes by account status.
@@ -218,11 +255,11 @@ Reserved request types still not routed by active cases are `UI` and `EXIT`.
 
 ### `app.CLIText`
 
-Contains user-facing console messages and menus. Several department job menus remain placeholders. `AdminMenu` and `LocalAdminMenu` display the first service-menu screens. The admin menu is now connected to the first service workflow for option `1`; the remaining options are labels only.
+Contains user-facing console messages and menus. `AdminMenu` displays five parent options: Requests, User, Security, Logs, and Logout. `LocalAdminMenu` currently displays only its heading. The nested `RequestMenu` is empty, and no menu option currently executes a business service.
 
 ### `app.Menu`
 
-`MenuFlow` validates numeric menu input and returns a valid selected option. `MenuValues` carries the selected option and the current user's role from `MenuController` to `ServiceController`.
+`MenuFlow` validates numeric menu input and returns a valid selected option. `MenuValues` carries `parentKonext`, `userRole`, and `childKontext` from `MenuController` to `ServiceController`; the child context is currently always 0.
 
 ### `app.Repository`
 
@@ -233,11 +270,11 @@ Contains user-facing console messages and menus. Several department job menus re
 - `AuthRepository.Management` handles failed-attempt counts, access requests, and assignment checks.
 - `AuthRepository.Password` handles status policy and password updates.
 - `AuthRepository.Recovery` handles recovery-key and target-account queries.
-- `ServiceRepository.AdminServices` contains the first admin service query for listing access-management requests.
+- `ServiceRepository.AdminServices` contains an access-request listing query. `ShowCurrentRequests` is currently disconnected from controller and service routing.
 
 ### `app.Services`
 
-Contains the first top-level service placeholder. `RouteService` currently has an empty `userChoice` method and is not part of the active runtime path.
+Contains the top-level `RouteService` placeholder. Its `userChoice` method is empty and not part of the active runtime path.
 
 ## Runtime Flow
 
@@ -260,6 +297,7 @@ Main
 
 ```text
 EnvValidationService
+-> EnvSetup
 -> SQLValidationService
 -> DBManager.initialize
 -> HandleRecoveryKey
@@ -289,11 +327,11 @@ BootConfigService
 -> FrontController(MENU)
 -> MenuController
 -> LocalAdminMenu or AdminMenu
--> MenuFlow for option validation
--> MenuValues
+-> MenuFlow for admin parent-option validation
+-> MenuValues(parent, role, child=0)
 -> FrontController(SERVICE)
 -> ServiceController
--> ShowCurrentRequests for admin option 1
+-> role-specific handler that currently only logs startup
 ```
 
 ### Recovery
@@ -324,8 +362,9 @@ LoginVerification
 
 - Database access is performed directly by repository classes through static `DBManager`.
 - Runtime session state is currently stored through static `CurrentSession`.
-- Logging migration is partial; direct console diagnostics still exist throughout the source tree.
+- Logging migration is partial; direct console diagnostics still exist throughout the source tree, while `logback.xml` writes console and category files.
 - Several names do not follow Java naming conventions.
-- `AccountPolicy`, `CollectUserJob`, `SetNewStatus`, `RouteService`, service directories, and `uiController` are placeholders.
+- `AccountPolicy`, `CollectUserJob`, `SetNewStatus`, `RouteService`, `RequestMenu`, `SubMenuController`, and `UIController` are placeholders.
 - `SystemAccountRequiresPasswordChange` and `HasAssignedRole` exist but are not part of the active primary flow.
-- `MenuFlow`, `MenuValues`, and `ServiceController` are connected as a first menu-to-service routing baseline.
+- `ShowCurrentRequests` is implemented but no longer connected after the current menu-routing refactor.
+- The full password creation path and registration correction path have known hash-handling defects described in `../project_info/CURRENT_STATUS.md`.

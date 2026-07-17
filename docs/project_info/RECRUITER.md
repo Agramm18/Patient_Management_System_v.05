@@ -1,72 +1,71 @@
 # Recruiter Overview
 
-Last synchronized: 2026-06-18.
+Last synchronized: 2026-07-18.
 
-Patient Management System V5.01 is a Java 21 console-based learning and portfolio project. It demonstrates the incremental development of a larger database-backed application with authentication, account security, runtime-session modeling, access-management foundations, first role-aware menu and service routing, and technical documentation.
+Patient Management System V5.01 is a Java 21 console-based learning and portfolio project. It demonstrates the incremental development of a database-backed application with configuration validation, authentication, account security, runtime sessions, access-management foundations, logging, unit testing, and technical documentation.
 
 ## Demonstrated Skills
 
 - Java and Object-Oriented Programming
-- Maven project organization
+- Maven project organization and dependency management
 - MySQL schema design and JDBC repositories
-- Controller, service, and repository separation
-- Runtime configuration through `.env`
+- Controller, flow, service, and repository separation
+- Runtime configuration through `.env` and a validated `EnvSetup` record
 - BCrypt password and recovery-key hashing
 - Authentication and account-status handling
-- Login attempt auditing and persisted security-policy updates
-- Runtime user-session modeling through `CurrentUser` and `CurrentSession`
-- Early role-aware menu routing for local admin and admin accounts
-- Menu-choice transfer into service routing through `MenuValues`
-- First admin service repository for listing access-management requests
-- SLF4J and Logback integration through a custom logging facade
+- Login-attempt auditing and persisted status changes
+- Runtime session modeling through `CurrentUser` and `CurrentSession`
+- Early role-aware parent-menu routing
+- Typed logging state through SLF4J and Logback
+- JUnit 5 unit testing
 - Markdown and Mermaid documentation
 - Git-based incremental development
 
-## Current Technical Highlights
+## Current Technical Baseline
 
-- Fail-fast configuration and database validation before authentication
+- Fail-fast environment and database validation before authentication
 - Automatic creation of missing local-admin and admin starter accounts
-- Registration of pending user accounts
+- Registration of pending accounts with username, email, and international phone validation
 - BCrypt login verification
 - First-login password replacement for starter accounts
-- Recovery-key validation with retry limits and system-account listing
-- Database-backed login attempt history
-- Persisted `locked`, `suspicious`, and `on_quarantine` status changes based on recent failed passwords
-- Active-user session creation with account ID, status, role, system-account flag, and menu-access flag
-- Basic `MENU` routing through `FrontController` and `MenuController`
-- Basic `SERVICE` routing through `FrontController` and `ServiceController`
-- Admin option `1` lists current access-management requests from the database
-- Pending-user department requests
-- Central `LogManager` introduced for categorized application logging
+- Recovery-key verification with a four-attempt limit
+- Database-backed login-attempt history
+- Persisted locked, suspicious, and quarantine states
+- Active-user session creation with account ID, status, role, system-account flag, and menu access
+- Pending department access requests
+- Parent-menu routing for local-admin and admin roles
+- Console and per-category file logging through `logback.xml`
+- 53 passing unit tests: 11 password-service tests and 42 registration-service tests
 
-## Current Development Stage
+## Current Architecture Work
 
-The project is not presented as a finished hospital product. The current stage is focused on stabilizing:
+The project is in an active menu and service-routing refactor. `MenuValues` now carries parent, role, and child context, and a `SubMenuController` plus `RequestMenu` have been introduced as placeholders. The admin menu has five parent options. Role-based service dispatch exists, but its handlers do not yet invoke business services.
 
-- Registration integrity
-- Authentication and security policies
-- Recovery boundaries
-- Logging consistency
-- Runtime session behavior
-- Role-aware menu routing
-- Service routing
-- Access requests and approval
-- Account activation
-- Automated tests
+An access-request listing repository already exists, but it is currently disconnected from the runtime. This is tracked explicitly rather than presented as a finished workflow.
 
-Patient records, appointments, treatment, billing, reporting, complete admin workflows, JavaFX, REST APIs, and deployment tooling are future work.
+## Engineering Risks Being Addressed
 
-## Current Engineering Challenges
+- The full password creation path clears the original character array before constructing the value to hash.
+- Registration correction does not retain the password hash returned by `PasswordFlow`.
+- Failed-login policy evaluation excludes the current failed attempt.
+- Recovery displays system accounts but accepts any existing account in its final lookup.
+- Repositories often print and swallow failures instead of returning structured results.
+- Automated tests cover validators but not database-backed or end-to-end authentication flows.
+- Logging migration and category alignment remain incomplete.
 
-The repository intentionally exposes active development work rather than hiding unfinished areas. Current priorities include completing the logging migration, improving return-based error handling, enforcing recovery scope, expanding service actions beyond the first access-request listing, completing access-request approval, and adding tests.
+## Development Stage
+
+This repository is not presented as a finished hospital system. Patient records, appointments, treatment, billing, reporting, complete administrator workflows, JavaFX, REST APIs, and deployment tooling remain future work.
+
+The current engineering focus is to stabilize password handling, registration integrity, recovery scope, status policies, session lifecycle, submenu and service routing, access approval, and integration-test coverage.
 
 ## Repository Reading Order
 
-1. `README.md`
-2. `docs/project_info/CURRENT_STATUS.md`
-3. `docs/project_info/ToDo.md`
-4. `docs/architecture/PROJECT_STRUCTURE.md`
-5. `docs/architecture/TECHNICHAL.md`
-6. `docs/setup/ENV_SETUP.md`
-7. `docs/setup/DB_SETUP.md`
-8. `docs/architecture/diagramms/patient-management-uml.md`
+1. `../../README.md`
+2. `CURRENT_STATUS.md`
+3. `ToDo.md`
+4. `../architecture/PROJECT_STRUCTURE.md`
+5. `../architecture/TECHNICHAL.md`
+6. `../setup/ENV_SETUP.md`
+7. `../setup/DB_SETUP.md`
+8. `../architecture/diagramms/patient-management-uml.md`

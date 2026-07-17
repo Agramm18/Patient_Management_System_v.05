@@ -1,10 +1,23 @@
 # Database Setup
 
-Last synchronized: 2026-06-18.
+Last synchronized: 2026-07-18.
 
 This document defines the MySQL schema and reference IDs expected by the current Java implementation.
 
-Create `.env` first by following `ENV_SETUP.md`.
+## Intended Setup Order
+
+Follow this order for a fresh setup. The application validates `.env` before it can use the database, and the SQL tables below depend on each other through foreign keys.
+
+1. Create `.env` in the project root by following `ENV_SETUP.md`.
+2. Set `DB_NAME=patient_management_v5` in `.env`, or change the database name below to match your `.env` value.
+3. Make sure `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, and `DB_PASSWORD` are set before starting the application.
+4. Make sure `DB_PORT` is numeric and between 1 and 65535, for example `3306`.
+5. Connect to MySQL with a user that can create and use the configured database.
+6. Run the database creation statement below.
+7. Run the table creation and seed statements in the exact order shown in this document.
+8. Start the application only after the schema and reference data exist.
+
+`EnvValidationService` looks for `.env` in the project root and builds an `EnvSetup` record from all 13 required values. `EnvSetup` rejects missing or blank values and ports outside 1 through 65535. Valid database settings are then exposed to `SQLValidationService` and `DBManager`. If `.env` is missing or invalid, startup stops before the database can be used.
 
 ## Database Creation
 
@@ -12,6 +25,8 @@ Create `.env` first by following `ENV_SETUP.md`.
 CREATE DATABASE IF NOT EXISTS patient_management_v5;
 USE patient_management_v5;
 ```
+
+The database name used here must match `DB_NAME` in `.env`.
 
 Create and seed tables in the order shown because later tables use foreign keys.
 
@@ -254,20 +269,22 @@ Both accounts:
 - Role `9`
 - Default request status `3`
 
-`ShowCurrentRequests` currently reads access-management rows for admin menu option `1`. It joins `access_management`, `accounts`, `departments`, and `roles`, then prints:
+`ShowCurrentRequests` contains a query that joins `access_management`, `accounts`, `departments`, and `roles`, then prints:
 
 - Requesting account name
 - Requested department name
 - Requested job
 - Requested role name
 
-The current query does not filter by `request_status`, so it can display more than only pending requests when older approved or rejected rows exist.
+The current query does not filter by `request_status`, so it can display more than only pending requests when older approved or rejected rows exist. The repository is not currently connected to `MenuController`, `SubMenuController`, or `ServiceController`; the active service handlers only log startup.
 
 ### Password and Status Updates
 
 - `UpdateUserPassword` changes the password hash, sets status ID `1`, clears the password-change flag, and enables menu access.
 - `UpdateSystemAccountPassword` changes only the password hash.
 - `ExecutePWSDPolicy` sets status ID `4`, `5`, or `7`.
+
+The schema requires a non-null `password_hash`. The current Java registration correction path can pass a null hash, and the full `PasswordService` path clears the original character array before it constructs the string used for hashing. These are application defects, not schema requirements, and are tracked in `../project_info/ToDo.md`.
 
 ## Migration for Existing Databases
 
@@ -305,11 +322,11 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 The next application startup recreates the recovery-key row and missing starter accounts.
 
-## Query.sql
+## Local SQL Files
 
-The root-level `Query.sql` is an ignored local scratch file. It currently contains only an insert for the `suspicious` account status. It is not the canonical schema and is not tracked by Git.
+The repository ignores `*.sql`. Any root-level SQL scratch file is local, is not tracked, and must not be treated as the canonical schema.
 
-Use this document as the current database setup source.
+Use this document as the current database setup source until versioned migrations are introduced.
 
 ## Verification Queries
 

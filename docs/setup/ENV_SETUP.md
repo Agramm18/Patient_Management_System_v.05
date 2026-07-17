@@ -1,24 +1,33 @@
 # Environment Setup
 
-Last synchronized: 2026-06-18.
+Last synchronized: 2026-07-18.
 
-This document describes the `.env` values used by the current Java implementation.
+This document describes the `.env` values required by the current Java implementation.
+
+## Prerequisites
+
+- Java 21 or a newer JDK capable of compiling the Java 21 source target
+- MySQL accessible from the application host
+- Maven through the included wrapper or a global Maven installation
+- A real terminal for hidden password and recovery-key input
 
 ## File Location
 
 Create `.env` in the project root next to `pom.xml`.
 
 ```text
-Patient_Management_V5.01/
+Patient_Management_System_v.05/
 |-- .env
 |-- pom.xml
+|-- mvnw
+|-- mvnw.cmd
 |-- src/
 `-- docs/
 ```
 
-The file is ignored by Git. Do not commit credentials, starter passwords, bootstrap keys, or recovery keys.
+`.env` is ignored by Git. Do not commit database credentials, starter passwords, bootstrap keys, or recovery keys.
 
-## Current Template
+## Template
 
 ```env
 DB_HOST=localhost
@@ -41,77 +50,86 @@ RECOVERY_KEY=replace_with_a_recovery_key
 
 ## Required Values
 
-`EnvValidationService` currently requires:
+`EnvValidationService` loads all values into the `EnvSetup` record. Every value is required and must not be blank.
 
-- `DB_HOST`
-- `DB_PORT`
-- `DB_NAME`
-- `DB_USER`
-- `DB_PASSWORD`
-- `LOCAL_ADMIN_NAME`
-- `LOCAL_ADMIN_PASSWORD`
-- `LOCAL_ADMIN_EMAIL`
-- `ADMIN_NAME`
-- `ADMIN_PASSWORD_DEFAULT`
-- `ADMIN_EMAIL_DEFAULT`
-- `BOOTSTRAP_KEY`
-- `RECOVERY_KEY`
+| Key | Purpose |
+| --- | --- |
+| `DB_HOST` | MySQL host name or IP address |
+| `DB_PORT` | MySQL TCP port as an integer from 1 through 65535 |
+| `DB_NAME` | Database name; must match `DB_SETUP.md` |
+| `DB_USER` | MySQL user with access to the configured database |
+| `DB_PASSWORD` | Password for `DB_USER` |
+| `LOCAL_ADMIN_NAME` | Starter local-admin account name |
+| `LOCAL_ADMIN_PASSWORD` | Starter local-admin password before BCrypt hashing |
+| `LOCAL_ADMIN_EMAIL` | Starter local-admin email address |
+| `ADMIN_NAME` | Starter admin account name |
+| `ADMIN_PASSWORD_DEFAULT` | Starter admin password before BCrypt hashing |
+| `ADMIN_EMAIL_DEFAULT` | Starter admin email address |
+| `BOOTSTRAP_KEY` | Value stored with newly created starter accounts |
+| `RECOVERY_KEY` | Secret used to authorize password recovery |
 
-`DB_PORT` must be numeric. Every other required value must exist and must not be blank.
+Legacy names such as `DB_PWSD`, `LOCAL_ADMIN_PWSD`, and `ADMIN_PWSD_DEFAULT` are not read by the current code.
 
-## Admin Password Key
+## Validation Flow
 
-`ADMIN_PASSWORD_DEFAULT` is the single required starter password value for the default admin account.
-`EnvValidationService` validates this value, and `CreateDefaultAccounts` reads the same value when it creates the default admin account.
+1. `EnvValidationService` checks for `.env` in the current project root.
+2. dotenv-java loads the file.
+3. `DB_PORT` is parsed as an integer.
+4. `EnvSetup` rejects missing or blank values.
+5. `EnvSetup` rejects ports below 1 or above 65535.
+6. Validated database values are exposed through `EnvValidationService` getters.
+7. `SQLValidationService` builds and tests the JDBC connection.
+8. `DBManager` stores the connection settings for repository calls.
 
-## Database Values
+Startup stops before authentication when the file is missing, a value is missing or blank, the port is invalid, the database connection fails, or `DBManager` receives invalid values.
 
-- `DB_HOST` is the MySQL host name or IP address.
-- `DB_PORT` is the MySQL TCP port.
-- `DB_NAME` must match the database created in `DB_SETUP.md`.
-- `DB_USER` must be able to connect to the configured database.
-- `DB_PASSWORD` is the password for the configured MySQL user.
+## Starter Accounts
 
-Older documentation used `DB_PWSD`; that name is not read by the current code.
-
-## Starter Account Values
-
-Starter-account values are used only when an account with role `1` or role `2` is missing.
+Starter-account values are used when no account exists for role ID 1 or role ID 2:
 
 - Local admin uses `LOCAL_ADMIN_NAME`, `LOCAL_ADMIN_PASSWORD`, and `LOCAL_ADMIN_EMAIL`.
-- Admin uses `ADMIN_NAME`, `ADMIN_PASSWORD_DEFAULT`, and `ADMIN_EMAIL_DEFAULT` during creation.
-- `BOOTSTRAP_KEY` is stored with created starter accounts.
-- Starter passwords are hashed with BCrypt before insert.
+- Admin uses `ADMIN_NAME`, `ADMIN_PASSWORD_DEFAULT`, and `ADMIN_EMAIL_DEFAULT`.
+- `BOOTSTRAP_KEY` is stored in each newly created starter account.
+- Starter passwords are hashed with BCrypt cost 12.
 
-The starter-account values are still required during every startup because environment validation checks them even when both accounts already exist.
+All starter-account keys remain mandatory on every startup because `EnvSetup` validates them even when both accounts already exist.
+
+The current fallback password-hash checks use fixed account IDs 1 and 2. Databases whose starter accounts have different IDs are not validated reliably by that fallback.
 
 ## Recovery Key
 
-`RECOVERY_KEY` is required during startup.
+On every successful configuration run:
 
-Current behavior:
-
-1. `HandleRecoveryKey` reads the plain value.
-2. The value is hashed with BCrypt.
+1. `HandleRecoveryKey` reads `RECOVERY_KEY`.
+2. BCrypt hashes it with cost 12 and a new random salt.
 3. `SetRecoveryKey` inserts or updates `recovery_keys.id = 1`.
-4. Recovery input is checked against the stored hash.
+4. Recovery input is later verified against that stored hash.
 
-The recovery hash changes on each startup because BCrypt creates a new salt, even when the plain key remains unchanged.
+The stored hash changes on each startup even when the plain recovery key is unchanged. Do not reuse database credentials, starter passwords, or the bootstrap key as the recovery key.
 
-Do not reuse database credentials, starter passwords, or the bootstrap key as the recovery key.
+## Terminal Requirement
 
-## Runtime Validation
+`System.console()` is used for login passwords, password creation, password re-entry, and recovery-key input. Many IDE run configurations do not provide a terminal-backed console. Use a real PowerShell, Command Prompt, Bash, or another terminal when running interactive authentication flows.
 
-Startup stops before authentication when:
+## Setup and Run Order
 
-- `.env` is missing.
-- A required value is missing or blank.
-- `DB_PORT` is not numeric.
-- The test database connection fails.
-- `DBManager` receives invalid runtime values.
+1. Create `.env` from the template.
+2. Create and seed MySQL by following `DB_SETUP.md`.
+3. Run the tests.
+4. Start the application from a terminal.
 
-Hidden password and recovery-key input requires a real terminal-backed `System.console()`. Running through an IDE configuration without a terminal can fail in authentication flows.
+PowerShell with the Maven Wrapper:
 
-## Related Setup
+```powershell
+.\mvnw.cmd test
+.\mvnw.cmd exec:java
+```
 
-After creating `.env`, follow `DB_SETUP.md` to create and seed the database.
+Global Maven alternative:
+
+```powershell
+mvn test
+mvn exec:java
+```
+
+In the current Windows PowerShell validation environment, `mvnw.cmd` failed inside the generated wrapper script while checking a null filesystem-link target. The configured Maven 3.9.16 distribution itself ran the 53-test suite successfully. If the same wrapper error occurs locally, use a global Maven installation until the wrapper script is corrected.

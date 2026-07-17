@@ -1,220 +1,277 @@
-# ToDo
+# Project Backlog
 
-Status date: 2026-06-24.
+Status date: 2026-07-18.
 
-This is the current implementation backlog. It is ordered by dependency and risk rather than by product feature.
+`mvn test` currently passes 53 tests: 11 `PasswordServiceTest` tests and 42 `RegistrationServiceTest` tests.
 
-`mvn test` currently succeeds with 53 tests: 11 PasswordService tests and 42 RegistrationService validation tests.
+## Category Guide
 
-## Current Milestone
+| Category | Meaning |
+| --- | --- |
+| `DONE` | Verified project foundations that already exist |
+| `Current` | The small set of tasks being worked on now |
+| `Urgent` | Work that should follow the current focus |
+| `Critical` | Security, correctness, and data-integrity blockers before real use |
+| `Core Production` | Features that form the actual patient-management system |
+| `Side Tasks` | Tooling, cleanup, documentation, and optional infrastructure |
 
-Complete and stabilize the authentication, session, menu-routing, and access-management foundation:
+## DONE
 
-```text
-configuration
--> registration
--> login and security policy
--> recovery
--> current-user session
--> role-aware menu routing
--> service routing
--> complete access request
--> approval
--> activation
--> usable role menus
--> logging and test coverage hardening
-```
+### Project and Configuration
 
-## Completed Baseline
+- [x] Create the Java 21 Maven project.
+- [x] Add Maven Wrapper scripts configured for Maven 3.9.16.
+- [x] Implement controller-based bootstrap and front-controller dispatch.
+- [x] Validate `.env` existence and required values.
+- [x] Add the `EnvSetup` record for validated environment values.
+- [x] Validate the MySQL connection and initialize static `DBManager` settings.
+- [x] Hash and upsert the recovery key during startup.
+- [x] Detect and create missing local-admin and admin starter accounts.
 
-- [x] Java 21 Maven project
-- [x] Controller-based bootstrap
-- [x] `.env` and MySQL connection validation
-- [x] Runtime database connection manager
-- [x] Missing starter-account creation
-- [x] Registration and BCrypt password creation baseline
-- [x] Login and BCrypt verification baseline
-- [x] Login attempt persistence
-- [x] Starter-account first password change
-- [x] Recovery-key hashing, persistence, and verification
-- [x] Four-attempt recovery-key limit
-- [x] Pending-user department request baseline
-- [x] Persisted failed-login status updates
-- [x] Initial SLF4J and Logback integration
-- [x] `CurrentUser` and `CurrentSession` runtime session baseline
-- [x] `FrontController.RequestType.MENU` routing baseline
-- [x] `MenuController` role routing baseline for local admin and admin
-- [x] Admin and local-admin menu display classes
-- [x] `MenuFlow.chooseOption` returns a validated selected option
-- [x] `MenuValues` passes menu choice and role into the service layer
-- [x] `FrontController.RequestType.SERVICE` routing baseline
-- [x] `ServiceController` role and choice dispatch baseline
-- [x] Admin option `1` lists current access-management requests
-- [x] Default admin account creation now uses `ADMIN_PASSWORD_DEFAULT`
-- [x] Local setup no longer requires duplicate admin-password environment variables
-- [x] Environment setup documentation uses current keys: `DB_PASSWORD`, `LOCAL_ADMIN_PASSWORD`, and `ADMIN_PASSWORD_DEFAULT`
-- [x] JUnit 5 and Surefire test baseline
-- [x] `src/test/java` test structure
-- [x] PasswordService validation, retype, and terminal-fallback unit tests
-- [x] RegistrationService validation tests for username, email, phone number, confirmation state, and correction choices
-- [x] `mvn test` passes with 53 tests
-- [x] `src/main/resources/logback.xml` baseline with console and per-category file appenders
-- [x] Generated log files and the `logs/` directory are ignored by `.gitignore`
-- [x] Registration correction flow displays updated values before continuing
-- [x] Current TODO synchronized
+### Authentication Foundation
 
-## Highest Priority Defects
+- [x] Implement registration input and validation.
+- [x] Implement the BCrypt password-policy and password-retype baseline.
+- [x] Implement login and BCrypt verification.
+- [x] Persist login attempts.
+- [x] Persist locked, suspicious, and quarantine status updates.
+- [x] Add the starter-account first-password-change route.
+- [x] Add the four-attempt recovery-key limit.
+- [x] Add the pending-user department-request baseline.
+- [x] Add `CurrentUser` and the static `CurrentSession` baseline.
 
-### Environment and Starter Accounts
+### Menu and Access Foundation
 
-- [x] Add validation or explicit failure when a starter-account password cannot be loaded.
-- [ ] Add clear startup diagnostics for legacy `.env` keys such as `DB_PWSD`, `LOCAL_ADMIN_PWSD`, and `ADMIN_PWSD_DEFAULT`.
-- [ ] Replace hard-coded starter-account IDs in password-hash fallback checks with role or account lookup.
-- [ ] Make starter-account creation failures distinguish duplicate accounts, missing password hashes, and database errors.
+- [x] Add local-admin and admin parent-menu routing.
+- [x] Add the five-option admin parent menu.
+- [x] Add `MenuValues` with parent, role, and child context.
+- [x] Add role-based `ServiceController` dispatch.
+- [x] Implement the first access-request listing query.
+
+### Logging and Tests
+
+- [x] Replace the former single `LogType` switch with typed logging methods and state enums.
+- [x] Configure console and category file appenders in `logback.xml`.
+- [x] Exclude generated logs through `.gitignore`.
+- [x] Configure JUnit 5 and Surefire.
+- [x] Add password validation and retype unit tests.
+- [x] Add registration username, email, phone, and choice validation tests.
+- [x] Verify all 53 tests on 2026-07-18.
+
+## Current
+
+Current focus: make password creation and registration produce a valid, persistable account every time.
+
+### Password Creation
+
+- [ ] Convert and hash the original password before clearing its character array.
+- [ ] Clear sensitive character arrays exactly once after the hash input is no longer needed.
+- [ ] Handle the retyped password deliberately instead of discarding the reassigned method parameter.
+- [ ] Handle a missing terminal console without entering an endless retry loop.
+- [ ] Add an end-to-end test that verifies the generated BCrypt hash against the entered password.
+- [ ] Add tests for the three-attempt password-policy limit.
 
 ### Registration Integrity
 
-- [ ] Rework registration correction so every changed field returns to one full confirmation step.
-- [ ] Store the password hash in `RegistrationService.hashedPWSD` after the correction branch runs `PasswordService`.
-- [ ] Prevent `CreateAccount` from running with a null or blank password hash.
-- [ ] Add explicit username and email uniqueness checks.
-- [ ] Improve remaining email validation edge cases beyond the current structural checks.
-- [ ] Review phone validation boundaries after the libphonenumber-based baseline.
-- [ ] Return repository success or failure instead of only printing messages.
+- [ ] Store the hash returned by `PasswordFlow.policy` in `RegistrationService.hashedPWSD` after every correction path.
+- [ ] Return every changed field to one complete registration confirmation step.
+- [ ] Reject a null or blank password hash before `CreateAccount` executes SQL.
+- [ ] Return account-creation success or failure to `RegistrationFlow`.
+- [ ] Add complete registration and correction-flow tests.
 
-### Login Session and Status Handling
+### Current Completion Check
 
-- [ ] Create a consistent session result for every login status that should be treated as successful.
-- [ ] Decide whether `suspicious` login should create menu access, require password change, or remain blocked.
-- [ ] After a starter-account password change, decide whether the user should be logged in automatically or asked to log in again.
-- [ ] Guard `BootConfigService` against a null `CurrentSession` before calling user session methods.
-- [ ] Prevent success logs from exposing user identity and security state more broadly than needed.
+- [ ] Verify that a normally entered password matches the stored BCrypt hash.
+- [ ] Verify that every registration correction path produces a nonblank hash.
+- [ ] Run the complete unit-test suite with no failures.
+
+## Urgent
+
+### Registration Validation
+
+- [ ] Add explicit username uniqueness checks before insert.
+- [ ] Add explicit email uniqueness checks before insert.
+- [ ] Review email edge cases such as multiple `@` characters and invalid domain labels.
+- [ ] Review phone-number boundary behavior around the libphonenumber checks.
+
+### Authentication and Session
+
+- [ ] Define one result type for authenticated, rejected, password-changed, pending-requested, and suspicious outcomes.
+- [ ] Decide whether suspicious accounts are blocked, restricted, or forced to change passwords.
+- [ ] Decide whether starter accounts are logged in automatically after their first password change.
+- [ ] Add logout and clear `CurrentSession`.
+- [ ] Prevent stale static session state across repeated authentication attempts.
+- [ ] Test active-session creation and every account-status branch.
 
 ### Failed-Login Policy
 
-- [ ] Include the current failed attempt when evaluating thresholds.
-- [ ] Confirm and document the intended thresholds for locked, suspicious, and quarantine states.
-- [ ] Define how failed-attempt history is reset after success or admin action.
-- [ ] Replace status-ID magic numbers with named values.
-- [ ] Decide whether `accounts.failed_password_attempts` is still required.
+- [ ] Include the current failed attempt before threshold evaluation.
+- [ ] Define non-overlapping semantics for locked, suspicious, and quarantine thresholds.
+- [ ] Define reset behavior after login success, recovery, or administrator action.
+- [ ] Replace numeric account-status IDs with named constants or typed values.
+- [ ] Decide whether `accounts.failed_password_attempts` should be removed or used.
+- [ ] Add boundary tests for attempts 5, 6, and 25.
+
+### Menu and Service Routing
+
+- [ ] Add a real submenu dispatch path or remove the unused `SubMenuController` dependency.
+- [ ] Implement `RequestMenu`.
+- [ ] Populate and validate `MenuValues.childKontext`.
+- [ ] Add selectable local-admin parent options.
+- [ ] Connect the five admin parent options to submenus or commands.
+- [ ] Define behavior for role IDs other than 1 and 2.
+- [ ] Add routing tests for parent context, child context, role, and invalid values.
+
+### Access Requests
+
+- [ ] Implement `CollectUserJob`.
+- [ ] Collect an actual job choice from every department job menu.
+- [ ] Make `CollectUserRole` return the selected role ID.
+- [ ] Connect job and role selection to `FirstLogin`.
+- [ ] Replace default job `unassigned` and role ID 9 with selected values.
+- [ ] Decide how duplicate pending requests are handled.
+- [ ] Add a request reason if required.
+- [ ] Return success or failure from `CreateAccessRequest`.
+- [ ] Reconnect the request-listing query to the active menu and service path.
+- [ ] Return structured request data instead of printing from `ShowCurrentRequests`.
+- [ ] Filter request listings by pending status.
+
+## Critical
+
+These items must be resolved before the application handles real users or patient data.
 
 ### Recovery Safety
 
-- [ ] Restrict the final recovery target lookup to `is_system_account = true`, or rename the feature.
-- [ ] Handle missing `recovery_keys.id = 1` without passing null to BCrypt.
-- [ ] Return success or failure from password update repositories.
-- [ ] Decide whether recovery should also change status, password-change, or menu-access fields.
+- [ ] Restrict `SelectUserForRecover` to accounts with `is_system_account = true`.
+- [ ] Handle a missing or blank `recovery_keys.id = 1` value before BCrypt verification.
+- [ ] Return an explicit result from `UpdateSystemAccountPassword`.
+- [ ] Define which status, password-change, and menu-access fields recovery updates.
+- [ ] Test the four-attempt limit and system-account target restriction.
 
-## Menu and Runtime Routing
+### Authorization and Account Activation
 
-- [x] Return the selected admin menu option from `MenuFlow.chooseOption`.
-- [x] Store the selected menu option in `MenuValues`.
-- [ ] Implement local-admin menu options.
-- [ ] Implement admin menu options `2` through `8`.
-- [ ] Expand admin option `1` from raw request listing into a complete review workflow.
-- [ ] Route authorized admin options to dedicated service classes.
-- [ ] Decide the long-term boundary between `ServiceController`, `RouteService`, and `app.Services`.
-- [ ] Define behavior for role IDs other than `1` and `2`.
-- [ ] Decide whether `uiController` is needed in the console runtime.
-- [ ] Replace direct `System.exit` calls with controlled application shutdown where practical.
+- [ ] Authorize access-request viewing and decisions.
+- [ ] Implement approve and reject transactions.
+- [ ] Persist the approver, approval timestamp, and rejection reason.
+- [ ] Apply department, job, role, permission, status, and menu access atomically.
+- [ ] Test approval, rejection, duplicate handling, and transaction rollback.
+- [ ] Prevent direct repository access from bypassing service authorization.
 
-## Logging Migration
+### Configuration and Database Integrity
 
-- [x] Add `src/main/resources/logback.xml`.
-- [x] Define initial console and per-category file output policy.
-- [ ] Add log-file retention or rotation policy.
-- [x] Ensure generated `logs/` output stays out of source control.
-- [ ] Handle every declared `LogType` in `LogManager.log`.
-- [ ] Add the missing `break` after `AUTH_DEBUG`.
-- [ ] Remove unused loggers and imports from `LogManager`, including `ACCESS`, `systemLogger`, and `com.google.protobuf.Message`.
-- [ ] Decide whether success events should use `INFO` or a structured event field.
-- [ ] Migrate login, password, repository, and menu diagnostics from `System.out.println`.
-- [ ] Keep user-facing CLI messages separate from diagnostic logs.
-- [ ] Prevent credentials and secrets from being logged.
+- [ ] Propagate `SetRecoveryKey` failures so configuration cannot report false success.
+- [ ] Replace fixed account IDs 1 and 2 in starter-password fallback checks.
+- [ ] Distinguish duplicate accounts, missing hashes, and database connection failures.
+- [ ] Return explicit results from password-update and account repositories.
+- [ ] Close result sets consistently with try-with-resources.
+- [ ] Add versioned schema migrations instead of relying only on setup SQL.
+- [ ] Add repository integration tests using an isolated database.
 
-## Access Request Workflow
+### Security and Audit
 
-### Job and Role Selection
+- [ ] Prevent credentials, recovery values, and unnecessary personal data from being logged.
+- [ ] Avoid logging usernames and detailed account state unless required for an authorized audit event.
+- [ ] Separate security audit events from operational diagnostics.
+- [ ] Define retention and access rules for security and login-attempt data.
 
-- [ ] Implement `CollectUserJob`.
-- [ ] Complete every department job menu.
-- [ ] Make `CollectUserRole` return the selected role ID.
-- [ ] Connect job and role selection to `FirstLogin`.
-- [ ] Replace default access-request job and role values with selected values.
+## Core Production
 
-### Request Persistence
+This section contains the actual patient-management product. Start it after the authentication, authorization, and data-integrity foundation is stable.
 
-- [ ] Return success or failure from `CreateAccessRequest`.
-- [ ] Decide how duplicate pending requests are handled.
-- [ ] Add request reason input if required.
-- [ ] Decide whether pending-user request creation is a successful login event.
+### Patient Records
 
-### Approval and Activation
+- [ ] Design the patient data model and required reference tables.
+- [ ] Create patient records with validated personal and contact data.
+- [ ] View and update patient records through authorized services.
+- [ ] Implement patient search and filtering.
+- [ ] Track record creation, changes, and responsible users.
+- [ ] Define archival and deletion rules for patient records.
 
-- [x] Add a first admin-side access-request listing query.
-- [ ] Filter admin request listing by pending request status when required.
-- [ ] Return structured results from the request listing instead of printing directly in the repository.
-- [ ] List pending requests only for authorized administrators.
-- [ ] Add approve behavior.
-- [ ] Add reject behavior and reject reasons.
-- [ ] Apply approved department, job, role, permission, and menu access to the account.
-- [ ] Activate accounts only after approval.
+### Appointments
 
-## Testing and Quality
+- [ ] Design appointment, staff, department, room, and status relationships.
+- [ ] Create, reschedule, and cancel appointments.
+- [ ] Prevent conflicting appointments for staff, patients, and rooms.
+- [ ] Add daily and department appointment views.
+- [ ] Record appointment status and attendance.
 
-- [x] Add JUnit dependencies and `src/test/java`.
-- [x] Unit-test password validation.
-- [x] Unit-test password retype validation.
-- [x] Unit-test terminal fallback behavior for password input.
-- [x] Unit-test RegistrationService username validation.
-- [x] Unit-test RegistrationService email validation.
-- [x] Unit-test RegistrationService phone-number validation.
-- [x] Unit-test RegistrationService registration-state and correction-choice validation.
-- [x] Verify current suite with `mvn test`.
-- [ ] Add tests for registration correction so changed fields still produce a stored password hash.
-- [ ] Unit-test registration reconfirmation and full correction flow.
-- [ ] Test account-status routing.
-- [ ] Test failed-login thresholds.
-- [ ] Test recovery retry and target restrictions.
-- [ ] Test current-user session creation.
-- [ ] Test menu routing for local admin and admin users.
-- [ ] Add repository integration tests.
-- [ ] Add Maven Wrapper.
-- [ ] Configure Maven with `--release 21` instead of separate `source` and `target` values.
-- [ ] Add formatter and static analysis.
-- [ ] Add CI after the initial test suite exists.
+### Clinical Workflows
 
-## Naming and Cleanup
+- [ ] Add visits and treatment records.
+- [ ] Add diagnoses and clinical notes with strict authorization.
+- [ ] Add laboratory orders and result tracking.
+- [ ] Add medication and prescription workflows.
+- [ ] Add emergency and inpatient workflow foundations if they remain in scope.
 
-- [ ] Rename inconsistent identifiers such as `uiController`, `itJobsMenu`, `userAccunt`, `sqlQuerry`, and `logsRepository`.
-- [ ] Correct the `TECHNICHAL.md` and `diagramms` names when links can be updated safely.
-- [ ] Remove unused classes or connect them to the runtime.
-- [ ] Remove unused imports and fields.
-- [ ] Replace inconsistent direct console error handling with shared patterns.
-- [ ] Decide whether empty directories under `src/main/java/app/Services` should be kept.
+### Staff and Departments
+
+- [ ] Implement staff profiles linked to user accounts.
+- [ ] Implement department, job, role, and permission administration.
+- [ ] Assign staff to departments and operational responsibilities.
+- [ ] Add staff availability and scheduling foundations.
+
+### Billing and Reporting
+
+- [ ] Add billing and payment records.
+- [ ] Add finance workflows with separated permissions.
+- [ ] Add operational reports and analytics.
+- [ ] Add secure data export with audit logging.
+
+### Production Interface
+
+- [ ] Complete the console workflows before replacing them.
+- [ ] Design and implement the JavaFX user interface.
+- [ ] Add a REST API only after service boundaries and authorization are stable.
+- [ ] Add end-to-end tests for the primary patient workflows.
+
+## Side Tasks
+
+### Build and Quality Tooling
+
+- [ ] Resolve the Maven Wrapper null-target failure observed in Windows PowerShell.
+- [ ] Configure Maven with `release` 21 instead of separate `source` and `target` values.
+- [ ] Separate unit and integration-test execution.
+- [ ] Add database test configuration.
+- [ ] Add a formatter and static analysis.
+- [ ] Add continuous integration.
+- [ ] Add test coverage reporting.
+
+### Logging Improvements
+
+- [ ] Align Logback categories with active `LogManager` fields.
+- [ ] Decide whether the `ACCESS` and `DATABASE` appenders should be used or removed.
+- [ ] Route recovery events to a dedicated logger if required.
+- [ ] Migrate diagnostic `System.out.println` calls while retaining intentional CLI output.
+- [ ] Add rolling files and retention limits.
+- [ ] Define development and production log levels.
+- [ ] Test logging configuration only where filesystem behavior is part of the contract.
+
+### Cleanup and Naming
+
+- [ ] Rename inconsistent identifiers such as `userAccunt`, `sqlQuerry`, `parentKonext`, `childKontext`, `itJobsMenu`, and `logsRepository`.
+- [ ] Normalize public method names such as `SystemAccounts`, `Value`, `Logs`, and `CurrentRequests`.
+- [ ] Rename `TECHNICHAL.md` and `diagramms` with all references updated together.
+- [ ] Replace broad `SELECT *` queries with required columns.
+- [ ] Remove unused fields, imports, and placeholder classes without a planned responsibility.
 - [ ] Decide whether `RouteService` should be implemented or removed.
-- [ ] Synchronize `README.md` and `docs/project_info/CURRENT_STATUS.md` with the current automated tests and Logback setup.
-- [ ] Clean duplicate `.gitignore` patterns once the ignore policy is finalized.
+- [ ] Separate CLI rendering from repository and security-policy code.
+- [ ] Replace direct `System.exit` calls with controlled shutdown where practical.
+- [ ] Clean duplicate `.gitignore` patterns.
+- [ ] Add diagnostics for legacy `.env` keys such as `DB_PWSD`, `LOCAL_ADMIN_PWSD`, and `ADMIN_PWSD_DEFAULT`.
 
-## Product Features After Foundation Work
+### Optional Infrastructure
 
-- [ ] Patient records and search
-- [ ] Appointment scheduling
-- [ ] Treatment and visit workflows
-- [ ] Billing and finance workflows
-- [ ] Reporting and analytics
-- [ ] JavaFX UI
-- [ ] REST API
-- [ ] Docker and deployment tooling
+- [ ] Add Docker after local setup and integration tests are stable.
+- [ ] Add deployment automation after a usable application release exists.
+- [ ] Evaluate cloud hosting only when deployment requirements are known.
+- [ ] Evaluate Kubernetes or Redis only for a concrete operational requirement.
 
-## Open Decisions
+### Open Decisions
 
-- Should `suspicious` login be treated as success, require password change, or stay blocked?
-- Should recovery remain limited to system accounts?
-- Which roles may approve access requests?
-- Should jobs remain strings or move to a dedicated table?
-- Which login-attempt data is the source of truth for security policy?
-- Should application logs be stored only in files, only in the database, or in both?
-- Should the console menu remain the main runtime target before JavaFX or REST work begins?
-- Should starter-account fallback validation use role lookup, configured names, or fixed system-account IDs?
-- Should Logback keep separate files per category or move to rolling combined files?
+- [ ] Define the exact policy for suspicious accounts.
+- [ ] Confirm whether recovery remains permanently restricted to system accounts.
+- [ ] Define which roles may view, approve, or reject access requests.
+- [ ] Decide whether jobs remain strings or move to a reference table.
+- [ ] Decide whether `login_attempts` is the only source of truth for failed-password policy.
+- [ ] Decide whether logs remain split by category or move to combined rolling files and database audit events.
+- [ ] Confirm that the console workflow will be completed before JavaFX or REST development begins.

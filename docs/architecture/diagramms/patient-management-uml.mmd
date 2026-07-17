@@ -1,12 +1,12 @@
 %%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Arial, sans-serif", "fontSize": "15px", "primaryTextColor": "#1f2937", "lineColor": "#64748b", "clusterBkg": "#f8fafc", "clusterBorder": "#cbd5e1", "edgeLabelBackground": "#ffffff"}, "flowchart": {"curve": "basis", "nodeSpacing": 46, "rankSpacing": 58, "padding": 14}}}%%
 flowchart TD
   %% Patient Management System V5.01
-  %% Last synchronized: 2026-06-18
-  %% Diagram type: complete activity flow plus class and method map
+  %% Last synchronized: 2026-07-18
+  %% Diagram type: current activity flow plus selected class and method map
 
   Start([Start application]):::terminal
   MainEntry["Main.main<br/>Create Scanner<br/>Show StartMSG"]:::entry
-  BootEntry["BootConfigService.displayLoader<br/>BootConfigService.SystemConfig<br/>Create controllers and dispatcher"]:::entry
+  BootEntry["BootConfigService.displayLoader<br/>BootConfigService.systemConfig<br/>Create controllers and dispatcher"]:::entry
 
   Start --> MainEntry --> BootEntry
 
@@ -15,23 +15,24 @@ flowchart TD
 
     subgraph ConfigFlow["1. System configuration"]
       direction TD
-      ConfigCtl["FrontController.navigateSubController<br/>RequestType.CONFIG"]:::controller
+      ConfigCtl["FrontController.callController<br/>RequestType.CONFIG"]:::controller
       ConfigExec["ConfigController.execute"]:::controller
-      EnvValidate["EnvValidationService.envStatus<br/>Validate .env file and values"]:::step
-      SqlValidate["SQLValidationService.DBConnection<br/>Build and test JDBC URL"]:::step
+      EnvValidate["EnvValidationService.envStatus<br/>Load .env file"]:::step
+      EnvSetupNode["EnvSetup record<br/>Validate 13 values and port range"]:::data
+      SqlValidate["SQLValidationService.dbConnection<br/>Build and test JDBC URL"]:::step
       DbInit["DBManager.initialize<br/>Store global DB runtime config"]:::data
       RecoveryKey["HandleRecoveryKey.plainKey<br/>HandleRecoveryKey.hashedKey<br/>Hash RECOVERY_KEY"]:::secure
       StoreRecovery["SetRecoveryKey.keyValue<br/>Persist recovery key hash"]:::data
       DefaultAccounts["CheckForDefaultAccounts.dbAccounts<br/>CreateDefaultAccounts.defaultAccounts"]:::data
       ConfigOk{"Configuration OK?"}:::decision
 
-      ConfigCtl --> ConfigExec --> EnvValidate --> SqlValidate --> DbInit --> RecoveryKey --> StoreRecovery --> DefaultAccounts --> ConfigOk
+      ConfigCtl --> ConfigExec --> EnvValidate --> EnvSetupNode --> SqlValidate --> DbInit --> RecoveryKey --> StoreRecovery --> DefaultAccounts --> ConfigOk
     end
 
     subgraph AuthLoopFlow["2. Authentication menu loop"]
       direction TD
       AuthHeader["AuthMSG.msg"]:::ui
-      AuthRoute["FrontController.navigateSubController<br/>RequestType.AUTH"]:::controller
+      AuthRoute["FrontController.callController<br/>RequestType.AUTH"]:::controller
       AuthControllerNode["AuthController.verifyAccountStatus"]:::controller
       AuthMenuNode["AuthMenu.authMenu"]:::ui
       AuthChoice{"User choice"}:::decision
@@ -43,10 +44,11 @@ flowchart TD
       direction TD
       RegistrationFlowNode["RegistrationFlow.user"]:::flow
       RegistrationServiceNode["RegistrationService.userAccunt<br/>Collect username, email, phone"]:::step
-      RegistrationPassword["PasswordFlow.policy<br/>PasswordService.userPWSD<br/>Create BCrypt hash"]:::secure
+      RegistrationPassword["PasswordFlow.policy<br/>PasswordService.userPWSD<br/>Known risk: original array cleared before hash input conversion"]:::secure
       RegistrationSave["CreateAccount.newAccount<br/>Save account"]:::data
+      RegistrationCorrection["Known correction defect<br/>Returned hash is not stored in RegistrationService"]:::warning
 
-      RegistrationFlowNode --> RegistrationServiceNode --> RegistrationPassword --> RegistrationSave
+      RegistrationFlowNode --> RegistrationServiceNode --> RegistrationPassword --> RegistrationCorrection --> RegistrationSave
     end
 
     subgraph LoginFlow["2b. Login branch"]
@@ -56,7 +58,7 @@ flowchart TD
       LoginVerify["LoginVerification.loggedUser"]:::secure
       UserExists{"CheckUserInDB.checkUserInDB<br/>User exists?"}:::decision
       PasswordOk{"CheckUserInDB.checkPWSD<br/>Password valid?"}:::decision
-      FailedPolicy["CountFailedLoginAttempts.Logs<br/>ExecutePWSDPolicy.locked<br/>ExecutePWSDPolicy.suspicious<br/>ExecutePWSDPolicy.quarantine"]:::secure
+      FailedPolicy["CountFailedLoginAttempts.Logs<br/>ExecutePWSDPolicy status update<br/>Current failed attempt is stored afterward"]:::secure
       SaveFailed["logsRepository.CollectLogs.loginAttempts<br/>Save failed attempt"]:::data
       StatusCheck["CheckUserInDB.checkUserStatus"]:::data
       Status{"Account status"}:::decision
@@ -94,12 +96,14 @@ flowchart TD
       CollectDepartment["CollectUserDepartment.department<br/>CollectUserDepartment.getSelectedDepartment"]:::step
       DepartmentChoice{"Selected department"}:::decision
       DepartmentJobs["Department job menus<br/>Medical, Emergency, Laboratory, Pharmacy,<br/>IT, Security, Finance, Office,<br/>Administration, Training, System"]:::ui
-      SystemAccess["HasAssignedDepartment.status<br/>Protect system jobs"]:::secure
-      AccessRequest["CreateAccessRequest.accessManagement<br/>Store access request"]:::data
+      SystemAccess{"HasAssignedDepartment.status<br/>Assigned to department 11 or 5?"}:::decision
+      AccessRequest["CreateAccessRequest.accessManagement<br/>Store selected department<br/>Default job and role"]:::data
 
       PendingStatus --> DepartmentMenuNode --> CollectDepartment --> DepartmentChoice
       DepartmentChoice -->|Normal department| DepartmentJobs --> AccessRequest
-      DepartmentChoice -->|System department| SystemAccess --> DepartmentJobs
+      DepartmentChoice -->|System department| SystemAccess
+      SystemAccess -->|Yes| DepartmentJobs
+      SystemAccess -->|No, jobs hidden| AccessRequest
       AccessRequest --> SaveSuccess
     end
 
@@ -111,15 +115,16 @@ flowchart TD
       RecoveryCheck["CheckKeyStatus.Value"]:::secure
       RecoveryValid{"Recovery key valid?"}:::decision
       RecoveryRetry["Retry counter<br/>max 4"]:::warning
+      DisplayRecoverable["FindRecoverableUser.systemAccounts<br/>Display system accounts"]:::data
       SelectRecoverUser["SelectUserForRecovery.username<br/>SelectUserForRecovery.getRecoverUsername"]:::step
-      RecoverUserExists{"SelectUserForRecover.inDB<br/>Account exists?"}:::decision
+      RecoverUserExists{"SelectUserForRecover.inDB<br/>Any account exists?<br/>Not limited to system accounts"}:::decision
       ResetSystemPassword["PasswordService.userPWSD<br/>UpdateSystemAccountPassword.sqlQuerry"]:::data
 
       RecoveryStart --> RecoveryInput --> RecoveryHashLoad --> RecoveryCheck --> RecoveryValid
       RecoveryValid -->|No| RecoveryRetry
       RecoveryRetry -->|Retry left| RecoveryInput
       RecoveryRetry -->|Limit reached| AuthMenuNode
-      RecoveryValid -->|Yes| SelectRecoverUser --> RecoverUserExists
+      RecoveryValid -->|Yes| DisplayRecoverable --> SelectRecoverUser --> RecoverUserExists
       RecoverUserExists -->|No| AuthMenuNode
       RecoverUserExists -->|Yes| ResetSystemPassword --> AuthMenuNode
     end
@@ -127,20 +132,21 @@ flowchart TD
     subgraph MenuServiceFlow["3. Menu and service"]
       direction TD
       BootAccess{"BootConfigService reads<br/>CurrentSession.getCurrentUser<br/>hasAccessToMenu?"}:::decision
-      MenuRoute["FrontController.navigateSubController<br/>RequestType.MENU"]:::controller
+      MenuRoute["FrontController.callController<br/>RequestType.MENU"]:::controller
       MenuControllerNode["MenuController.routeMenu<br/>Read CurrentUser.getRole"]:::controller
       RoleChoice{"User role"}:::decision
-      LocalAdminNode["LocalAdminMenu.localAdminMenu"]:::ui
-      AdminNode["AdminMenu.showMenu<br/>AdminMenu.getMenuSize"]:::ui
-      AdminChoiceNode["MenuFlow.chooseOption<br/>MenuValues record"]:::step
+      LocalAdminNode["LocalAdminMenu.localAdminMenu<br/>Heading only<br/>Parent and child context 0"]:::ui
+      AdminNode["AdminMenu.showMenu<br/>Five parent options<br/>AdminMenu.getMenuSize"]:::ui
+      AdminChoiceNode["MenuFlow.chooseOption<br/>MenuValues parent, role, child 0"]:::step
       NoRoleNode["No switch case implemented"]:::warning
-      ServiceRoute["FrontController.navigateSubController<br/>RequestType.SERVICE"]:::controller
-      ServiceControllerNode["ServiceController.routeService<br/>Use MenuValues role and choice"]:::controller
+      ServiceRoute["FrontController.callController<br/>RequestType.SERVICE"]:::controller
+      ServiceControllerNode["ServiceController.routeService<br/>Dispatch by role"]:::controller
       ServiceRoleChoice{"Service role"}:::decision
       LocalAdminServiceNode["startLocalAdminService<br/>Log service start only"]:::placeholder
-      AdminServiceChoice{"Admin choice"}:::decision
-      ShowRequestsNode["ShowCurrentRequests.CurrentRequests<br/>Print access requests"]:::data
-      UnimplementedAdminChoice["Admin choices 2-8<br/>No action yet"]:::placeholder
+      AdminServiceNode["startAdminService<br/>Log service start only"]:::placeholder
+      SubMenuNode["SubMenuController<br/>Empty and not dispatched"]:::placeholder
+      RequestMenuNode["RequestMenu<br/>Empty"]:::placeholder
+      ShowRequestsNode["ShowCurrentRequests.CurrentRequests<br/>Query exists but is disconnected"]:::placeholder
       Done([End of current implemented flow]):::terminal
 
       BootAccess -->|Yes| MenuRoute --> MenuControllerNode --> RoleChoice
@@ -149,9 +155,10 @@ flowchart TD
       RoleChoice -->|Other| NoRoleNode --> FatalExit
       ServiceRoute --> ServiceControllerNode --> ServiceRoleChoice
       ServiceRoleChoice -->|Local admin| LocalAdminServiceNode --> Done
-      ServiceRoleChoice -->|Admin| AdminServiceChoice
-      AdminServiceChoice -->|1| ShowRequestsNode --> Done
-      AdminServiceChoice -->|2-8| UnimplementedAdminChoice --> Done
+      ServiceRoleChoice -->|Admin| AdminServiceNode --> Done
+      AdminChoiceNode -. child context planned .-> SubMenuNode
+      SubMenuNode -. planned .-> RequestMenuNode
+      AdminServiceNode -. repository not connected .-> ShowRequestsNode
     end
   end
 
@@ -168,20 +175,20 @@ flowchart TD
   SessionReady -->|Yes| BootAccess
   BootAccess -->|No| FatalExit
 
-  subgraph MethodMap["4. Complete class and public method map"]
+  subgraph MethodMap["4. Selected class and public method map"]
     direction TD
 
     subgraph AppAndControllers["Application and controllers"]
       direction LR
-      AppMethods["Main.main<br/>BootConfigService.displayLoader<br/>BootConfigService.SystemConfig<br/>FrontController.navigateSubController<br/>RequestType enum: CONFIG, AUTH, MENU, SERVICE, UI, EXIT"]:::catalog
-      ControllerMethods["ConfigController.execute<br/>AuthController.verifyAccountStatus<br/>MenuController.routeMenu<br/>ServiceController.routeService<br/>uiController placeholder"]:::catalog
+      AppMethods["Main.main<br/>BootConfigService.displayLoader<br/>BootConfigService.systemConfig<br/>FrontController.callController<br/>RequestType enum: CONFIG, AUTH, MENU, SERVICE, UI, EXIT"]:::catalog
+      ControllerMethods["ConfigController.execute<br/>AuthController.verifyAccountStatus<br/>MenuController.routeMenu<br/>ServiceController.routeService<br/>SubMenuController placeholder<br/>UIController placeholder"]:::catalog
     end
 
     subgraph ConfigMethods["Configuration and logging"]
       direction LR
-      EnvMethods["EnvValidationService.envStatus<br/>EnvValidationService.setEnvValues<br/>EnvValidationService.getHost<br/>EnvValidationService.getPort<br/>EnvValidationService.getDBName<br/>EnvValidationService.getUser<br/>EnvValidationService.getPassword"]:::catalog
-      SqlMethods["SQLValidationService.DBConnection<br/>SQLValidationService.getSQLUser<br/>SQLValidationService.getSqlPWSD<br/>SQLValidationService.getSqlURL<br/>DBManager.initialize<br/>DBManager.getConnection"]:::catalog
-      RecoveryConfigMethods["HandleRecoveryKey.plainKey<br/>HandleRecoveryKey.hashedKey<br/>HandleRecoveryKey.getRecoveryKeyHashed<br/>LogManager.log<br/>LogType enum"]:::catalog
+      EnvMethods["EnvSetup record and compact validation<br/>EnvValidationService.envStatus<br/>EnvValidationService.getHost<br/>EnvValidationService.getPort<br/>EnvValidationService.getDBName<br/>EnvValidationService.getUser<br/>EnvValidationService.getPassword"]:::catalog
+      SqlMethods["SQLValidationService.dbConnection<br/>SQLValidationService.getSqlUser<br/>SQLValidationService.getSqlPassword<br/>SQLValidationService.getSqlURL<br/>DBManager.initialize<br/>DBManager.getConnection"]:::catalog
+      RecoveryConfigMethods["HandleRecoveryKey.plainKey<br/>HandleRecoveryKey.hashedKey<br/>HandleRecoveryKey.getRecoveryKeyHashed<br/>LogManager typed category methods<br/>Ten program-state enums"]:::catalog
     end
 
     subgraph AuthMethods["Authentication flows and services"]
@@ -206,10 +213,19 @@ flowchart TD
     subgraph UiMethods["CLI text and menu classes"]
       direction LR
       DisplayMethods["StartMSG.startMSG<br/>LoaderMSG.message<br/>AuthMSG.msg<br/>ConfigMSG.configMSG<br/>DefaultAccountsMSG.msg"]:::catalog
-      ProgramMenus["AuthMenu.authMenu<br/>roleMenu.roles<br/>DepartmentMenu.departments<br/>AdminMenu.showMenu<br/>AdminMenu.getMenuSize<br/>LocalAdminMenu.localAdminMenu"]:::catalog
+      ProgramMenus["AuthMenu.authMenu<br/>roleMenu.roles<br/>DepartmentMenu.departments<br/>AdminMenu.showMenu<br/>AdminMenu.getMenuSize<br/>LocalAdminMenu.localAdminMenu<br/>RequestMenu placeholder"]:::catalog
       JobMenus["MedicalJobsMenu.jobsMenu<br/>EmergencyJobsMenu.jobsMenu<br/>LaboratoryJobsMenu.jobsMenu<br/>PharmacyJobsMenu.jobsMenu<br/>itJobsMenu.jobsMenu<br/>SecurityJobsMenu.jobsMenu<br/>FinanceJobsMenu.jobsMenu<br/>OfficeJobsMenu.jobsMenu<br/>AdministrationJobsMenu.jobsMenu<br/>TrainingJobsMenu.jobsMenu<br/>SystemJobsMenu.jobsMenu"]:::catalog
-      MenuRuntime["MenuFlow.chooseOption<br/>MenuValues record: userChoice, userRole<br/>RouteService.userChoice placeholder"]:::catalog
+      MenuRuntime["MenuFlow.chooseOption<br/>MenuValues record: parentKonext, userRole, childKontext<br/>RouteService.userChoice placeholder"]:::catalog
     end
+  end
+
+  subgraph QualityMap["5. Logging and test baseline"]
+    direction LR
+    LoggingNode["LogManager and state enums<br/>Eight active logger fields<br/>Recovery currently routes to SYSTEM"]:::catalog
+    LogbackNode["src/main/resources/logback.xml<br/>Console and category files<br/>No rotation or retention"]:::catalog
+    TestNode["JUnit 5 and Surefire<br/>11 PasswordService tests<br/>42 RegistrationService tests<br/>53 passing"]:::catalog
+
+    LoggingNode --> LogbackNode
   end
 
   ConfigCtl -. method map .-> AppMethods
@@ -219,6 +235,9 @@ flowchart TD
   DepartmentJobs -. menu details .-> JobMenus
   ServiceControllerNode -. selected values .-> MenuRuntime
   ShowRequestsNode -. repository details .-> ServiceRepos
+  BootEntry -. logging .-> LoggingNode
+  RegistrationServiceNode -. validation coverage .-> TestNode
+  RegistrationPassword -. method-level coverage .-> TestNode
 
   classDef terminal fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c2d48;
   classDef entry fill:#eaf3ff,stroke:#2563eb,stroke-width:1.5px,color:#0f172a;
