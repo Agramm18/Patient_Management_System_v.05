@@ -176,10 +176,13 @@ public class PasswordService {
             throw new IllegalArgumentException("[ERROR] The verification password can't be empty and must be equal to the password from before");
         }
 
+
         Arrays.fill(original, '\0');
         Arrays.fill(retyped, '\0');
 
         LogManager.security(SecurityState.SUCCESS, "The password is ok");
+        LogManager.auth(AuthState.INFO, "The password is ok");
+        Arrays.fill(retyped, '\0');
         System.out.println("[OK] Your password is correct an fit to all the credentials");
     }
 
