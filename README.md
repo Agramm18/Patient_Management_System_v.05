@@ -1,71 +1,61 @@
 # Patient Management System V5.01
 
-Patient Management System V5.01 is a Java 21 console application that simulates selected foundations of a hospital management system.
+Patient Management System V5.01 is a Java 21 console application that implements selected foundations of a hospital management system.
 
-The project is being developed as a learning and portfolio project to gain practical experience in software architecture, database design, authentication systems, security concepts, and enterprise application development.
+The project is being developed as a learning and portfolio project focused on software architecture, database design, authentication, security concepts, testing, and enterprise application development. It is not production-ready and must not be used with real patient data.
 
 ## Current Scope
 
-The current implementation focuses on:
-
-- Bootstrap and controller-based startup flow
-- `.env` validation and MySQL connection validation
-- Database-backed starter account creation
-- Registration of pending user accounts
-- Login with BCrypt password verification
-- Login attempt logging
-- Starter account first-login password change
-- Recovery-key based system-account password reset baseline
-- Pending-user access request groundwork with department selection
-
-The application is still console-based. Main-menu routing, patient records, appointments, billing, reporting, JavaFX, REST APIs, Docker, and deployment workflows are planned but not implemented yet.
+- Controller-based bootstrap, authentication, menu, and service routing
+- `.env` validation and MySQL connection setup
+- Automatic local-admin and admin starter-account creation
+- Registration with username, email, international phone-number, and password validation
+- Login with BCrypt verification, attempt logging, and account-status updates
+- Starter-account first-login password changes and recovery-key based reset
+- Current-session handling for active users
+- Pending-user department selection and access-request creation
+- Initial role-based admin and local-admin menus
+- Category-based Logback logging
+- 53 passing JUnit 5 tests for password and registration validation
 
 ## Current Limitations
 
-- Active users are not routed into a real main menu yet.
-- Pending users can create access requests, but job and role still use default values.
-- Admin approval and rejection workflows are not implemented yet.
-- Failed-login thresholds are detected but do not persist account status changes yet.
-- There are no automated tests yet.
+- Password creation and registration still contain critical end-to-end defects.
+- Admin actions, access-request decisions, account activation, and logout are not connected.
+- Local-admin and role-specific service implementations are placeholders.
+- Authorization, recovery handling, and automated integration coverage are incomplete.
+- Patient records, appointments, billing, reporting, JavaFX, REST APIs, CI, Docker, and deployment are not implemented.
+
+See `docs/project_info/CURRENT_STATUS.md` and `docs/project_info/ToDo.md` for verified behavior, known defects, and current priorities.
 
 ## Technologies
 
-- Java 21
-- Maven
-- MySQL
-- JDBC
-- BCrypt
-- dotenv-java
-- Git
-- GitHub
+- Java 21 and Maven
+- MySQL and JDBC
+- BCrypt and dotenv-java
+- libphonenumber
+- Logback
+- JUnit 5
 
 ## Documentation
 
-- `docs/project_info/CURRENT_STATUS.md` - Current development status and implemented features
-- `docs/project_info/ToDo.md` - Current implementation priorities and open decisions
-- `docs/architecture/PROJECT_STRUCTURE.md` - Project and package structure overview
-- `docs/architecture/TECHNICHAL.md` - Technical implementation details and architecture concepts
-- `docs/architecture/diagramms/patient-management-uml.md` - GitHub-renderable Mermaid class diagram
-- `docs/architecture/diagramms/patient-management-uml.mmd` - Raw Mermaid class diagram source
-- `docs/setup/ENV_SETUP.md` - Environment variable and `.env` configuration
-- `docs/setup/DB_SETUP.md` - Database setup, schema, seed data, migrations, and verification queries
-- `docs/project_info/RECRUITER.md` - Project goals, learning objectives, and skills demonstrated
-- `docs/project_info/FUTURE_PLANS.md` - Planned features and project roadmap
+- `docs/project_info/CURRENT_STATUS.md` - Verified implementation status and test coverage
+- `docs/project_info/ToDo.md` - Current priorities and backlog
+- `docs/architecture/PROJECT_STRUCTURE.md` - Package and project structure
+- `docs/architecture/TECHNICHAL.md` - Technical implementation details
+- `docs/architecture/diagramms/patient-management-uml.md` - Mermaid class diagram
+- `docs/setup/ENV_SETUP.md` - Required `.env` configuration
+- `docs/setup/DB_SETUP.md` - Database schema, seed data, and verification
+- `docs/project_info/RECRUITER.md` - Project goals and demonstrated skills
+- `docs/project_info/FUTURE_PLANS.md` - Planned features and roadmap
 
 ## Run Commands
 
-Compile without tests:
+Complete the environment and database setup before starting. A terminal-backed console is required for hidden credential input.
 
-```bash
-mvn -DskipTests compile
+```powershell
+.\mvnw.cmd test
+.\mvnw.cmd exec:java
 ```
 
-Run the console application:
-
-```bash
-mvn exec:java
-```
-
-## Notes
-
-Some documentation files are maintained with the assistance of OpenAI Codex and manually reviewed before being committed.
+If the Windows wrapper reports `Cannot start maven from wrapper`, use the global Maven equivalents `mvn test` and `mvn exec:java`.
