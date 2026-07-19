@@ -112,5 +112,45 @@ public class PasswordServiceTest {
         assertEquals("[ERROR] The verification password can't be empty and must be equal to the password from before", ex.getMessage());
     }
 
-    
+
+    //Test if the Array is cleared Successfully
+    @Test
+    void testClearedArray() {
+        PasswordService service = new PasswordService();
+
+        char[] original = "Password1234!!".toCharArray();
+        char[] retyped = "Password1234!!".toCharArray();
+
+        service.clearPassword(original, retyped);
+
+        assertArrayEquals(new char[original.length], original);
+        assertArrayEquals(new char[retyped.length], retyped);
+    }
+
+    @Test
+    void testClearedPasswordWithNullArray() {
+        PasswordService service = new PasswordService();
+
+        assertDoesNotThrow(() -> service.clearPassword(null, null));
+    }
+
+    @Test
+    void testClearedOnlyOriginalPassword() {
+        PasswordService service = new PasswordService();
+
+        char[] original = "Password1234!!".toCharArray();
+
+        assertDoesNotThrow(() -> service.clearPassword(original, null));
+        assertArrayEquals(new char[original.length], original);
+    }
+
+    @Test
+    void testClearedOnlyRetypedPassword() {
+        PasswordService service = new PasswordService();
+
+        char[] retyped = "Password1234!!".toCharArray();
+
+        assertDoesNotThrow(() -> service.clearPassword(null, retyped));
+        assertArrayEquals(new char[retyped.length], retyped);
+    }
 }
