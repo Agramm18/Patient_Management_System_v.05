@@ -24,6 +24,8 @@ public class ExecutePWSDPolicy {
 
             if (rows > 0) {
                 LogManager.auth(AuthState.INFO, "The Account was locked because of to many password attempts in 24 hours");
+                LogManager.security(SecurityState.INFO, "Affected Account: " + Username);
+
                 LogManager.sql(SqlState.INFO, "Rows affected: " + rows);
                 System.out.println("[OK] Account is locked");
                 System.out.println("[INFO] Rows affected: " + rows);
@@ -48,6 +50,7 @@ public class ExecutePWSDPolicy {
 
             if (rows > 0) {
                 LogManager.auth(AuthState.INFO, "The Account was set to quarantine because of to many password attempts in 24 hours");
+                LogManager.security(SecurityState.INFO, "Affected Account: " + Username);
                 LogManager.sql(SqlState.INFO, "Rows affected: " + rows);
 
                 System.out.println("[OK] Account is locked");
@@ -73,6 +76,7 @@ public class ExecutePWSDPolicy {
 
             if (rows > 0) {
                 LogManager.auth(AuthState.INFO, "The Account was set to suspicious because of to many password attempts in 24 hours");
+                LogManager.security(SecurityState.INFO, "Affected Account: " + Username);
                 LogManager.sql(SqlState.INFO, "Rows affected: " + rows);
 
                 System.out.println("[OK] Account is locked");
