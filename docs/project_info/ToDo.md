@@ -1,8 +1,8 @@
 # Project Backlog
 
-Status date: 2026-07-18.
+Status date: 2026-07-19.
 
-`mvn test` currently passes 53 tests: 11 `PasswordServiceTest` tests and 42 `RegistrationServiceTest` tests.
+The last verified `mvn test` run passed 53 tests. The test sources now contain 57 tests: 15 `PasswordServiceTest` tests and 42 `RegistrationServiceTest` tests. A new complete run is still pending because of the known Maven Wrapper failure in Windows PowerShell.
 
 ## Category Guide
 
@@ -64,10 +64,11 @@ Current focus: make password creation and registration produce a valid, persista
 
 ### Password Creation
 
-- [ ] Convert and hash the original password before clearing its character array.
-- [ ] Clear sensitive character arrays exactly once after the hash input is no longer needed.
-- [ ] Handle the retyped password deliberately instead of discarding the reassigned method parameter.
-- [ ] Handle a missing terminal console without entering an endless retry loop.
+- [x] Convert and hash the original password before clearing its character array.
+- [x] Clear sensitive character arrays exactly once after the hash input is no longer needed.
+- [x] Handle the retyped password deliberately instead of discarding the reassigned method parameter.
+- [x] Handle a missing terminal console without entering an endless retry loop.
+- [x] Add focused tests for clearing both password arrays, null arrays, and either array independently.
 - [ ] Add an end-to-end test that verifies the generated BCrypt hash against the entered password.
 - [ ] Add tests for the three-attempt password-policy limit.
 
