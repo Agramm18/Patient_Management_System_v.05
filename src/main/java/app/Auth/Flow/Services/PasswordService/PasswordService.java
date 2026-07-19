@@ -79,7 +79,7 @@ public class PasswordService {
         LogManager.security(SecurityState.INFO, "Converting Char back to String");
         convertCHARtoString();
         LogManager.security(SecurityState.INFO, "Hashing entered String value");
-        PlainToHash();
+        PlainToHash(this.originalPassword, this.retypedPassword);
         LogManager.security(SecurityState.SUCCESS, "The Password was hashed successfully");
     }
 
@@ -163,9 +163,12 @@ public class PasswordService {
     void retypePassword(char[] original, char[] retyped) {
         Console console = System.console();
 
-        retyped = console.readPassword("[INFO] Please retype your password from before: ");
-        validateRetypedPassword(original, retyped);
-
+        if (console == null) {
+            throw new RuntimeException("The program only works in the Terminal");
+        } else {
+            this.retypedPassword = console.readPassword("[INFO] Please retype your password from before: ");
+            validateRetypedPassword(original, this.retypedPassword);
+        }
     }
 
     //Force the user to retype the password
@@ -176,13 +179,8 @@ public class PasswordService {
             throw new IllegalArgumentException("[ERROR] The verification password can't be empty and must be equal to the password from before");
         }
 
-
-        Arrays.fill(original, '\0');
-        Arrays.fill(retyped, '\0');
-
         LogManager.security(SecurityState.SUCCESS, "The password is ok");
         LogManager.auth(AuthState.INFO, "The password is ok");
-        Arrays.fill(retyped, '\0');
         System.out.println("[OK] Your password is correct an fit to all the credentials");
     }
 
@@ -191,12 +189,27 @@ public class PasswordService {
         this.plainPWSD = String.valueOf(this.originalPassword);
         System.out.println("[OK] Passwords are converted");
         LogManager.security(SecurityState.INFO, "The password was converted back to string");
-        Arrays.fill(this.originalPassword, '\0');
     }
 
     //Hash the password with bcrypt and the string value
-    private void PlainToHash() {
-        this.hashedPWSD = BCrypt.hashpw(plainPWSD, BCrypt.gensalt(15));
+     void PlainToHash(char[] original, char[] retyped) {
+
+        try {
+            this.hashedPWSD = BCrypt.hashpw(plainPWSD, BCrypt.gensalt(15));
+        } finally {
+            clearPassword(originalPassword, retypedPassword);
+            this.plainPWSD = null;
+        }
+    }
+
+     void clearPassword(char[] originalPassword, char[] retypedPassword) {
+        if (originalPassword != null) {
+            Arrays.fill(originalPassword, '\0');
+        }
+
+        if (retypedPassword != null) {
+            Arrays.fill(retypedPassword, '\0');
+        }
     }
 
     //Store the pwsd in a getter
