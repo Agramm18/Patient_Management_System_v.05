@@ -3,6 +3,7 @@ import java.util.Scanner;
 
 import app.Auth.Flow.PasswordFlow;
 
+import app.Auth.Flow.Services.PasswordService.PasswordService;
 import app.Logging.LogManager;
 import app.Logging.Enums.ProgrammState.*;
 
@@ -214,30 +215,40 @@ public class RegistrationService {
         }
     }
 
-    //Printing the Results and allowing changes
-    private void showCurrentInfo(Scanner scanner) {
+    private void currentData() {
         System.out.println("\n[INFO] Current Data");
         System.out.println("[DEBUG] User Name: " + this.userName);
         System.out.println("[DEBUG] Email Address: " + this.emailAddress);
         System.out.println("[DEBUG] Phone Number: " + this.phoneNumber + "\n");
+    }
+
+    //Printing the Results and allowing changes
+     void showCurrentInfo(Scanner scanner) {
+        currentData();
 
         String registrationState;
-        int changeValue;
 
         while (true) {
             try {
-                System.out.println("\nINFO] Is the Data correct? Y/N]\n");
+                System.out.println("\nINFO] Is the Data correct? Y/N]");
                 registrationState = scanner.nextLine().trim().toLowerCase();
 
-                validateRegistrationState(registrationState);
+                if (registrationState.isBlank()) {
+                    throw new IllegalArgumentException("[ERROR] This field can't be empty");
+                }
+
+                if (!registrationState.equals("y") && !registrationState.equals("n")) {
+                    throw new IllegalArgumentException("[ERROR] Only y or n are permitted");
+                }
 
                 if (registrationState.equals("y")) {
 
                     LogManager.auth(AuthState.SUCCESS, "Basic Registration Credentials Successfully collected");
 
-                    //If everything is valid the password flow runs through the registration
                     PasswordFlow execute = new PasswordFlow();
                     this.hashedPWSD = execute.policy(scanner);
+
+                    break;
 
                 } else {
 
@@ -247,127 +258,61 @@ public class RegistrationService {
                     System.out.println("[INFO] 2 Email Address");
                     System.out.println("[INFO] 3 Phone Number");
 
-                    changeValue = scanner.nextInt();
-                    scanner.nextLine();
+                    String changeValueString = scanner.nextLine().trim();
 
-                while (true) {
+                    if (changeValueString.trim().isBlank()) {
+                        throw new IllegalArgumentException("[ERROR] This field can't be empty");
+                    }
 
-                        String valueIsRight;
+                    int changeValueINT;
 
-                        validateChangeValue(changeValue);
+                    try {
+                        changeValueINT= Integer.parseInt(changeValueString);
+                    } catch (NumberFormatException error) {
+                        throw new IllegalArgumentException("[ERROR] Please enter a Number between 1 and 3");
+                    }
 
-                        if (changeValue == 1) {
-                            setUserName(scanner);
-                            System.out.println("Is the Username Right?´ Y/N: " + userName);
+                    try {
+                        if (changeValueINT == 1) {
+                            changeUsername(scanner);
 
-                            valueIsRight = scanner.nextLine().toLowerCase();
+                        } else if (changeValueINT == 2) {
+                            changeEmailAddress(scanner);
 
-                            validateValueIsRight(valueIsRight);
-
-                            if (valueIsRight.equals("y")) {
-
-                                System.out.println("\n[INFO] Current Data");
-                                System.out.println("[DEBUG] User Name: " + this.userName);
-                                System.out.println("[DEBUG] Email Address: " + this.emailAddress);
-                                System.out.println("[DEBUG] Phone Number: " + this.phoneNumber + "\n");
-
-                                PasswordFlow execute = new PasswordFlow();
-                                execute.policy(scanner);
-
-                                return;
-                            } else {
-                                setUserName(scanner);
-                            }
-
-                        } else if (changeValue == 2) {
-                            setEmailAddress(scanner);
-
-                            System.out.println("Is the Email Address Right? Y/N: " + emailAddress);
-
-                            valueIsRight = scanner.nextLine().toLowerCase();
-
-                            validateValueIsRight(valueIsRight);
-
-                            if (valueIsRight.equals("y")) {
-
-                                System.out.println("\n[INFO] Current Data");
-                                System.out.println("[DEBUG] User Name: " + this.userName);
-                                System.out.println("[DEBUG] Email Address: " + this.emailAddress);
-                                System.out.println("[DEBUG] Phone Number: " + this.phoneNumber + "\n");
-
-                                PasswordFlow execute = new PasswordFlow();
-                                execute.policy(scanner);
-
-                                return;
-                            } else {
-                                setEmailAddress(scanner);
-                            }
-
+                        } else if (changeValueINT == 3) {
+                            changePhoneNumber(scanner);
 
                         } else {
-                            setPhoneNumber(scanner);
-
-                            System.out.println("Is the Phone Number Right?: Y/N: " + phoneNumber);
-
-                            valueIsRight = scanner.nextLine().toLowerCase();
-
-                            validateValueIsRight(valueIsRight);
-
-                            if (valueIsRight.equals("y")) {
-                                System.out.println("\n[INFO] Current Data");
-                                System.out.println("[DEBUG] User Name: " + this.userName);
-                                System.out.println("[DEBUG] Email Address: " + this.emailAddress);
-                                System.out.println("[DEBUG] Phone Number: " + this.phoneNumber + "\n");
-
-                                PasswordFlow execute = new PasswordFlow();
-                                execute.policy(scanner);
-
-                                return;
-                            } else {
-                                setPhoneNumber(scanner);
-                            }
-
+                            throw new IllegalArgumentException("Only 1-3 are permitted");
                         }
+
+                        currentData();
+
+                    } catch (IllegalArgumentException error) {
+                        System.out.println(error.getMessage());
+                        LogManager.auth(AuthState.INFO, error.getMessage());
                     }
+
                 }
-                break;
+
             } catch (IllegalArgumentException error) {
                 System.out.println(error.getMessage());
-                LogManager.other(OtherState.INVALID_INPUT, error.getMessage());
+                LogManager.auth(AuthState.INFO, error.getMessage());
             }
         }
-    }
-
-    void validateRegistrationState(String registrationState) throws IllegalArgumentException {
-        if (registrationState.isBlank()) {
-            throw new IllegalArgumentException("This field can't be empty please try again");
-        }
-
-        if (!registrationState.equals("y") && !registrationState.equals("n")) {
-            throw new IllegalArgumentException("Only y for yes or n for n are valid please try again");
-        }
 
     }
 
-    void validateChangeValue(int changeValue) throws IllegalArgumentException {
-        if (changeValue < 1) {
-            throw new IllegalArgumentException("The Value can't be less than 1");
-        }
-
-        if (changeValue > 3) {
-            throw new IllegalArgumentException("The value can't be higher than 3");
-        }
+    void changeUsername(Scanner scanner) {
+        setUserName(scanner);
     }
 
-    void validateValueIsRight(String valueIsRight) throws IllegalArgumentException{
+    void changeEmailAddress(Scanner scanner) {
+        setEmailAddress(scanner);
+    }
 
-        if (valueIsRight.isBlank()) {
-            throw new IllegalArgumentException("This value can't be empty");
-        }
-
-        if (!valueIsRight.equals("y") && !valueIsRight.equals("n")) {
-            throw new IllegalArgumentException("Only y or n are permitted values");
-        }
+    void changePhoneNumber(Scanner scanner) {
+        setPhoneNumber(scanner);
     }
 
     public String getUserName() {
