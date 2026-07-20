@@ -266,113 +266,89 @@ public class RegistrationServiceTest {
         assertEquals("The Country Code in your Phone Number is Invalid", ex.getMessage());
     }
 
-    //Test Registration State
-
     @Test
-    void testValidRegistrationStateTrue() {
+    void testRegistrationStateY() {
         RegistrationService service = new RegistrationService();
 
         assertDoesNotThrow(() -> service.validateRegistrationState("y"));
     }
 
     @Test
-    void testValidRegistrationStateFalse() {
+    void testRegistrationStateN() {
         RegistrationService service = new RegistrationService();
 
         assertDoesNotThrow(() -> service.validateRegistrationState("n"));
     }
 
     @Test
-    void testEmptyRegistrationState() {
+    void testRegistrationStateEmpty() {
         RegistrationService service = new RegistrationService();
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> service.validateRegistrationState(""));
 
-        assertEquals("This field can't be empty please try again", ex.getMessage());
+        assertEquals("[ERROR] This field can't be empty", ex.getMessage());
     }
 
     @Test
-    void testInvalidRegistrationState() {
+    void testRegistrationStateIsNotYOrN() {
         RegistrationService service = new RegistrationService();
 
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> service.validateRegistrationState("test"));
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> service.validateRegistrationState("abc"));
 
-        assertEquals("Only y for yes or n for n are valid please try again", ex.getMessage());
-    }
-
-    //Change Value
-
-    @Test
-    void testValidChangeValueOne() {
-        RegistrationService service = new RegistrationService();
-
-        assertDoesNotThrow(() -> service.validateChangeValue(1));
+        assertEquals("[ERROR] Only y or n are permitted", ex.getMessage());
     }
 
     @Test
-    void testValidChangeValueTwo() {
+    void testEmptyChangeValueString() {
         RegistrationService service = new RegistrationService();
 
-        assertDoesNotThrow(() -> service.validateChangeValue(2));
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> service.validateChangeValueString(""));
+
+        assertEquals("[ERROR] This field can't be empty", ex.getMessage());
     }
 
     @Test
-    void testValidChangeValueThree() {
+    void testValidNumberInput() {
         RegistrationService service = new RegistrationService();
 
-        assertDoesNotThrow(() -> service.validateChangeValue(3));
+        assertDoesNotThrow(() -> service.convertStringValueToNumber("1"));
     }
 
     @Test
-    void testMoreThanThreeChangeValue() {
+    void testThrowsNumberFormatExceptionIfInputIsAString() {
         RegistrationService service = new RegistrationService();
 
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> service.validateChangeValue(4));
-
-        assertEquals("The value can't be higher than 3", ex.getMessage());
+        assertThrows(NumberFormatException.class, () -> service.convertStringValueToNumber("abc"));
     }
 
     @Test
-    void testLessThanOneChangeValue() {
+    void testValidPasswordHash() {
         RegistrationService service = new RegistrationService();
 
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> service.validateChangeValue(0));
-
-        assertEquals("The Value can't be less than 1", ex.getMessage());
-    }
-
-    //Test valueIsRight
-
-    @Test
-    void testValueIsRightIsTrue() {
-        RegistrationService service = new RegistrationService();
-
-        assertDoesNotThrow(() -> service.validateValueIsRight("y"));
+        assertDoesNotThrow(() -> service.verifyCollectedPassword("TestPassword1234!!"));
     }
 
     @Test
-    void testValueIsRightIsFalse() {
+    void testNullPasswordHash() {
         RegistrationService service = new RegistrationService();
 
-        assertDoesNotThrow(() -> service.validateValueIsRight("n"));
+        IllegalStateException ex = assertThrows(IllegalStateException.class, () -> service.verifyCollectedPassword(null));
+        assertEquals("[ERROR] The Password can't be empty", ex.getMessage());
     }
 
     @Test
-    void testValueIsRightIsEmpty()  {
+    void testBlankPasswordHash() {
         RegistrationService service = new RegistrationService();
 
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> service.validateValueIsRight(""));
-
-        assertEquals("This value can't be empty", ex.getMessage());
+        IllegalStateException ex = assertThrows(IllegalStateException.class, () -> service.verifyCollectedPassword(""));
+        assertEquals("[ERROR] The Password can't be empty", ex.getMessage());
     }
 
     @Test
-    void testValueIsRightIsNotYesOrNo() {
+    void testPasswordHashWithOnylSpaces() {
         RegistrationService service = new RegistrationService();
 
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> service.validateValueIsRight("test"));
-
-        assertEquals("Only y or n are permitted values", ex.getMessage());
+        IllegalStateException ex = assertThrows(IllegalStateException.class, () -> service.verifyCollectedPassword("    "));
+        assertEquals("[ERROR] The Password can't be empty", ex.getMessage());
     }
-
 }
