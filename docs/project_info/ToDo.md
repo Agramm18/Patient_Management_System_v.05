@@ -1,8 +1,8 @@
 # Project Backlog
 
-Status date: 2026-07-19.
+Status date: 2026-07-20.
 
-The last verified `mvn test` run passed 53 tests. The test sources now contain 57 tests: 15 `PasswordServiceTest` tests and 42 `RegistrationServiceTest` tests. A new complete run is still pending because of the known Maven Wrapper failure in Windows PowerShell.
+The last verified `.\mvnw.cmd test` run passed 55 tests on 2026-07-20: 15 `PasswordServiceTest` tests and 40 `RegistrationServiceTest` tests. The Maven Wrapper is currently verified in Windows PowerShell.
 
 ## Category Guide
 
@@ -55,12 +55,13 @@ The last verified `mvn test` run passed 53 tests. The test sources now contain 5
 - [x] Exclude generated logs through `.gitignore`.
 - [x] Configure JUnit 5 and Surefire.
 - [x] Add password validation and retype unit tests.
-- [x] Add registration username, email, phone, and choice validation tests.
-- [x] Verify all 53 tests on 2026-07-18.
+- [x] Add registration username, email, phone, confirmation-state, correction-choice, and password-hash guard tests.
+- [x] Re-check Maven Wrapper test execution in Windows PowerShell.
+- [x] Verify all 55 tests on 2026-07-20.
 
 ## Current
 
-Current focus: make password creation and registration produce a valid, persistable account every time.
+Current focus: prove password creation and registration persist a valid account and report repository outcomes.
 
 ### Password Creation
 
@@ -74,17 +75,21 @@ Current focus: make password creation and registration produce a valid, persista
 
 ### Registration Integrity
 
-- [ ] Store the hash returned by `PasswordFlow.policy` in `RegistrationService.hashedPWSD` after every correction path.
-- [ ] Return every changed field to one complete registration confirmation step.
-- [ ] Reject a null or blank password hash before `CreateAccount` executes SQL.
+- [x] Store the hash returned by `PasswordFlow.policy` in `RegistrationService.hashedPWSD` on the confirmed registration path.
+- [x] Return every changed field to one complete registration confirmation step.
+- [x] Reject a null or blank collected password hash before `CreateAccount` is reached.
+- [ ] Add a repository-level guard so direct `CreateAccount.newAccount` calls cannot insert a null or blank hash.
 - [ ] Return account-creation success or failure to `RegistrationFlow`.
 - [ ] Add complete registration and correction-flow tests.
+- [x] Restore focused tests for registration confirmation, correction-choice parsing, invalid yes/no values, and password-hash guard behavior.
+- [ ] Add correction-choice boundary tests for values outside 1-3 and user-facing nonnumeric input handling.
 
 ### Current Completion Check
 
 - [ ] Verify that a normally entered password matches the stored BCrypt hash.
 - [ ] Verify that every registration correction path produces a nonblank hash.
-- [ ] Run the complete unit-test suite with no failures.
+- [x] Verify helper-level null and blank password-hash rejection.
+- [x] Run the complete unit-test suite with no failures.
 
 ## Urgent
 
@@ -229,7 +234,6 @@ This section contains the actual patient-management product. Start it after the 
 
 ### Build and Quality Tooling
 
-- [ ] Resolve the Maven Wrapper null-target failure observed in Windows PowerShell.
 - [ ] Configure Maven with `release` 21 instead of separate `source` and `target` values.
 - [ ] Separate unit and integration-test execution.
 - [ ] Add database test configuration.
@@ -259,6 +263,7 @@ This section contains the actual patient-management product. Start it after the 
 - [ ] Replace direct `System.exit` calls with controlled shutdown where practical.
 - [ ] Clean duplicate `.gitignore` patterns.
 - [ ] Add diagnostics for legacy `.env` keys such as `DB_PWSD`, `LOCAL_ADMIN_PWSD`, and `ADMIN_PWSD_DEFAULT`.
+- [ ] Sync `README.md` and `docs/project_info/CURRENT_STATUS.md` with the current 55-test Maven Wrapper result.
 
 ### Optional Infrastructure
 
