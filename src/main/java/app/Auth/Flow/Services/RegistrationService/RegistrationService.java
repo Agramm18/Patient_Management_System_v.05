@@ -11,6 +11,8 @@ import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
 
+import javax.management.RuntimeErrorException;
+
 /*
     This is the Basic Registration for a User
 
@@ -226,32 +228,26 @@ public class RegistrationService {
      void showCurrentInfo(Scanner scanner) {
         currentData();
 
-        String registrationState;
-
         while (true) {
             try {
-                System.out.println("\nINFO] Is the Data correct? Y/N]");
-                registrationState = scanner.nextLine().trim().toLowerCase();
+                System.out.println("\n[INFO] Is the Data correct? Y/N");
+                String registrationState = scanner.nextLine().trim().toLowerCase();
 
-                if (registrationState.isBlank()) {
-                    throw new IllegalArgumentException("[ERROR] This field can't be empty");
-                }
+                boolean registrationStateIsValid = validateRegistrationState(registrationState);
 
-                if (!registrationState.equals("y") && !registrationState.equals("n")) {
-                    throw new IllegalArgumentException("[ERROR] Only y or n are permitted");
-                }
-
-                if (registrationState.equals("y")) {
-
+                if (registrationStateIsValid && registrationState.equals("y")) {
                     LogManager.auth(AuthState.SUCCESS, "Basic Registration Credentials Successfully collected");
 
                     PasswordFlow execute = new PasswordFlow();
-                    this.hashedPWSD = execute.policy(scanner);
+                    hashedPWSD = execute.policy(scanner);
 
-                    break;
+                    boolean collectedPasswordIsNotEmpty = verifyCollectedPassword(hashedPWSD);
 
-                } else {
+                    if (collectedPasswordIsNotEmpty) {
+                        break;
+                    }
 
+                } else if (registrationStateIsValid && registrationState.equals("n")) {
                     //If anything is incorrect you can change the value
                     System.out.println("[INFO] Please Enter what you want to change");
                     System.out.println("[INFO] 1 User Name");
@@ -260,49 +256,78 @@ public class RegistrationService {
 
                     String changeValueString = scanner.nextLine().trim();
 
-                    if (changeValueString.trim().isBlank()) {
-                        throw new IllegalArgumentException("[ERROR] This field can't be empty");
-                    }
+                    boolean changeValueIsValid = validateChangeValueString(changeValueString);
 
-                    int changeValueINT;
+                    if (changeValueIsValid) {
+                        Integer changeValueINT = convertStringValueToNumber(changeValueString);
 
-                    try {
-                        changeValueINT= Integer.parseInt(changeValueString);
-                    } catch (NumberFormatException error) {
-                        throw new IllegalArgumentException("[ERROR] Please enter a Number between 1 and 3");
-                    }
+                        if (changeValueINT == null) {
+                            continue;
+                        }
 
-                    try {
-                        if (changeValueINT == 1) {
-                            changeUsername(scanner);
+                        switch(changeValueINT) {
+                            case 1 -> changeUsername(scanner);
+                            case 2 -> changeEmailAddress(scanner);
+                            case 3 -> changePhoneNumber(scanner);
 
-                        } else if (changeValueINT == 2) {
-                            changeEmailAddress(scanner);
-
-                        } else if (changeValueINT == 3) {
-                            changePhoneNumber(scanner);
-
-                        } else {
-                            throw new IllegalArgumentException("Only 1-3 are permitted");
+                            default -> throw new IllegalArgumentException("[ERROR] Only 1-3 are permitted");
                         }
 
                         currentData();
 
-                    } catch (IllegalArgumentException error) {
-                        System.out.println(error.getMessage());
-                        LogManager.auth(AuthState.INFO, error.getMessage());
                     }
-
                 }
 
             } catch (IllegalArgumentException error) {
                 System.out.println(error.getMessage());
                 LogManager.auth(AuthState.INFO, error.getMessage());
+            } catch (IllegalStateException error) {
+                System.out.println(error.getMessage());
+                LogManager.security(SecurityState.ERROR, error.getMessage());
             }
         }
 
     }
 
+    //Validate values so the method is testable
+    boolean validateRegistrationState(String registrationState) {
+
+        if (registrationState.isBlank()) {
+            throw new IllegalArgumentException("[ERROR] This field can't be empty");
+        }
+
+        if (!registrationState.equals("y") && !registrationState.equals("n")) {
+            throw new IllegalArgumentException("[ERROR] Only y or n are permitted");
+        }
+
+        return true;
+    }
+
+    boolean validateChangeValueString(String changeValueString) {
+
+        if (changeValueString.trim().isBlank()) {
+            throw new IllegalArgumentException("[ERROR] This field can't be empty");
+        }
+
+        return true;
+    }
+
+    Integer convertStringValueToNumber(String changeValueString) {
+
+        return Integer.parseInt(changeValueString);
+
+    }
+
+    boolean verifyCollectedPassword(String hashedPWSD) {
+
+        if (hashedPWSD == null || hashedPWSD.isBlank()) {
+            throw new IllegalStateException("[ERROR] The Password can't be empty");
+        }
+
+        return true;
+    }
+
+    //Call the methods again so the user can change the value
     void changeUsername(Scanner scanner) {
         setUserName(scanner);
     }
