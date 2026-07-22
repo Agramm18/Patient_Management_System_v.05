@@ -40,16 +40,16 @@ public class MenuController {
 
                 //The sub menu should be called here like choice = 1 -> request sub menu and this valude should be routed to the service controller
 
-                int parentKontext = route.chooseOption(scanner, this.MAX_OPTIONS);
+                int parentContext = route.chooseOption(scanner, this.MAX_OPTIONS);
 
-                if (parentKontext > 0) {
+                if (parentContext > 0) {
                     LogManager.menu(MenuState.INFO, "The admin called the child admin menus");
 
                 } else {
-                    throw new IllegalArgumentException("The value is invalid " + parentKontext);
+                    throw new IllegalArgumentException("The value is invalid " + parentContext);
                 }
 
-                MenuContextStructure menuChoice = new MenuContextStructure(parentKontext, user.getRole(), 0);
+                MenuContextStructure menuChoice = new MenuContextStructure(parentContext, user.getRole(), 0);
 
                 return menuChoice;
         }
