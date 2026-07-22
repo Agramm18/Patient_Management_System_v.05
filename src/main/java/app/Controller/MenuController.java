@@ -25,6 +25,7 @@ public class MenuController {
         MenuFlow route = new MenuFlow();
 
         switch(UserRole) {
+
             case 1:
                 LogManager.auth(AuthState.INFO, "The user has granted access to the local admin menu");
                 new LocalAdminMenu().localAdminMenu();
@@ -38,11 +39,10 @@ public class MenuController {
 
                 this.MAX_OPTIONS = adminMenu.getMenuSize();
 
-                //The sub menu should be called here like choice = 1 -> request sub menu and this valude should be routed to the service controller
-
+                //The sub menu should be called here like choice = 1 -> request sub menu and this value should be routed to the service controller
                 int parentContext = route.chooseOption(scanner, this.MAX_OPTIONS);
 
-                if (parentContext > 0) {
+                if (parentContext > 0 || parentContext < this.MAX_OPTIONS) {
                     LogManager.menu(MenuState.INFO, "The admin called the child admin menus");
 
                 } else {
@@ -50,7 +50,6 @@ public class MenuController {
                 }
 
                 MenuContextStructure menuChoice = new MenuContextStructure(parentContext, user.getRole(), 0);
-
                 return menuChoice;
         }
 

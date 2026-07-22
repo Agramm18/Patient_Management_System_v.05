@@ -63,7 +63,7 @@ public class FrontController {
                 return true;
 
             case MENU:
-                this.menuChoice = menuController.routeMenu(scanner);
+                menuController.routeMenu(scanner);
                 return true;
 
             case SERVICE:
