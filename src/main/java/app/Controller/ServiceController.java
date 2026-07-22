@@ -1,6 +1,6 @@
 package app.Controller;
 
-import app.Menu.MenuValues;
+import app.Menu.MenuContextStructure;
 import app.Logging.LogManager;
 import app.Logging.Enums.ProgrammState.*;
 
@@ -8,7 +8,7 @@ import java.util.Scanner;
 
 public class ServiceController {
 
-    public void routeService(MenuValues values, Scanner scanner) {
+    public void routeService(MenuContextStructure values, Scanner scanner) {
         int role = values.userRole();
 
         switch (role) {
@@ -23,11 +23,11 @@ public class ServiceController {
     }
 
 
-    private void startLocalAdminService(MenuValues values, Scanner scanner) {
+    private void startLocalAdminService(MenuContextStructure values, Scanner scanner) {
         LogManager.system(SystemState.INFO, "Starting LocalAdmin Service");
     }
 
-    private void startAdminService(MenuValues values, Scanner scanner) {
+    private void startAdminService(MenuContextStructure values, Scanner scanner) {
         LogManager.system(SystemState.INFO, "Starting Admin Service");
 
     }

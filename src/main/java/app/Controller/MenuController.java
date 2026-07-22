@@ -8,16 +8,16 @@ import app.Logging.Enums.ProgrammState.*;
 import app.Auth.Flow.CurrentSession;
 import app.Menu.MenuFlow;
 
-import app.Menu.MenuValues;
+import app.Menu.MenuContextStructure;
 
 import java.util.Scanner;
 
 public class MenuController {
-    private MenuValues menuValues;
+    private MenuContextStructure menuContextStructure;
 
     private int MAX_OPTIONS;
 
-    public MenuValues routeMenu(Scanner scanner) {
+    public MenuContextStructure routeMenu(Scanner scanner) {
         LogManager.system(SystemState.INFO, "Starting Menu Controller");
 
         CurrentUser user = CurrentSession.getCurrentUser();
@@ -28,7 +28,7 @@ public class MenuController {
             case 1:
                 LogManager.auth(AuthState.INFO, "The user has granted access to the local admin menu");
                 new LocalAdminMenu().localAdminMenu();
-                return new MenuValues(0, user.getRole(), 0);
+                return new MenuContextStructure(0, user.getRole(), 0);
 
             case 2:
                 LogManager.auth(AuthState.INFO, "The user has granted access to the admin menu");
@@ -49,7 +49,7 @@ public class MenuController {
                     throw new IllegalArgumentException("The value is invalid " + parrentKontext);
                 }
 
-                MenuValues menuChoice = new MenuValues(parrentKontext, user.getRole(), 0);
+                MenuContextStructure menuChoice = new MenuContextStructure(parrentKontext, user.getRole(), 0);
 
                 return menuChoice;
         }

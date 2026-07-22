@@ -3,7 +3,7 @@ import java.util.Scanner;
 
 
 import app.Auth.Flow.Services.LoginService.CurrentUser;
-import app.Menu.MenuValues;
+import app.Menu.MenuContextStructure;
 
 /*
     This Section is the Frontcontroller which basically Manage the other controllers
@@ -28,7 +28,7 @@ public class FrontController {
     private final SubMenuController subMenuController;
     private final ServiceController serviceController;
     private final UIController UIController;
-    private MenuValues menuChoice;
+    private MenuContextStructure menuChoice;
 
     private CurrentUser currentUser;
 
