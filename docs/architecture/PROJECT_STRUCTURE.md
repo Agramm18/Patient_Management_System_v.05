@@ -239,16 +239,16 @@ Reserved request types still not routed by active cases are `UI` and `EXIT`.
 - `LoginFlow` repeats credential collection, verifies login, and stores login attempts.
 - `PasswordFlow` delegates password creation to `PasswordService`.
 - `RecoveryFlow` validates the recovery key and coordinates password reset.
-- `CurrentSession` stores the current active `CurrentUser` for downstream routing.
+- `CurrentSession` stores the current active `Unknown` for downstream routing.
 
 ### `app.Auth.Flow.Services`
 
 - `RegistrationService` collects and validates profile data, including libphonenumber-based international phone validation.
 - `PasswordService` validates passwords and creates BCrypt hashes.
-- `LoginInputCollector` collects username and hidden password input.
-- `LoginVerification` verifies credentials and routes by account status.
-- `CurrentUser` stores active account ID, username, status, role, system-account flag, and menu-access flag.
-- `FirstLogin` creates pending-user access-request groundwork.
+- `CollectLoginValues` collects username and hidden password input.
+- `SetupCurrentSession` verifies credentials and routes by account status.
+- `Unknown` stores active account ID, username, status, role, system-account flag, and menu-access flag.
+- `FirstLoginFlow` creates pending-user access-request groundwork.
 - Recovery services collect, validate, and route recovery input.
 - Management services contain department and role input plus the job placeholder.
 - Audit `CollectLogs` is a small login-result value object, not the database log repository.

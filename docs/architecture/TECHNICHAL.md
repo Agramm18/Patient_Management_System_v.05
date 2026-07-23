@@ -74,9 +74,9 @@ Current risks:
 
 ## Authentication and Session Design
 
-Login input uses `Scanner` for usernames and `System.console()` for hidden passwords. `CheckUserInDB` performs username lookup, BCrypt verification, and account-status lookup. `LoginVerification` routes by status and creates `CurrentUser` only for an active account.
+Login input uses `Scanner` for usernames and `System.console()` for hidden passwords. `CheckUserInDB` performs username lookup, BCrypt verification, and account-status lookup. `SetupCurrentSession` routes by status and creates `Unknown` only for an active account.
 
-`CurrentUser` stores:
+`Unknown` stores:
 
 - Username
 - Account ID
@@ -85,7 +85,7 @@ Login input uses `Scanner` for usernames and `System.console()` for hidden passw
 - System-account flag
 - Menu-access flag
 
-`CurrentSession` stores one static `CurrentUser`. It has no clear or logout method, and no tests currently cover stale-session behavior.
+`CurrentSession` stores one static `Unknown`. It has no clear or logout method, and no tests currently cover stale-session behavior.
 
 ## Password Design
 
@@ -159,7 +159,7 @@ The stored hash is not checked for null before BCrypt verification. Recovery doe
 
 ## Access-Request Design
 
-A pending user chooses department ID 1 through 11. `FirstLogin` displays the corresponding job menu, but no job is selected. `CreateAccessRequest` inserts the account ID, department, job `unassigned`, and role ID 9. The database default supplies request status ID 3.
+A pending user chooses department ID 1 through 11. `FirstLoginFlow` displays the corresponding job menu, but no job is selected. `CreateAccessRequest` inserts the account ID, department, job `unassigned`, and role ID 9. The database default supplies request status ID 3.
 
 `CollectUserJob` is empty. `CollectUserRole` validates a role choice but returns no value and is not connected. Duplicate requests and request reasons are not handled.
 

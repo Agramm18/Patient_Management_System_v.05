@@ -10,7 +10,7 @@ The diagram reflects the current connected runtime and distinguishes it from cla
 - `.env`, `EnvSetup`, JDBC, recovery-key, and starter-account configuration
 - Registration and current password/hash risks
 - Login verification, status routing, login-attempt persistence, and threshold timing
-- Active `CurrentUser` and `CurrentSession` creation
+- Active `Unknown` and `CurrentSession` creation
 - Pending-user department requests with default job and role values
 - Recovery-key retry behavior and the unrestricted final account lookup
 - Local-admin and five-option admin parent menus

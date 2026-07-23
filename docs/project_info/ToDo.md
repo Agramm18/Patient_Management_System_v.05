@@ -1,8 +1,8 @@
 # Project Backlog
 
-Status date: 2026-07-20.
+Status date: 2026-07-23.
 
-The last verified `.\mvnw.cmd test` run passed 55 tests on 2026-07-20: 15 `PasswordServiceTest` tests and 40 `RegistrationServiceTest` tests. The Maven Wrapper is currently verified in Windows PowerShell.
+The last verified `.\mvnw.cmd test` run passed 55 tests on 2026-07-23: 15 `PasswordServiceTest` tests and 40 `RegistrationServiceTest` tests. The Maven Wrapper is currently verified in Windows PowerShell. The verified source snapshot contains 91 production Java files and 2 test source files.
 
 ## Category Guide
 
@@ -38,14 +38,17 @@ The last verified `.\mvnw.cmd test` run passed 55 tests on 2026-07-20: 15 `Passw
 - [x] Add the starter-account first-password-change route.
 - [x] Add the four-attempt recovery-key limit.
 - [x] Add the pending-user department-request baseline.
-- [x] Add `CurrentUser` and the static `CurrentSession` baseline.
+- [x] Add `Unknown` and the static `CurrentSession` baseline.
 
 ### Menu and Access Foundation
 
-- [x] Add local-admin and admin parent-menu routing.
-- [x] Add the five-option admin parent menu.
-- [x] Add `MenuValues` with parent, role, and child context.
-- [x] Add role-based `ServiceController` dispatch.
+- [x] Add local-admin and admin parent-menu routing through `MenuControllerParent`.
+- [x] Model the five-option admin parent menu with immutable `MenuOption` entries and typed `ServiceAction` values.
+- [x] Replace numeric parent and child contexts with `MenuContextStructure(userRole, action)`.
+- [x] Remove the obsolete `MenuController` and `SubMenuController` split from the active controller flow.
+- [x] Forward the selected `ServiceAction` through `FrontController` to `ServiceController`.
+- [x] Connect `ADMIN_USER_REQUESTS` to `ShowCurrentRequests`.
+- [x] Reject unknown role IDs explicitly in `MenuControllerParent`.
 - [x] Implement the first access-request listing query.
 
 ### Logging and Tests
@@ -57,11 +60,26 @@ The last verified `.\mvnw.cmd test` run passed 55 tests on 2026-07-20: 15 `Passw
 - [x] Add password validation and retype unit tests.
 - [x] Add registration username, email, phone, confirmation-state, correction-choice, and password-hash guard tests.
 - [x] Re-check Maven Wrapper test execution in Windows PowerShell.
-- [x] Verify all 55 tests on 2026-07-20.
+- [x] Verify all 55 tests on 2026-07-23 after the typed menu-routing refactor.
 
 ## Current
 
-Current focus: prove password creation and registration persist a valid account and report repository outcomes.
+Current focus: complete the typed menu and service-action routing, then close the remaining password and registration end-to-end verification gaps.
+
+### Menu Action Routing
+
+- [x] Map every displayed admin option to a stable `ServiceAction`.
+- [x] Carry the selected action through `MenuContextStructure`.
+- [x] Route `ADMIN_USER_REQUESTS` to the current request-listing query.
+- [ ] Implement `ADMIN_DISPLAY_ACCOUNTS`.
+- [ ] Implement `ADMIN_SECURITY_OPTIONS`.
+- [ ] Implement `ADMIN_VIEW_LOGS`.
+- [ ] Implement `ADMIN_LOGOUT`, clear `CurrentSession`, and return to the authentication flow.
+- [ ] Implement `LOCAL_ADMIN_DASHBOARD`; it currently reaches the unsupported-action exception.
+- [ ] Add a controlled menu loop so the application does not end after one menu/service pass.
+- [ ] Authorize each role/action combination inside the service layer before invoking a command.
+- [ ] Add tests for option-to-action mapping, request delegation, unsupported actions, unknown roles, local-admin routing, and logout.
+- [ ] Remove current routing cleanup leftovers: `AdminMenu.menuSize`, unused `Map` and `Consumer` imports, the empty `ServiceController` constructor, and unused parameters.
 
 ### Password Creation
 
@@ -90,6 +108,8 @@ Current focus: prove password creation and registration persist a valid account 
 - [ ] Verify that every registration correction path produces a nonblank hash.
 - [x] Verify helper-level null and blank password-hash rejection.
 - [x] Run the complete unit-test suite with no failures.
+- [ ] Verify that every displayed menu option has defined behavior and no valid action reaches the default exception.
+- [ ] Verify that logout clears the session and returns to authentication without terminating the process.
 
 ## Urgent
 
@@ -105,7 +125,6 @@ Current focus: prove password creation and registration persist a valid account 
 - [ ] Define one result type for authenticated, rejected, password-changed, pending-requested, and suspicious outcomes.
 - [ ] Decide whether suspicious accounts are blocked, restricted, or forced to change passwords.
 - [ ] Decide whether starter accounts are logged in automatically after their first password change.
-- [ ] Add logout and clear `CurrentSession`.
 - [ ] Prevent stale static session state across repeated authentication attempts.
 - [ ] Test active-session creation and every account-status branch.
 
@@ -120,25 +139,23 @@ Current focus: prove password creation and registration persist a valid account 
 
 ### Menu and Service Routing
 
-- [ ] Add a real submenu dispatch path or remove the unused `SubMenuController` dependency.
-- [ ] Implement `RequestMenu`.
-- [ ] Populate and validate `MenuValues.childKontext`.
+- [ ] Decide whether `RequestMenu` is still required; implement it as a submenu or remove the empty placeholder.
 - [ ] Add selectable local-admin parent options.
-- [ ] Connect the five admin parent options to submenus or commands.
-- [ ] Define behavior for role IDs other than 1 and 2.
-- [ ] Add routing tests for parent context, child context, role, and invalid values.
+- [ ] Map database role IDs explicitly to `AccountRoles` and never rely on enum ordinals, or remove the unused enum.
+- [ ] Define supported menu behavior for application roles other than local admin and admin.
+- [ ] Validate null, unsupported, and unauthorized role/action combinations.
+- [ ] Replace fatal handling of unfinished menu actions with a controlled user-facing flow.
 
 ### Access Requests
 
 - [ ] Implement `CollectUserJob`.
 - [ ] Collect an actual job choice from every department job menu.
 - [ ] Make `CollectUserRole` return the selected role ID.
-- [ ] Connect job and role selection to `FirstLogin`.
+- [ ] Connect job and role selection to `FirstLoginFlow`.
 - [ ] Replace default job `unassigned` and role ID 9 with selected values.
 - [ ] Decide how duplicate pending requests are handled.
 - [ ] Add a request reason if required.
 - [ ] Return success or failure from `CreateAccessRequest`.
-- [ ] Reconnect the request-listing query to the active menu and service path.
 - [ ] Return structured request data instead of printing from `ShowCurrentRequests`.
 - [ ] Filter request listings by pending status.
 
@@ -157,6 +174,7 @@ These items must be resolved before the application handles real users or patien
 ### Authorization and Account Activation
 
 - [ ] Authorize access-request viewing and decisions.
+- [ ] Enforce role/action authorization in `ServiceController` so a constructed context cannot invoke an admin command directly.
 - [ ] Implement approve and reject transactions.
 - [ ] Persist the approver, approval timestamp, and rejection reason.
 - [ ] Apply department, job, role, permission, status, and menu access atomically.
@@ -253,7 +271,7 @@ This section contains the actual patient-management product. Start it after the 
 
 ### Cleanup and Naming
 
-- [ ] Rename inconsistent identifiers such as `userAccunt`, `sqlQuerry`, `parentKonext`, `childKontext`, `itJobsMenu`, and `logsRepository`.
+- [ ] Rename inconsistent identifiers such as `userAccunt`, `sqlQuerry`, `ParrentMenus`, `itJobsMenu`, and `logsRepository`.
 - [ ] Normalize public method names such as `SystemAccounts`, `Value`, `Logs`, and `CurrentRequests`.
 - [ ] Rename `TECHNICHAL.md` and `diagramms` with all references updated together.
 - [ ] Replace broad `SELECT *` queries with required columns.
@@ -263,7 +281,7 @@ This section contains the actual patient-management product. Start it after the 
 - [ ] Replace direct `System.exit` calls with controlled shutdown where practical.
 - [ ] Clean duplicate `.gitignore` patterns.
 - [ ] Add diagnostics for legacy `.env` keys such as `DB_PWSD`, `LOCAL_ADMIN_PWSD`, and `ADMIN_PWSD_DEFAULT`.
-- [ ] Sync `README.md` and `docs/project_info/CURRENT_STATUS.md` with the current 55-test Maven Wrapper result.
+- [ ] Sync `README.md`, `CURRENT_STATUS.md`, architecture documentation, and UML files with the 91-source/55-test result and the typed `ServiceAction` menu flow.
 
 ### Optional Infrastructure
 

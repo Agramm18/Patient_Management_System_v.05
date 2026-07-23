@@ -1,18 +1,17 @@
 package app.Controller;
 
+import app.Auth.Flow.CurrentSession;
 import app.Auth.Flow.LoginFlow;
 import app.Auth.Flow.RecoveryFlow;
 import app.Auth.Flow.RegistrationFlow;
-import app.Auth.Flow.Services.LoginService.CurrentUser;
 import app.CLIText.Menus.Program.AuthMenu;
 
 import java.util.Scanner;
 
 import app.Logging.LogManager;
 import app.Logging.Enums.ProgrammState.*;
-import app.Auth.Flow.CurrentSession;
 
-
+import app.Auth.Flow.Services.LoginService.CurrentAccountInSessionValues;
 
 /*
     This section is a controller where the User has to choose what he wants to do
@@ -23,7 +22,6 @@ import app.Auth.Flow.CurrentSession;
 */
 
 public class AuthController {
-    private CurrentUser currentUser;
 
     public void verifyAccountStatus(Scanner scanner) {
         String accountStatusSTR;
@@ -57,9 +55,9 @@ public class AuthController {
                         LoginFlow login = new LoginFlow();
                         login.user(scanner);
 
-                        CurrentUser user = CurrentSession.getCurrentUser();
+                        CurrentAccountInSessionValues user = CurrentSession.getCurrentAccount();
 
-                        if (user != null && user.hasAccessToMenu() && user.getAccountStatus() == 1) {
+                        if (user != null && user.hasAccessToMenu() && user.accountStatus() == 1) {
                             LogManager.auth(AuthState.SUCCESS, "The Login was a success");
                             return;
                         }

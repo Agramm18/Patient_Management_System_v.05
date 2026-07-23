@@ -68,7 +68,7 @@ The project was rebuilt in Java to practice larger application structure, Maven,
 - Login attempts persisted to MySQL
 - Invalid passwords counted over a 24-hour window
 - Locked, suspicious, and quarantine status updates implemented
-- `CurrentUser` introduced for active runtime account data
+- `Unknown` introduced for active runtime account data
 - Static `CurrentSession` introduced for the active user
 - Login values loaded through `CollectLoginValues`
 

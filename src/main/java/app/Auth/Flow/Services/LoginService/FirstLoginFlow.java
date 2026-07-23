@@ -30,7 +30,7 @@ import app.Logging.Enums.ProgrammState.*;
 
 */
 
-public class FirstLogin {
+public class FirstLoginFlow {
 
     public void firstSetup(String Username, Scanner scanner) {
 

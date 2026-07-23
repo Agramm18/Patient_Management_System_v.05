@@ -2,7 +2,6 @@ package app.Controller;
 import java.util.Scanner;
 
 
-import app.Auth.Flow.Services.LoginService.CurrentUser;
 import app.Menu.MenuContextStructure;
 
 /*
@@ -28,8 +27,6 @@ public class FrontController {
     private final ServiceController serviceController;
     private final UIController UIController;
     private MenuContextStructure menuChoice;
-
-    private CurrentUser currentUser;
 
     //Enum to store request types
     public enum RequestType {

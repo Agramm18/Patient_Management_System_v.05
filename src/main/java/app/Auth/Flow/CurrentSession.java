@@ -1,14 +1,26 @@
 package app.Auth.Flow;
-import app.Auth.Flow.Services.LoginService.CurrentUser;
+import app.Auth.Flow.Services.LoginService.CurrentAccountInSessionValues;
 
-public class CurrentSession {
-    private  static CurrentUser currentUser;
+public final class CurrentSession {
+    private static CurrentAccountInSessionValues currentAccount;
 
-    public static void setCurrentUser(CurrentUser user) {
-        currentUser = user;
+    private CurrentSession() {
+
     }
 
-    public static CurrentUser getCurrentUser() {
-        return currentUser;
+    public static void setCurrentAccount(CurrentAccountInSessionValues account) {
+        currentAccount = account;
+    }
+
+    public static CurrentAccountInSessionValues getCurrentAccount() {
+        return currentAccount;
+    }
+
+    public static boolean isLoggedIn() {
+        return currentAccount != null;
+    }
+
+    public static void clear() {
+        currentAccount = null;
     }
 }

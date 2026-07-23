@@ -84,7 +84,7 @@ A terminal-backed console is required for login passwords, new passwords, and re
 
 | Account status | Current behavior |
 | --- | --- |
-| `active` | Loads account values, creates `CurrentUser`, stores it in `CurrentSession`, and reports success. |
+| `active` | Loads account values, creates `Unknown`, stores it in `CurrentSession`, and reports success. |
 | `disabled` | Rejects login and continues the login loop. |
 | `pending` | Runs department selection and inserts an access request, then returns to the authentication menu without creating a session. |
 | `locked` | Rejects login and continues the login loop. |
@@ -92,13 +92,13 @@ A terminal-backed console is required for login passwords, new passwords, and re
 | `waiting_for_password_change` | Runs password creation, updates the password and activation fields, then requires a new login. |
 | `suspicious` | Reports a successful login result with a warning reason but creates no session, so the authentication menu continues. |
 
-`CurrentUser` stores the username, account ID, account-status ID, menu-access flag, system-account flag, and role ID. `CurrentSession` stores one static current user. There is no logout or explicit session reset.
+`Unknown` stores the username, account ID, account-status ID, menu-access flag, system-account flag, and role ID. `CurrentSession` stores one static current user. There is no logout or explicit session reset.
 
 Every completed login result is inserted into `login_attempts`, including unknown usernames with a null account ID.
 
 ## Failed-Login Policy
 
-`CountFailedLoginAttempts` counts stored `INVALID_PASSWORD` rows from the previous 24 hours. `LoginVerification` then applies these status changes:
+`CountFailedLoginAttempts` counts stored `INVALID_PASSWORD` rows from the previous 24 hours. `SetupCurrentSession` then applies these status changes:
 
 | Previously stored count | Status update |
 | --- | --- |

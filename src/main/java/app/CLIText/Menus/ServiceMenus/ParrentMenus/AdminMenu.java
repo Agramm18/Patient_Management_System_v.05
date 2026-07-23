@@ -1,12 +1,11 @@
 package app.CLIText.Menus.ServiceMenus.ParrentMenus;
 
 import app.Auth.Flow.CurrentSession;
-import app.Auth.Flow.Services.LoginService.CurrentUser;
 import app.Logging.LogManager;
 import app.Logging.Enums.ProgrammState.*;
 import app.Menu.Enums.ServiceAction;
 import app.Menu.MenuOption;
-
+import app.Auth.Flow.Services.LoginService.CurrentAccountInSessionValues;
 import java.util.List;
 
 public class AdminMenu {
@@ -22,9 +21,9 @@ public class AdminMenu {
 
     public void showMenu() {
         LogManager.auth(AuthState.SUCCESS, "Routed successfully into the admin menu");
-        CurrentUser user = CurrentSession.getCurrentUser();
+        CurrentAccountInSessionValues user = CurrentSession.getCurrentAccount();
 
-        System.out.println("\nWelcome Admin: " + user.getUserName());
+        System.out.println("\nWelcome Admin: " + user.accountName());
         System.out.println("Please choose one of the following options\n");
 
         for (int i = 0; i < MENU_ITEMS.size(); i++) {

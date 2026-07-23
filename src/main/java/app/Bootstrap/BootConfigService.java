@@ -2,12 +2,11 @@ package app.Bootstrap;
 
 import app.CLIText.DisplayMessages.AuthMSG;
 import app.CLIText.DisplayMessages.LoaderMSG;
-import app.Auth.Flow.Services.LoginService.CurrentUser;
 
 import app.Logging.LogManager;
 import app.Logging.Enums.ProgrammState.*;
 import app.Controller.*;
-
+import app.Auth.Flow.Services.LoginService.CurrentAccountInSessionValues;
 import app.Auth.Flow.CurrentSession;
 
 import java.util.Scanner;
@@ -51,7 +50,7 @@ public class BootConfigService {
 
             dispatcher.callController(FrontController.RequestType.AUTH, scanner);
 
-            CurrentUser user = CurrentSession.getCurrentUser();
+            CurrentAccountInSessionValues user = CurrentSession.getCurrentAccount();
 
             if (user == null) {
                 LogManager.auth(AuthState.INFO, "No User Session where found");

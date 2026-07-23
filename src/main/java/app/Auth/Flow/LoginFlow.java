@@ -2,8 +2,8 @@ package app.Auth.Flow;
 
 import java.util.Scanner;
 
-import app.Auth.Flow.Services.LoginService.LoginVerification;
-import app.Auth.Flow.Services.LoginService.LoginInputCollector;
+import app.Auth.Flow.Services.LoginService.SetupCurrentSession;
+import app.Auth.Flow.Services.LoginService.CollectLoginValues;
 import app.Repository.logsRepository.CollectLogs;
 
 import app.Logging.LogManager;
@@ -18,11 +18,11 @@ public class LoginFlow {
     public void user(Scanner scanner) {
 
         //Build Obj to call the Login flow
-        LoginVerification check = new LoginVerification();
+        SetupCurrentSession check = new SetupCurrentSession();
         CollectLogs store = new CollectLogs();
 
         while (true) {
-            LoginInputCollector login = new LoginInputCollector();
+            CollectLoginValues login = new CollectLoginValues();
             login.user(scanner);
 
             //Check if Username & Password is Valid

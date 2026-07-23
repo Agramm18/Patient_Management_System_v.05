@@ -14,7 +14,7 @@ Patient Management System V5.01 is a Java 21 console-based learning and portfoli
 - BCrypt password and recovery-key hashing
 - Authentication and account-status handling
 - Login-attempt auditing and persisted status changes
-- Runtime session modeling through `CurrentUser` and `CurrentSession`
+- Runtime session modeling through `Unknown` and `CurrentSession`
 - Early role-aware parent-menu routing
 - Typed logging state through SLF4J and Logback
 - JUnit 5 unit testing

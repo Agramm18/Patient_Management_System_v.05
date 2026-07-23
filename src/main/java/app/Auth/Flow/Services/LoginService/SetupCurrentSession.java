@@ -15,6 +15,7 @@ import app.Auth.Flow.CurrentSession;
 import app.Logging.LogManager;
 import app.Logging.Enums.ProgrammState.*;
 import app.Repository.LoginRepository.CollectLoginValues;
+import app.Auth.Flow.Services.LoginService.CurrentAccountInSessionValues;
 
 /*
      This Section Checks the Username and Validate how to proceed after the first Login
@@ -25,29 +26,17 @@ import app.Repository.LoginRepository.CollectLoginValues;
 
 */
 
-public class LoginVerification {
+public class SetupCurrentSession {
     private int RETRYS = 0;
     private int RETRYS_MAX = 5;
     private int RETRYS_FOR_SUSPICOUS = 6;
     private int RETRYS_FOR_QUARANTINE = 25;
 
-    private CurrentUser currentUser;
     private CurrentSession currentSession;
 
     private final CheckUserInDB repository = new CheckUserInDB();
 
-    public enum UserStatus {
-        ACTIVE,
-        DISABLED,
-        PENDING,
-        LOCKED,
-        ON_QUARANTINE,
-        WAITING_FOR_PASSWORD_CHANGE,
-        SUSPICIOUS
-    };
-
     private String AccountStatus;
-
 
     public CollectLogs loggedUser(String Username, String PWSD, Scanner scanner) {
 
@@ -116,19 +105,17 @@ public class LoginVerification {
                     CollectLoginValues sessionObject = new CollectLoginValues();
                     sessionObject.loginValues(Username);
 
-                    boolean hasAccessToMenu = sessionObject.gethasAccesToMenu();
-                    int accountStatus = sessionObject.getUserStatus();
                     int accountID = sessionObject.getUserID();
                     String accountName = sessionObject.getAccount();
+                    int accountStatus = sessionObject.getUserStatus();
+                    boolean hasAccessToMenu = sessionObject.gethasAccesToMenu();
                     boolean isSystemAccount = sessionObject.isSystemAccount();
                     int userRole = sessionObject.getUserRole();
 
+                    CurrentAccountInSessionValues sessionValues = new CurrentAccountInSessionValues(accountID, accountName, accountStatus, hasAccessToMenu, isSystemAccount, userRole);
+
+                    CurrentSession.setCurrentAccount(sessionValues);
                     this.RETRYS = 0;
-
-                    CurrentUser session = new CurrentUser(accountName, accountID, hasAccessToMenu, accountStatus, isSystemAccount, userRole);
-                    session.loginResult();
-
-                    CurrentSession.setCurrentUser(session);
 
                     return new CollectLogs(true, null);
                 case "disabled":
@@ -139,7 +126,7 @@ public class LoginVerification {
                     LogManager.auth(AuthState.INFO, "The User Status is pending");
                     System.out.println("[INFO] This account is not fully activated");
 
-                    FirstLogin run = new FirstLogin();
+                    FirstLoginFlow run = new FirstLoginFlow();
                     run.firstSetup(Username, scanner);
 
                     return new CollectLogs(true, "Must be authorized");

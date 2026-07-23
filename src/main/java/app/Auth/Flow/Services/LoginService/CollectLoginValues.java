@@ -11,7 +11,7 @@ import app.Logging.Enums.ProgrammState.*;
     In this Section The User and PWSD will be collected and Stored via the getter
 */
 
-public class LoginInputCollector {
+public class CollectLoginValues {
     private String enteredUserName;
     private String enteredPWSD;
 
