@@ -243,16 +243,16 @@ There is no `MenuController` or `SubMenuController` class in the current source 
 ### `app.Auth.Flow`
 
 - `RegistrationFlow` coordinates validated registration data and account insertion.
-- `LoginFlow` collects one credential pair, delegates session configuration, and persists one `LogsForDB` result to `login_attempts`; the surrounding retry loop is in `AuthController`.
+- `LoginFlow` collects one credential pair, delegates session configuration, and persists one `StoreLogs` result to `login_attempts`; the surrounding retry loop is in `AuthController`.
 - `PasswordFlow` delegates password creation to `PasswordService`.
 - `RecoveryFlow` validates the recovery key and coordinates password reset.
-- `CurrentSession` stores one static `CurrentAccountInSessionValues` record and exposes `setCurrentAccount`, `getCurrentAccount`, `isLoggedIn`, and `clear`.
+- `CurrentSession` stores one static `SessionAccount` record and exposes `setCurrentAccount`, `getCurrentAccount`, `isLoggedIn`, and `clear`.
 
 ### `app.Auth.Flow.Services`
 
 - `RegistrationService` validates profile data, supports repeated confirmation/correction, requires a nonblank generated hash, and uses libphonenumber for international phone validation.
 - `PasswordService` validates passwords, creates BCrypt hashes, and clears both character arrays after hashing.
-- Login services are split into input collection (`CollectLoginValues`), credential/status orchestration (`SetupCurrentSession`), status-specific work (`HandleAccountStatusTasks`), session data (`CurrentAccountInSessionValues`), persistence results (`LogsForDB`), and pending-user setup (`FirstLoginFlow`).
+- Login services are split into input collection (`CollectLoginValues`), credential/status orchestration (`SetupCurrentSession`), status-specific work (`HandleAccountStatus`), session data (`SessionAccount`), persistence results (`StoreLogs`), and pending-user setup (`FirstLoginFlow`).
 - `CallPasswordPolicyRules` reads stored failed-login counts and calls status-update repositories after an invalid password.
 - Recovery services collect, validate, and route recovery input.
 - Management services contain department and role input plus the empty `CollectUserJob` placeholder.

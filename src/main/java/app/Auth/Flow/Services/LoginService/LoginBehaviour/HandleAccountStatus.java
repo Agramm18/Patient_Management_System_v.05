@@ -1,6 +1,7 @@
-package app.Auth.Flow.Services.LoginService;
+package app.Auth.Flow.Services.LoginService.LoginBehaviour;
 
 import app.Auth.Flow.CurrentSession;
+import app.Auth.Flow.Services.LoginService.FirstLoginFlow;
 import app.Auth.Flow.Services.PasswordService.PasswordService;
 import app.Logging.Enums.ProgrammState.AuthState;
 import app.Logging.Enums.ProgrammState.SecurityState;
@@ -10,11 +11,11 @@ import app.Repository.LoginRepository.CollectLoginValues;
 
 import java.util.Scanner;
 
-public class HandleAccountStatusTasks {
+public class HandleAccountStatus {
     private CurrentSession currentSession;
 
     //Handle the UserStatus to execute different policies
-    public LogsForDB accountStatusBehaviour(String status, String username, Scanner scanner) {
+    public StoreLogs accountStatusBehaviour(String status, String username, Scanner scanner) {
         app.Repository.LoginRepository.CollectLoginValues sessionObject = new CollectLoginValues();
 
         switch (status) {
@@ -31,17 +32,17 @@ public class HandleAccountStatusTasks {
                 boolean isSystemAccount = sessionObject.isSystemAccount();
                 int userRole = sessionObject.getUserRole();
 
-                CurrentAccountInSessionValues sessionValues = new CurrentAccountInSessionValues(accountID, accountName, accountStatus, hasAccessToMenu, isSystemAccount, userRole);
+                SessionAccount sessionValues = new SessionAccount(accountID, accountName, accountStatus, hasAccessToMenu, isSystemAccount, userRole);
 
                 CurrentSession.setCurrentAccount(sessionValues);
 
-                return new LogsForDB(username, true, "account status is active");
+                return new StoreLogs(username, true, "account status is active");
 
             case "disabled":
                 LogManager.auth(AuthState.INFO, "The User Status is disabled");
                 System.out.println("[WARNING] This account is Locked an must be activated by an administrator");
 
-                return new LogsForDB(username, false, "account status is disabled");
+                return new StoreLogs(username, false, "account status is disabled");
 
             case "pending":
                 LogManager.auth(AuthState.INFO, "The User Status is pending");
@@ -50,17 +51,17 @@ public class HandleAccountStatusTasks {
                 FirstLoginFlow run = new FirstLoginFlow();
                 run.firstSetup(username, scanner);
 
-                return new LogsForDB(username, true, "account status is pending");
+                return new StoreLogs(username, true, "account status is pending");
 
             case "locked":
                 LogManager.auth(AuthState.INFO, "The User Status is locked");
                 System.out.println("[WARNING] This account is locked and must be activated by an administrator");
-                return new LogsForDB(username, false, "account status is locked");
+                return new StoreLogs(username, false, "account status is locked");
 
             case "on_quarantine":
                 LogManager.auth(AuthState.INFO, "The User Status is on_quarantine");
                 System.out.println("[FATAL] This account is on quarantine and must be checked");
-                return new LogsForDB(username, false, "account status is on_quarantine");
+                return new StoreLogs(username, false, "account status is on_quarantine");
 
             case "waiting_for_password_change":
                 LogManager.auth(AuthState.INFO, "The User Status is waiting_for_password_change");
@@ -81,12 +82,12 @@ public class HandleAccountStatusTasks {
                     LogManager.security(SecurityState.INFO, "The password was changed successfully");
                 };
 
-                return new LogsForDB(username, true, null);
+                return new StoreLogs(username, false, null);
 
             case "suspicious":
                 LogManager.auth(AuthState.INFO, "The User Status is suspicious");
                 System.out.println("[INFO] You account is set to suspicious maybe you need to change your password");
-                return new LogsForDB(username, false, "account status is suspicious");
+                return new StoreLogs(username, false, "account status is suspicious");
 
             default:
                 LogManager.auth(AuthState.ERROR, "Invalid Account status");

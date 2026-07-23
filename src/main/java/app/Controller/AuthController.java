@@ -11,7 +11,7 @@ import java.util.Scanner;
 import app.Logging.LogManager;
 import app.Logging.Enums.ProgrammState.*;
 
-import app.Auth.Flow.Services.LoginService.CurrentAccountInSessionValues;
+import app.Auth.Flow.Services.LoginService.LoginBehaviour.SessionAccount;
 
 /*
     This section is a controller where the User has to choose what he wants to do
@@ -55,7 +55,7 @@ public class AuthController {
                         LoginFlow login = new LoginFlow();
                         login.user(scanner);
 
-                        CurrentAccountInSessionValues user = CurrentSession.getCurrentAccount();
+                        SessionAccount user = CurrentSession.getCurrentAccount();
 
                         if (user != null && user.hasAccessToMenu() && user.accountStatus() == 1) {
                             LogManager.auth(AuthState.SUCCESS, "The Login was a success");

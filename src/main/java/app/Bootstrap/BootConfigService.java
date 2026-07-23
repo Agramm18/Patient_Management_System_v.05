@@ -6,7 +6,7 @@ import app.CLIText.DisplayMessages.LoaderMSG;
 import app.Logging.LogManager;
 import app.Logging.Enums.ProgrammState.*;
 import app.Controller.*;
-import app.Auth.Flow.Services.LoginService.CurrentAccountInSessionValues;
+import app.Auth.Flow.Services.LoginService.LoginBehaviour.SessionAccount;
 import app.Auth.Flow.CurrentSession;
 
 import java.util.Scanner;
@@ -50,7 +50,7 @@ public class BootConfigService {
 
             dispatcher.callController(FrontController.RequestType.AUTH, scanner);
 
-            CurrentAccountInSessionValues user = CurrentSession.getCurrentAccount();
+            SessionAccount user = CurrentSession.getCurrentAccount();
 
             if (user == null) {
                 LogManager.auth(AuthState.INFO, "No User Session where found");

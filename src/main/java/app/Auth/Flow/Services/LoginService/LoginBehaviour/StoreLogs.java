@@ -1,6 +1,6 @@
-package app.Auth.Flow.Services.LoginService;
+package app.Auth.Flow.Services.LoginService.LoginBehaviour;
 
-public record LogsForDB(
+public record StoreLogs(
         String accountName,
         boolean canUseSystem,
         String reason

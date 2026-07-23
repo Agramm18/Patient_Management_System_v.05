@@ -38,10 +38,10 @@ The last verified `.\mvnw.cmd test` run passed 55 tests on 2026-07-23: 15 `Passw
 - [x] Add the starter-account first-password-change route.
 - [x] Add the four-attempt recovery-key limit.
 - [x] Add the pending-user department-request baseline.
-- [x] Store active-account state in the `CurrentAccountInSessionValues` record and static `CurrentSession`.
+- [x] Store active-account state in the `SessionAccount` record and static `CurrentSession`.
 - [x] Add `CurrentSession.isLoggedIn()` and `CurrentSession.clear()`.
-- [x] Split login orchestration into `SetupCurrentSession`, `HandleAccountStatusTasks`, and `CallPasswordPolicyRules`.
-- [x] Add the `LogsForDB` result record used by login-attempt persistence.
+- [x] Split login orchestration into `SetupCurrentSession`, `HandleAccountStatus`, and `CallPasswordPolicyRules`.
+- [x] Add the `StoreLogs` result record used by login-attempt persistence.
 
 ### Menu and Access Foundation
 
@@ -72,7 +72,7 @@ Current focus: correct the refactored login outcome and failed-attempt contracts
 ### Login Outcome and Failed-Attempt Correctness
 
 - [x] Replace the former `LoginVerification` class with smaller credential, status, and password-policy components.
-- [x] Replace the mutable current-user object with `CurrentAccountInSessionValues`.
+- [x] Replace the mutable current-user object with `SessionAccount`.
 - [ ] Use one canonical invalid-password reason in both `CallPasswordPolicyRules` and `CountFailedLoginAttempts`; the writer currently stores `to many false attempts` while the query counts only `INVALID_PASSWORD`.
 - [ ] Include the current invalid-password attempt before applying the 5, 6, and 25 thresholds.
 - [ ] Replace the ambiguous `canUseSystem` boolean with explicit outcomes for authenticated, pending-requested, password-changed, and rejected flows.
@@ -138,7 +138,7 @@ Current focus: correct the refactored login outcome and failed-attempt contracts
 
 ### Authentication and Session
 
-- [x] Introduce the `LogsForDB` result record as a common transport type.
+- [x] Introduce the `StoreLogs` result record as a common transport type.
 - [ ] Replace its boolean and free-form reason with explicit authenticated, rejected, password-changed, pending-requested, and suspicious outcomes.
 - [ ] Decide whether suspicious accounts are blocked, restricted, or forced to change passwords.
 - [ ] Decide whether starter accounts are logged in automatically after their first password change.

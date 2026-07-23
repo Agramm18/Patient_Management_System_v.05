@@ -87,12 +87,12 @@ An end-to-end interactive hash-verification test and safe full-flow behavior wit
 
 On 2026-07-23, the login and session structure changed:
 
-- `CurrentUser` was replaced by the immutable `CurrentAccountInSessionValues` record.
+- `CurrentUser` was replaced by the immutable `SessionAccount` record.
 - `CurrentSession` was updated with `setCurrentAccount`, `getCurrentAccount`, `isLoggedIn`, and `clear`.
 - The input service was named `CollectLoginValues`.
 - Credential and account-status verification moved to `SetupCurrentSession`.
-- Status-specific work moved to `HandleAccountStatusTasks`.
-- Login-attempt output moved into the `LogsForDB` record.
+- Status-specific work moved to `HandleAccountStatus`.
+- Login-attempt output moved into the `StoreLogs` record.
 - Failed-password policy calls moved to `CallPasswordPolicyRules`.
 
 The refactor left a failure-reason contract mismatch: the new policy path returns `to many false attempts`, while the counting query accepts only `INVALID_PASSWORD`. The policy also evaluates the stored count before the current attempt is persisted.
@@ -198,7 +198,7 @@ The following older claims are no longer current:
 - The suite contains 11 password tests and 42 registration tests. It now contains 15 and 40 respectively.
 - The project contains 76, 89, or 91 production Java files. It now contains 93.
 - The Windows Maven Wrapper cannot start in PowerShell. The wrapper completed the verified 2026-07-23 run.
-- Active session data is stored in `Unknown` or `CurrentUser`. It is stored in `CurrentAccountInSessionValues`.
+- Active session data is stored in `Unknown` or `CurrentUser`. It is stored in `SessionAccount`.
 - `CurrentSession` has no clear method. `clear()` now exists, although logout does not call it.
 - Menu routing uses `MenuValues` or numeric parent and child contexts. It now uses a typed `ServiceAction`.
 - `SubMenuController` is injected but unused. The class and dependency were removed.

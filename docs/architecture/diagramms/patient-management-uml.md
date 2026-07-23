@@ -9,8 +9,8 @@ The diagram shows the current connected console runtime rather than a proposed f
 - Startup through `Main`, `BootConfigService`, and `FrontController`
 - `.env` validation, JDBC setup, recovery-key persistence, and starter-account creation
 - Registration with the corrected password conversion/clearing order
-- The current login split across `CollectLoginValues`, `SetupCurrentSession`, `HandleAccountStatusTasks`, and `LogsForDB`
-- `CurrentAccountInSessionValues` and static `CurrentSession` creation for active accounts
+- The current login split across `CollectLoginValues`, `SetupCurrentSession`, `HandleAccountStatus`, and `StoreLogs`
+- `SessionAccount` and static `CurrentSession` creation for active accounts
 - The failed-login reason mismatch that prevents new wrong-password rows from advancing the stored threshold count
 - Pending access-request setup and system-account recovery
 - Action-based routing through `ServiceAction`, `MenuOption`, and `MenuContextStructure`

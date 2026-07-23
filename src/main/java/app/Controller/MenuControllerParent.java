@@ -12,7 +12,7 @@ import app.Menu.MenuContextStructure;
 import app.Menu.MenuOption;
 
 import java.util.Scanner;
-import app.Auth.Flow.Services.LoginService.CurrentAccountInSessionValues;
+import app.Auth.Flow.Services.LoginService.LoginBehaviour.SessionAccount;
 import java.util.List;
 
 public class MenuControllerParent {
@@ -20,7 +20,7 @@ public class MenuControllerParent {
     public MenuContextStructure routeRole(Scanner scanner) {
         LogManager.system(SystemState.INFO, "Starting Menu Controller");
 
-        CurrentAccountInSessionValues user = CurrentSession.getCurrentAccount();
+        SessionAccount user = CurrentSession.getCurrentAccount();
         int userRole = user.role();
         MenuFlow route = new MenuFlow();
 

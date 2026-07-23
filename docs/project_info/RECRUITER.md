@@ -16,7 +16,7 @@ It is intentionally presented as an in-progress engineering project, not as a fi
 - BCrypt password and recovery-key hashing
 - Authentication and account-status handling
 - Login-attempt auditing and database-backed policy foundations
-- Immutable runtime state through `CurrentAccountInSessionValues`
+- Immutable runtime state through `SessionAccount`
 - Static session lifecycle methods through `CurrentSession`
 - Typed menu modeling through records and enums
 - Role-aware controller and service routing
@@ -33,7 +33,7 @@ It is intentionally presented as an in-progress engineering project, not as a fi
 - BCrypt login verification and login-attempt persistence
 - First-login password replacement for starter accounts
 - Recovery-key verification with a four-attempt limit
-- Account-status-specific behavior separated into `HandleAccountStatusTasks`
+- Account-status-specific behavior separated into `HandleAccountStatus`
 - Active-user session creation with account ID, name, status, role, system-account flag, and menu access
 - Pending department access requests
 - Five immutable admin `MenuOption` entries mapped to typed `ServiceAction` values
@@ -57,10 +57,10 @@ The login path was separated into focused components:
 
 - `CollectLoginValues` collects credentials.
 - `SetupCurrentSession` verifies the account, password, and status.
-- `HandleAccountStatusTasks` executes status-specific behavior.
-- `CurrentAccountInSessionValues` models the active account.
+- `HandleAccountStatus` executes status-specific behavior.
+- `SessionAccount` models the active account.
 - `CurrentSession` stores, reports, and clears the active account reference.
-- `LogsForDB` carries the login-attempt values persisted by the repository.
+- `StoreLogs` carries the login-attempt values persisted by the repository.
 - `CallPasswordPolicyRules` contains the failed-password policy call path.
 
 ## Current Engineering Limitations

@@ -100,16 +100,16 @@ The current login path is split into focused types:
 - `CollectLoginValues` collects the username and hidden password.
 - `SetupCurrentSession` verifies account existence, password, and status.
 - `CallPasswordPolicyRules` handles invalid-password thresholds.
-- `HandleAccountStatusTasks` handles account-status behavior.
-- `LogsForDB` carries `accountName`, `canUseSystem`, and `reason` to the login-attempt repository.
-- `CurrentAccountInSessionValues` stores account ID, name, status ID, menu access, system-account flag, and role ID.
+- `HandleAccountStatus` handles account-status behavior.
+- `StoreLogs` carries `accountName`, `canUseSystem`, and `reason` to the login-attempt repository.
+- `SessionAccount` stores account ID, name, status ID, menu access, system-account flag, and role ID.
 - `CurrentSession` stores the current record and provides `getCurrentAccount`, `setCurrentAccount`, `isLoggedIn`, and `clear`.
 
 `LoginFlow` processes one credential submission and persists one login-attempt row. If no active menu-ready session was created, `AuthController` displays the authentication menu again.
 
 | Account status | `LogsForDB.canUseSystem` | Current effect |
 | --- | --- | --- |
-| `active` | `true` | Loads account values and stores `CurrentAccountInSessionValues` in `CurrentSession`. |
+| `active` | `true` | Loads account values and stores `SessionAccount` in `CurrentSession`. |
 | `disabled` | `false` | Rejects the login. |
 | `pending` | `true` | Runs department request setup but creates no session; authentication continues. |
 | `locked` | `false` | Rejects the login. |

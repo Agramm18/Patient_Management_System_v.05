@@ -1,12 +1,10 @@
 package app.Auth.Flow.Services.PasswordService;
 
-import app.Auth.Flow.Services.LoginService.LogsForDB;
+import app.Auth.Flow.Services.LoginService.LoginBehaviour.StoreLogs;
 import app.Logging.Enums.ProgrammState.SecurityState;
 import app.Logging.LogManager;
 import app.Repository.AuthRepository.Management.CountFailedLoginAttempts;
 import app.Repository.AuthRepository.Password.ExecutePWSDPolicy;
-
-import app.Auth.Flow.Services.LoginService.LogsForDB;
 
 public class CallPasswordPolicyRules {
 
@@ -15,7 +13,7 @@ public class CallPasswordPolicyRules {
     private int RETRYS_FOR_SUSPICOUS = 6;
     private int RETRYS_FOR_QUARANTINE = 25;
 
-    public LogsForDB passwordPolicies(String username) {
+    public StoreLogs passwordPolicies(String username) {
         System.out.println("[INFO] Please Notice if retry >=5 your account will be locked");
         System.out.println("[INFO] If you have 25 Failed Passwords the Accounts will be set to quarantine");
 
@@ -39,21 +37,21 @@ public class CallPasswordPolicyRules {
         if (failedAttempts >= this.RETRYS_FOR_QUARANTINE) {
             System.out.println("\n[WARNING] Malicious Activities Recognized you Account will be set to quarantine\n");
             changeStatusTo.quarantine(username);
-            return new LogsForDB(username, false, "to many false attempts");
+            return new StoreLogs(username, false, "to many false attempts");
 
         } else if (failedAttempts >= this.RETRYS_FOR_SUSPICOUS) {
             System.out.println("\n[INFO] Due to your current activities your account will be set to suspicious\n");
             changeStatusTo.suspicious(username);
 
-            return new LogsForDB(username, false, "to many false attempts");
+            return new StoreLogs(username, false, "to many false attempts");
 
         } else if (failedAttempts >= this.RETRYS_MAX) {
             changeStatusTo.locked(username);
             System.out.println("\n[WARNING] To many requests you account will be locked\n");
 
-            return new LogsForDB(username, false, "to many false attempts");
+            return new StoreLogs(username, false, "to many false attempts");
         }
 
-        return new LogsForDB(username, false, "to many false attempts");
+        return new StoreLogs(username, false, "to many false attempts");
     }
 }

@@ -1,6 +1,6 @@
-package app.Auth.Flow.Services.LoginService;
+package app.Auth.Flow.Services.LoginService.LoginBehaviour;
 
-public record CurrentAccountInSessionValues(
+public record SessionAccount(
         int userID,
         String accountName,
         int accountStatus,

@@ -15,7 +15,7 @@ The following work is now part of the current implementation rather than future 
 - The menu layer uses `MenuOption`, `ServiceAction`, and `MenuContextStructure` instead of numeric parent and child contexts.
 - `MenuControllerParent` forwards the selected typed action to `ServiceController`.
 - `ADMIN_USER_REQUESTS` invokes `ShowCurrentRequests`.
-- The active session value is the immutable `CurrentAccountInSessionValues` record.
+- The active session value is the immutable `SessionAccount` record.
 - Credential verification, account-status behavior, login-log values, and failed-password policy calls have been separated into dedicated login services.
 - The Windows Maven Wrapper runs the complete 55-test suite successfully.
 

@@ -13,7 +13,7 @@ The repository currently focuses on platform foundations rather than patient-man
 - Database-backed registration and authentication
 - BCrypt password and recovery-key hashing
 - Login-attempt persistence and account-status policies
-- Runtime session state through `CurrentAccountInSessionValues` and `CurrentSession`
+- Runtime session state through `SessionAccount` and `CurrentSession`
 - Pending-user access requests
 - Typed role-aware menu and service-action routing
 - SLF4J and Logback logging
@@ -45,7 +45,7 @@ The current implementation is a Java 21 Maven console application. It can:
 
 The password creation sequence now converts the validated password before hashing and clears both character arrays only after the hash input is no longer needed. Registration now stores the hash returned by `PasswordFlow` after the final confirmation step, including after profile corrections. These fixes remove the two critical hash-handling defects documented in the previous baseline.
 
-The 2026-07-23 login refactor separates credential and status work across `SetupCurrentSession`, `HandleAccountStatusTasks`, `LogsForDB`, and `CallPasswordPolicyRules`. Active account data is stored in the immutable `CurrentAccountInSessionValues` record, and `CurrentSession` provides `setCurrentAccount`, `getCurrentAccount`, `isLoggedIn`, and `clear`.
+The 2026-07-23 login refactor separates credential and status work across `SetupCurrentSession`, `HandleAccountStatus`, `StoreLogs`, and `CallPasswordPolicyRules`. Active account data is stored in the immutable `SessionAccount` record, and `CurrentSession` provides `setCurrentAccount`, `getCurrentAccount`, `isLoggedIn`, and `clear`.
 
 The menu refactor uses immutable `MenuOption` entries, typed `ServiceAction` values, and `MenuContextStructure(userRole, action)`. `MenuControllerParent` maps all five displayed admin options to actions. Only `ADMIN_USER_REQUESTS` currently invokes a service; the other four admin actions and `LOCAL_ADMIN_DASHBOARD` reach the unsupported-action exception. The application also completes only one menu and service pass after authentication.
 

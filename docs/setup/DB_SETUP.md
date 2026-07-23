@@ -220,7 +220,7 @@ CREATE TABLE login_attempts (
 
 Unknown usernames are stored with `account_id = NULL`.
 
-`LoginFlow` inserts the `LogsForDB` result after each completed login attempt. The current values have several important consequences:
+`LoginFlow` inserts the `StoreLogs` result after each completed login attempt. The current values have several important consequences:
 
 - An unknown username is stored with reason `USERNAME_NOT_FOUND`.
 - A wrong password is stored with reason `to many false attempts`.

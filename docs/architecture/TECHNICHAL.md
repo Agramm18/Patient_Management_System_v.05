@@ -121,7 +121,7 @@ LoginService.CollectLoginValues
 -> logsRepository.CollectLogs
 ```
 
-Only an `active` account creates `CurrentAccountInSessionValues`. The record stores:
+Only an `active` account creates `SessionAccount`. The record stores:
 
 - Account ID
 - Account name
@@ -136,7 +136,7 @@ Only an `active` account creates `CurrentAccountInSessionValues`. The record sto
 
 | Account status | Current behavior |
 | --- | --- |
-| `active` | Loads account fields, stores `CurrentAccountInSessionValues`, and returns `canUseSystem = true`. |
+| `active` | Loads account fields, stores `SessionAccount`, and returns `canUseSystem = true`. |
 | `disabled` | Rejects access and returns `false`. |
 | `pending` | Runs department/request setup without a session but returns `canUseSystem = true`. |
 | `locked` | Rejects access and returns `false`. |

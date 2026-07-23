@@ -1,5 +1,7 @@
 package app.Auth.Flow.Services.LoginService;
 
+import app.Auth.Flow.Services.LoginService.LoginBehaviour.HandleAccountStatus;
+import app.Auth.Flow.Services.LoginService.LoginBehaviour.StoreLogs;
 import app.Auth.Flow.Services.PasswordService.CallPasswordPolicyRules;
 import app.Repository.LoginRepository.CheckUserInDB;
 import app.Logging.LogManager;
@@ -21,19 +23,21 @@ public class SetupCurrentSession {
 
     private final CheckUserInDB repository = new CheckUserInDB();
 
-    public LogsForDB configurateSessionObject(String username, String password, Scanner scanner) {
+    public StoreLogs configurateSessionObject(String username, String password, Scanner scanner) {
+
+        CheckInput check = new CheckInput();
 
         try {
             LogManager.auth(AuthState.INFO, "Starting the first Account Setup");
-            boolean userExists = checkAccount(username);
+            boolean userExists = check.account(username);
 
             if (!userExists) {
                 LogManager.auth(AuthState.ERROR, "Unknown Username");
-                return new LogsForDB(username, false, "USERNAME_NOT_FOUND");
+                return new StoreLogs(username, false, "USERNAME_NOT_FOUND");
             }
 
             LogManager.auth(AuthState.INFO, "Continue with the Password Check");
-            boolean passwordMatchesWithDB = checkPassword(password, username);
+            boolean passwordMatchesWithDB = check.password(password, username);
 
             if (!passwordMatchesWithDB) {
                 LogManager.auth(AuthState.ERROR, "The Password does not match with the DB entry");
@@ -44,42 +48,24 @@ public class SetupCurrentSession {
 
             LogManager.auth(AuthState.INFO, "Continuing with the Account status check");
 
-            String status = checkAccountStatus(username);
+            String status = check.status(username);
 
             if (status == null) {
                 LogManager.auth(AuthState.INFO, "Unknown Account Status");
-                return new LogsForDB(username, false, "UNKNOWN_ACCOUNT-STATUS");
+                return new StoreLogs(username, false, "UNKNOWN_ACCOUNT-STATUS");
             }
 
-            HandleAccountStatusTasks run = new HandleAccountStatusTasks();
+            HandleAccountStatus run = new HandleAccountStatus();
             return run.accountStatusBehaviour(status, username, scanner);
 
         } catch (SQLException error) {
             System.out.println(error.getMessage());
             LogManager.sql(SqlState.ERROR, error.getMessage());
-            return new LogsForDB(username, false, "SQL Exception");
+            return new StoreLogs(username, false, "SQL Exception");
         } catch (IllegalStateException error) {
             System.out.println(error.getMessage());
             LogManager.auth(AuthState.ERROR, error.getMessage());
-            return new LogsForDB(username, false, error.getMessage());
+            return new StoreLogs(username, false, error.getMessage());
         }
-    }
-
-    //Check if the User exists in the DB
-    boolean checkAccount(String username) throws SQLException {
-        CheckUserInDB check = new CheckUserInDB();
-        return check.checkUserInDB(username);
-    }
-
-    //Check if the entered password matches with the password in the db
-    boolean checkPassword(String password, String username) throws SQLException {
-        CheckUserInDB check = new CheckUserInDB();
-        return check.checkPWSD(password, username);
-    }
-
-    //Check the Account status
-    String checkAccountStatus(String username) throws SQLException {
-        CheckUserInDB check = new CheckUserInDB();
-        return check.checkUserStatus(username);
     }
 }

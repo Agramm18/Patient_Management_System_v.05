@@ -1,18 +1,18 @@
 package app.Auth.Flow;
-import app.Auth.Flow.Services.LoginService.CurrentAccountInSessionValues;
+import app.Auth.Flow.Services.LoginService.LoginBehaviour.SessionAccount;
 
 public final class CurrentSession {
-    private static CurrentAccountInSessionValues currentAccount;
+    private static SessionAccount currentAccount;
 
     private CurrentSession() {
 
     }
 
-    public static void setCurrentAccount(CurrentAccountInSessionValues account) {
+    public static void setCurrentAccount(SessionAccount account) {
         currentAccount = account;
     }
 
-    public static CurrentAccountInSessionValues getCurrentAccount() {
+    public static SessionAccount getCurrentAccount() {
         return currentAccount;
     }
 

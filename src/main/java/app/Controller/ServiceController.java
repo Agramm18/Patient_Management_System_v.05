@@ -4,13 +4,11 @@ import app.Auth.Flow.CurrentSession;
 import app.Menu.MenuContextStructure;
 import app.Logging.LogManager;
 import app.Logging.Enums.ProgrammState.*;
-import java.util.Map;
-import java.util.function.Consumer;
 
 import java.util.Scanner;
 
 import app.Repository.ServiceRepository.AdminServices.ShowCurrentRequests;
-import app.Auth.Flow.Services.LoginService.CurrentAccountInSessionValues;
+import app.Auth.Flow.Services.LoginService.LoginBehaviour.SessionAccount;
 public class ServiceController {
 
     public ServiceController() {
@@ -19,7 +17,7 @@ public class ServiceController {
 
     public void routeService(MenuContextStructure values, Scanner scanner) {
 
-        CurrentAccountInSessionValues user = CurrentSession.getCurrentAccount();
+        SessionAccount user = CurrentSession.getCurrentAccount();
 
         switch (values.action()) {
             case ADMIN_USER_REQUESTS -> {

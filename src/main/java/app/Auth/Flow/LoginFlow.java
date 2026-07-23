@@ -8,8 +8,7 @@ import app.Repository.logsRepository.CollectLogs;
 
 import app.Logging.LogManager;
 import app.Logging.Enums.ProgrammState.*;
-import app.Auth.Flow.Services.LoginService.SetupCurrentSession;
-import app.Auth.Flow.Services.LoginService.LogsForDB;
+import app.Auth.Flow.Services.LoginService.LoginBehaviour.StoreLogs;
 /*
     Just sub controller to rout to the Login flow and to collect the logs
 */
@@ -31,7 +30,7 @@ public class LoginFlow {
             String username = login.getEnteredUserName();
             String password = login.getEnteredPWSD();
 
-            LogsForDB result = run.configurateSessionObject(username, password, scanner);
+            StoreLogs result = run.configurateSessionObject(username, password, scanner);
 
             store.loginAttempts(result.accountName(), result.canUseSystem(), result.reason());
 
