@@ -1,6 +1,6 @@
 # Database Setup
 
-Last synchronized: 2026-07-18.
+Last synchronized: 2026-07-23.
 
 This document defines the MySQL schema and reference IDs expected by the current Java implementation.
 
@@ -19,6 +19,8 @@ Follow this order for a fresh setup. The application validates `.env` before it 
 
 `EnvValidationService` looks for `.env` in the project root and builds an `EnvSetup` record from all 13 required values. `EnvSetup` rejects missing or blank values and ports outside 1 through 65535. Valid database settings are then exposed to `SQLValidationService` and `DBManager`. If `.env` is missing or invalid, startup stops before the database can be used.
 
+The application does not create this schema or seed reference data. There are no versioned migrations. SQL repository errors are often logged or printed and then swallowed, so successful startup is not proof that every table and column below is usable.
+
 ## Database Creation
 
 ```mysql
@@ -32,7 +34,7 @@ Create and seed tables in the order shown because later tables use foreign keys.
 
 ## Required Reference IDs
 
-The Java code currently uses numeric IDs directly.
+The Java code currently uses numeric IDs directly. The seeded names also matter because login status routing compares the `account_status.status` text with exact string values.
 
 ### Roles
 
@@ -43,6 +45,8 @@ The Java code currently uses numeric IDs directly.
 | 9 | `intern` |
 | 10 | `apprentice` |
 
+Role IDs 1 and 2 control starter-account detection and the only active parent-menu routes. Role ID 9 is written for registered accounts and access requests. Role ID 10 is the database default. The other seeded roles are displayed in the role menu and represented by `AccountRoles`, but the current request flow does not persist a selected role.
+
 ### Departments
 
 | ID | Value |
@@ -50,6 +54,8 @@ The Java code currently uses numeric IDs directly.
 | 5 | `IT` |
 | 11 | `System` |
 | 12 | `unassigned` |
+
+Pending users may request department IDs 1 through 11. Registered accounts are inserted with department ID 12. Starter accounts use IDs 11 and 5.
 
 ### Account Statuses
 
@@ -151,7 +157,11 @@ CREATE TABLE recovery_keys (
 );
 ```
 
-During every successful startup, `SetRecoveryKey` inserts or updates row ID `1`.
+During configuration, `SetRecoveryKey` attempts to insert or update row ID `1`. It writes only `recovery_key_hash`; the defaults for `is_active` and `key_scope` are therefore required when the row is first inserted. Current recovery code does not read or enforce either of those two fields.
+
+`SetRecoveryKey` catches SQL exceptions without returning failure to `ConfigController`, so an unsuccessful upsert can be followed by the remaining bootstrap logic.
+
+After a valid key check, `FindRecoverableUser` displays only rows with `is_system_account = true`, but `SelectUserForRecover` looks up only `account_name`. The final recovery target can therefore be any existing account. A missing row or null hash is not validated before `BCrypt.checkpw`.
 
 ## Accounts
 
@@ -183,6 +193,15 @@ CREATE TABLE accounts (
 );
 ```
 
+The defaults for `user_job`, `permission`, and `requires_password_change` are required by the current registration insert because `CreateAccount` omits those columns. The `failed_password_attempts` column is not read or updated; failed-password policy reads `login_attempts` instead.
+
+Current validation and schema limits are not fully aligned:
+
+- Registration accepts email strings up to 253 characters, while this schema stores at most 100. A value that passes Java validation can therefore fail at insert time.
+- Login does not enforce the 50-character `account_name` limit before repository calls.
+- `BOOTSTRAP_KEY` is not length-validated and is stored unchanged in `bootstrap_key`, whose limit is 255 characters.
+- Username and email uniqueness are enforced only by the database.
+
 ## Login Attempts
 
 ```mysql
@@ -201,7 +220,19 @@ CREATE TABLE login_attempts (
 
 Unknown usernames are stored with `account_id = NULL`.
 
-`CountFailedLoginAttempts` currently counts only rows where `failure_reason = 'INVALID_PASSWORD'` from the previous 24 hours.
+`LoginFlow` inserts the `LogsForDB` result after each completed login attempt. The current values have several important consequences:
+
+- An unknown username is stored with reason `USERNAME_NOT_FOUND`.
+- A wrong password is stored with reason `to many false attempts`.
+- Active and pending status results are stored with `is_success = true` and a non-null status description.
+- The starter-account password-change branch returns `is_success = true` even if the repository update reports failure. It does not create a session, so the caller must log in again.
+- A pending account is also stored as successful after creating an access request, although no session is created.
+
+`CountFailedLoginAttempts` counts only rows where `failure_reason = 'INVALID_PASSWORD'` from the previous 24 hours. `CallPasswordPolicyRules` now returns `to many false attempts`, so newly written wrong-password rows do not match the count query. As a result, current wrong-password attempts do not advance the locked, suspicious, or quarantine thresholds unless matching legacy rows already exist. Policy evaluation also occurs before the current attempt is inserted.
+
+When matching historical rows do exist, the ordered checks set status ID 5 at 25 or more rows, status ID 7 at 6 through 24 rows, and status ID 4 at exactly 5 rows.
+
+`failure_reason` is only 50 characters in this schema, but one path can forward a longer `IllegalStateException` message. In strict SQL mode that login-attempt insert can fail. Repository code logs or prints the SQL exception and continues.
 
 ## Access Management
 
@@ -276,7 +307,7 @@ Both accounts:
 - Requested job
 - Requested role name
 
-The current query does not filter by `request_status`, so it can display more than only pending requests when older approved or rejected rows exist. The repository is not currently connected to `MenuControllerParrent`, `SubMenuController`, or `ServiceController`; the active service handlers only log startup.
+The admin menu's Requests option maps to `ServiceAction.ADMIN_USER_REQUESTS`, and `ServiceController` now calls `ShowCurrentRequests` for that action. The query does not filter by `request_status`, so it can display more than pending requests when older approved or rejected rows exist. It prints rows directly instead of returning structured data. `ServiceController` does not independently verify that the current session is authorized for the supplied role/action context.
 
 ### Password and Status Updates
 
@@ -284,11 +315,21 @@ The current query does not filter by `request_status`, so it can display more th
 - `UpdateSystemAccountPassword` changes only the password hash.
 - `ExecutePWSDPolicy` sets status ID `4`, `5`, or `7`.
 
-The schema requires a non-null `password_hash`. The current Java registration correction path can pass a null hash, and the full `PasswordService` path clears the original character array before it constructs the string used for hashing. These are application defects, not schema requirements, and are tracked in `../project_info/ToDo.md`.
+The previously documented end-to-end password and registration-correction defects are fixed:
+
+- `PasswordService` converts the validated password before clearing the character arrays and hashes user-created passwords with BCrypt cost 15.
+- `RegistrationService` stores the hash returned by `PasswordFlow`, returns corrected data to the full confirmation step, and rejects a null or blank collected hash before calling `CreateAccount`.
+
+Remaining defects:
+
+- `CreateAccount.newAccount` has no repository-level null or blank hash guard, and repository failures are swallowed instead of returned.
+- `UpdateUserPassword` changes the hash and activation fields in two separate connections without a transaction. Its first update can report success even if the second update fails.
+- `UpdateSystemAccountPassword` returns no result and recovery does not update status, `requires_password_change`, menu access, or session state.
+- Password re-entry has no retry loop; a mismatch exits that password-service call.
 
 ## Migration for Existing Databases
 
-At minimum, an existing database created from the previous documentation needs the suspicious status:
+An existing database must contain the suspicious status used by the current policy repository:
 
 ```mysql
 USE patient_management_v5;
@@ -327,6 +368,16 @@ The next application startup recreates the recovery-key row and missing starter 
 The repository ignores `*.sql`. Any root-level SQL scratch file is local, is not tracked, and must not be treated as the canonical schema.
 
 Use this document as the current database setup source until versioned migrations are introduced.
+
+## Verified Test State
+
+The Maven Wrapper was verified in Windows PowerShell on 2026-07-23:
+
+```powershell
+.\mvnw.cmd test
+```
+
+The build passed 55 tests with no failures, errors, or skipped tests: 15 `PasswordServiceTest` tests and 40 `RegistrationServiceTest` tests. These tests do not connect to MySQL and therefore do not validate this schema, foreign keys, bootstrap behavior, login policy, recovery, sessions, or repository error handling.
 
 ## Verification Queries
 

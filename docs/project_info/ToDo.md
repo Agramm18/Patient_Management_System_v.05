@@ -2,7 +2,7 @@
 
 Status date: 2026-07-23.
 
-The last verified `.\mvnw.cmd test` run passed 55 tests on 2026-07-23: 15 `PasswordServiceTest` tests and 40 `RegistrationServiceTest` tests. The Maven Wrapper is currently verified in Windows PowerShell. The verified source snapshot contains 91 production Java files and 2 test source files.
+The last verified `.\mvnw.cmd test` run passed 55 tests on 2026-07-23: 15 `PasswordServiceTest` tests and 40 `RegistrationServiceTest` tests. The Maven Wrapper is currently verified in Windows PowerShell. The verified source snapshot contains 93 production Java files and 2 test source files.
 
 ## Category Guide
 
@@ -34,11 +34,14 @@ The last verified `.\mvnw.cmd test` run passed 55 tests on 2026-07-23: 15 `Passw
 - [x] Implement the BCrypt password-policy and password-retype baseline.
 - [x] Implement login and BCrypt verification.
 - [x] Persist login attempts.
-- [x] Persist locked, suspicious, and quarantine status updates.
+- [x] Add repository methods that persist locked, suspicious, and quarantine status updates.
 - [x] Add the starter-account first-password-change route.
 - [x] Add the four-attempt recovery-key limit.
 - [x] Add the pending-user department-request baseline.
-- [x] Add `Unknown` and the static `CurrentSession` baseline.
+- [x] Store active-account state in the `CurrentAccountInSessionValues` record and static `CurrentSession`.
+- [x] Add `CurrentSession.isLoggedIn()` and `CurrentSession.clear()`.
+- [x] Split login orchestration into `SetupCurrentSession`, `HandleAccountStatusTasks`, and `CallPasswordPolicyRules`.
+- [x] Add the `LogsForDB` result record used by login-attempt persistence.
 
 ### Menu and Access Foundation
 
@@ -64,7 +67,18 @@ The last verified `.\mvnw.cmd test` run passed 55 tests on 2026-07-23: 15 `Passw
 
 ## Current
 
-Current focus: complete the typed menu and service-action routing, then close the remaining password and registration end-to-end verification gaps.
+Current focus: correct the refactored login outcome and failed-attempt contracts, complete the typed menu actions, and close the remaining end-to-end test gaps.
+
+### Login Outcome and Failed-Attempt Correctness
+
+- [x] Replace the former `LoginVerification` class with smaller credential, status, and password-policy components.
+- [x] Replace the mutable current-user object with `CurrentAccountInSessionValues`.
+- [ ] Use one canonical invalid-password reason in both `CallPasswordPolicyRules` and `CountFailedLoginAttempts`; the writer currently stores `to many false attempts` while the query counts only `INVALID_PASSWORD`.
+- [ ] Include the current invalid-password attempt before applying the 5, 6, and 25 thresholds.
+- [ ] Replace the ambiguous `canUseSystem` boolean with explicit outcomes for authenticated, pending-requested, password-changed, and rejected flows.
+- [ ] Do not persist pending or failed password-update flows as successful authenticated logins.
+- [ ] Propagate `UpdateUserPassword` failure instead of returning success unconditionally from the password-change status branch.
+- [ ] Add tests for unknown users, invalid passwords, every account status, login-attempt reasons, and threshold boundaries.
 
 ### Menu Action Routing
 
@@ -108,6 +122,8 @@ Current focus: complete the typed menu and service-action routing, then close th
 - [ ] Verify that every registration correction path produces a nonblank hash.
 - [x] Verify helper-level null and blank password-hash rejection.
 - [x] Run the complete unit-test suite with no failures.
+- [ ] Verify that each invalid password advances the persisted 24-hour count exactly once.
+- [ ] Verify that only an active, menu-enabled account produces an authenticated session.
 - [ ] Verify that every displayed menu option has defined behavior and no valid action reaches the default exception.
 - [ ] Verify that logout clears the session and returns to authentication without terminating the process.
 
@@ -122,7 +138,8 @@ Current focus: complete the typed menu and service-action routing, then close th
 
 ### Authentication and Session
 
-- [ ] Define one result type for authenticated, rejected, password-changed, pending-requested, and suspicious outcomes.
+- [x] Introduce the `LogsForDB` result record as a common transport type.
+- [ ] Replace its boolean and free-form reason with explicit authenticated, rejected, password-changed, pending-requested, and suspicious outcomes.
 - [ ] Decide whether suspicious accounts are blocked, restricted, or forced to change passwords.
 - [ ] Decide whether starter accounts are logged in automatically after their first password change.
 - [ ] Prevent stale static session state across repeated authentication attempts.
@@ -130,6 +147,7 @@ Current focus: complete the typed menu and service-action routing, then close th
 
 ### Failed-Login Policy
 
+- [ ] Fix the failure-reason mismatch so newly stored invalid attempts are counted.
 - [ ] Include the current failed attempt before threshold evaluation.
 - [ ] Define non-overlapping semantics for locked, suspicious, and quarantine thresholds.
 - [ ] Define reset behavior after login success, recovery, or administrator action.
@@ -281,7 +299,7 @@ This section contains the actual patient-management product. Start it after the 
 - [ ] Replace direct `System.exit` calls with controlled shutdown where practical.
 - [ ] Clean duplicate `.gitignore` patterns.
 - [ ] Add diagnostics for legacy `.env` keys such as `DB_PWSD`, `LOCAL_ADMIN_PWSD`, and `ADMIN_PWSD_DEFAULT`.
-- [ ] Sync `README.md`, `CURRENT_STATUS.md`, architecture documentation, and UML files with the 91-source/55-test result and the typed `ServiceAction` menu flow.
+- [ ] Sync the root `README.md` with the 93-source/55-test result, the typed menu flow, and the refactored login classes.
 
 ### Optional Infrastructure
 

@@ -1,20 +1,20 @@
 # Project Archive
 
-Last synchronized: 2026-07-18.
+Last synchronized: 2026-07-23.
 
 This document records completed milestones, later refactors, and superseded statements. It is historical context, not the active task list.
 
 For current information, use:
 
-- `../project_info/CURRENT_STATUS.md`
-- `../project_info/ToDo.md`
-- `../architecture/PROJECT_STRUCTURE.md`
+- [Current project status](../project_info/CURRENT_STATUS.md)
+- [Project backlog](../project_info/ToDo.md)
+- [Project structure](../architecture/PROJECT_STRUCTURE.md)
 
 ## Project Evolution
 
 ### Original Python Version
 
-The first Patient Management System version was created in Python as a programming and Object-Oriented Programming learning project. It focused on basic input handling and application logic without the current Java architecture, MySQL repositories, authentication model, or automated tests.
+The first Patient Management System version was created in Python as a programming and Object-Oriented Programming learning project. It focused on command-line input and application logic without the current Java architecture, MySQL repositories, authentication model, or automated tests.
 
 ### Java Rebuild
 
@@ -28,9 +28,8 @@ The project was rebuilt in Java to practice larger application structure, Maven,
 - `app.Main` entry point created
 - Bootstrap behavior moved into `BootConfigService`
 - `FrontController` and request types introduced
-- Configuration and authentication routes connected
-- Menu and service request types connected
-- UI and exit request values reserved
+- Configuration, authentication, menu, and service routes connected
+- `UI` and `EXIT` request values reserved
 
 ### Configuration and Database
 
@@ -39,12 +38,12 @@ The project was rebuilt in Java to practice larger application structure, Maven,
 - Static runtime database settings stored in `DBManager`
 - Configuration failure made fatal before authentication
 - Recovery-key startup persistence added
-- Setup documentation separated into environment and database guides
-- `EnvSetup` record added on 2026-06-25 to validate and store all environment values before database settings are exposed
+- Environment and database setup documentation separated
+- `EnvSetup` added on 2026-06-25 to validate and store all 13 environment values before database settings are exposed
 
 ### Starter Accounts
 
-- Missing local-admin and admin accounts detected by role
+- Missing local-admin and admin accounts detected by database role ID
 - Missing starter accounts created automatically
 - Starter passwords hashed with BCrypt
 - Starter accounts marked as system accounts
@@ -55,22 +54,48 @@ The project was rebuilt in Java to practice larger application structure, Maven,
 ### Registration
 
 - Username, email, phone, and password collection implemented
-- Registration validators separated from input loops to support unit testing
+- Registration validators separated from input loops for unit testing
 - Email structure validation expanded
 - International phone validation added through libphonenumber
-- Pending-account insert implemented
+- Pending-account insertion implemented
 - Confirmation and field-correction flow introduced
+- On 2026-07-20, corrected values were returned to one confirmation loop and the confirmed `PasswordFlow` result was stored in `RegistrationService.hashedPWSD`
+- Helper-level null and blank password-hash checks added
+
+The repository-level account insert still has no independent null or blank hash guard and does not return an explicit result.
+
+### Password Handling
+
+- Password policy and retype validation implemented
+- User-created password hashes configured with BCrypt cost 15
+- Starter-account and recovery-key hashes configured with BCrypt cost 12
+- Password policy, retype, terminal-input, and array-clearing tests added
+- On 2026-07-19, password conversion and cleanup order was corrected so hashing uses the original password before both character arrays are cleared
+
+An end-to-end interactive hash-verification test and safe full-flow behavior without `System.console()` remain open.
 
 ### Login, Session, and Security Policy
 
 - Username lookup and BCrypt password verification implemented
 - Account-status routing implemented
 - Login attempts persisted to MySQL
-- Invalid passwords counted over a 24-hour window
-- Locked, suspicious, and quarantine status updates implemented
-- `Unknown` introduced for active runtime account data
-- Static `CurrentSession` introduced for the active user
-- Login values loaded through `CollectLoginValues`
+- Invalid-password counting over a 24-hour window introduced
+- Locked, suspicious, and quarantine status-update repositories implemented
+- `CurrentUser` introduced as the first active runtime account object
+- Static `CurrentSession` introduced for the active account
+- Login values loaded through the login repository
+
+On 2026-07-23, the login and session structure changed:
+
+- `CurrentUser` was replaced by the immutable `CurrentAccountInSessionValues` record.
+- `CurrentSession` was updated with `setCurrentAccount`, `getCurrentAccount`, `isLoggedIn`, and `clear`.
+- The input service was named `CollectLoginValues`.
+- Credential and account-status verification moved to `SetupCurrentSession`.
+- Status-specific work moved to `HandleAccountStatusTasks`.
+- Login-attempt output moved into the `LogsForDB` record.
+- Failed-password policy calls moved to `CallPasswordPolicyRules`.
+
+The refactor left a failure-reason contract mismatch: the new policy path returns `to many false attempts`, while the counting query accepts only `INVALID_PASSWORD`. The policy also evaluates the stored count before the current attempt is persisted.
 
 ### Recovery
 
@@ -82,34 +107,52 @@ The project was rebuilt in Java to practice larger application structure, Maven,
 - System-account list display implemented
 - Selected account password update implemented
 
+The final account lookup still accepts any existing account rather than only the system accounts displayed to the user.
+
 ### Pending Access Requests
 
 - Department menu and range validation implemented
 - Department-specific job menu classes added
-- System department display guard added
-- Access-request insert implemented with selected department and default job and role values
+- System-department display guard added
+- Access-request insertion implemented with the selected department and default job and role values
 - Access-request listing query added under `Repository.ServiceRepository.AdminServices`
 
-### First Menu and Service Baseline
+Job and role selection, duplicate handling, review decisions, and account activation remain incomplete.
 
-- `MenuControllerParrent` introduced for local-admin and admin role routing
-- `MenuFlow` introduced for validated numeric choices
-- `MenuValues` introduced to transfer role and menu choice
-- `ServiceController` introduced as a role-aware dispatcher
-- On 2026-06-18, admin option 1 was connected directly to `ShowCurrentRequests`
+### Initial Menu and Service Baseline
 
-### Menu Refactor
+- Role-aware local-admin and admin menu routing introduced
+- `MenuFlow` added for validated numeric choices
+- A menu context value introduced to transfer role and selected option
+- `ServiceController` introduced as a service dispatcher
+- On 2026-06-18, the first admin option was connected directly to `ShowCurrentRequests`
 
-On 2026-06-24 and 2026-06-25, the menu structure changed:
+### Intermediate Menu Refactor
+
+On 2026-06-24 and 2026-06-25:
 
 - Admin and local-admin menus moved under `ServiceMenus/ParrentMenus`
-- Empty `RequestMenu` child menu added
-- Empty `SubMenuController` added and injected into `FrontController`
-- `MenuValues` changed to parent, role, and child context
-- Admin parent menu reduced to five options
-- Logging calls migrated to the new typed logging facade
+- Empty `RequestMenu` and `SubMenuController` placeholders were added
+- The menu context expanded to parent, role, and child values
+- The admin parent menu was reduced to five options
+- Logging calls migrated to the typed logging facade
 
-As a result of the unfinished refactor, the current `ServiceController` role handlers only log startup. `ShowCurrentRequests` still exists but is no longer called by the active runtime.
+That intermediate state disconnected `ShowCurrentRequests` and left role handlers that only logged startup.
+
+### Typed Menu and Service-Action Refactor
+
+On 2026-07-22 and 2026-07-23:
+
+- Numeric parent and child contexts were replaced by `MenuContextStructure(userRole, action)`.
+- `MenuOption` and `ServiceAction` were introduced.
+- All five admin labels were mapped to stable typed actions.
+- `MenuController` was replaced by `MenuControllerParent`.
+- `SubMenuController` was removed from the controller graph and source tree.
+- The selected action was forwarded through `FrontController` to `ServiceController`.
+- `ADMIN_USER_REQUESTS` was connected to `ShowCurrentRequests`.
+- Unknown role IDs were rejected explicitly.
+
+The remaining four admin actions and `LOCAL_ADMIN_DASHBOARD` currently reach the unsupported-action exception. There is no repeated menu loop or connected logout action.
 
 ### Logging
 
@@ -123,52 +166,66 @@ As a result of the unfinished refactor, the current `ServiceController` role han
 ### Automated Tests
 
 - JUnit Jupiter and Surefire added
-- `PasswordServiceTest` added with 11 tests
-- `RegistrationServiceTest` added and expanded to 42 tests
+- `PasswordServiceTest` added
+- `RegistrationServiceTest` added
 - libphonenumber-based validation covered by phone tests
-- On 2026-07-18, all 53 tests passed with no failures, errors, or skipped tests
+- On 2026-07-18, 53 tests passed: 11 password-service tests and 42 registration-service tests
+- On 2026-07-23, the reorganized suite passed 55 tests: 15 password-service tests and 40 registration-service tests
+
+The current suite has 0 failures, 0 errors, and 0 skipped tests, but it remains limited to service-level validation helpers.
 
 ### Build Tooling
 
 - Maven Wrapper 3.3.4 scripts added on 2026-07-17
 - Wrapper configured for Maven 3.9.16
-- The wrapper-managed Maven distribution successfully ran the test suite
-- Direct `mvnw.cmd` startup still has a null-target issue in the current Windows PowerShell environment
+- An earlier Windows PowerShell run exposed a generated-wrapper null-target issue
+- On 2026-07-23, `.\mvnw.cmd test` ran successfully in Windows PowerShell
 
 ### Documentation
 
 - Documentation organized under `docs/project_info`, `docs/setup`, `docs/architecture`, and `docs/archive`
 - Current status, roadmap, setup, architecture, and Mermaid flow documents created
 - Documentation synchronized with the service and request-listing baseline on 2026-06-18
-- `ToDo.md` partially synchronized with registration tests on 2026-06-24
-- All files under `docs` synchronized with the source, configuration, tests, and current runtime on 2026-07-18
+- All files under `docs` synchronized with the 89-source and 53-test snapshot on 2026-07-18
+- `ToDo.md` updated for the typed menu baseline and 55-test suite on 2026-07-23
+- All 11 Markdown documents under `docs` and the supporting Mermaid source synchronized with the 93-source/55-test snapshot on 2026-07-23
 
 ## Superseded Statements
 
 The following older claims are no longer current:
 
-- There are no automated tests. There are now 53 passing unit tests.
-- There is no `src/main/resources` directory. `logback.xml` now exists there.
+- There are no automated tests. There are now 55 passing unit tests.
+- The suite contains 11 password tests and 42 registration tests. It now contains 15 and 40 respectively.
+- The project contains 76, 89, or 91 production Java files. It now contains 93.
+- The Windows Maven Wrapper cannot start in PowerShell. The wrapper completed the verified 2026-07-23 run.
+- Active session data is stored in `Unknown` or `CurrentUser`. It is stored in `CurrentAccountInSessionValues`.
+- `CurrentSession` has no clear method. `clear()` now exists, although logout does not call it.
+- Menu routing uses `MenuValues` or numeric parent and child contexts. It now uses a typed `ServiceAction`.
+- `SubMenuController` is injected but unused. The class and dependency were removed.
+- `ShowCurrentRequests` is disconnected. It is invoked by `ADMIN_USER_REQUESTS`.
+- Both role-specific service handlers only log startup. The service now switches on actions and implements request listing.
+- Password creation hashes an already-cleared array. The conversion and cleanup order was fixed.
+- Registration correction loses the returned hash. Password collection now follows the final confirmation loop.
+- There is no `src/main/resources` directory. `logback.xml` exists there.
 - Logback uses only default console configuration. Explicit console and file appenders are configured.
-- The project contains 76 production Java files. It now contains 89.
-- Environment values are stored only in `EnvValidationService`. `EnvSetup` now validates the complete value set first.
+- Environment values are stored only in `EnvValidationService`. `EnvSetup` validates the complete value set first.
 - The admin menu contains eight options. It currently contains five parent options.
-- Admin option 1 currently lists requests. That was true before the menu refactor; the listing repository is now disconnected.
-- `MenuValues` contains only a menu choice and role. It now contains parent, role, and child context.
 - `uiController` is the current class name. It was renamed to `UIController`.
 - The old `LogType` switch is current. It was replaced by typed methods and state enums.
 - A root `Query.sql` file is the database source. SQL files are ignored; `DB_SETUP.md` is the documented schema source.
 
 ## Historical Limitations Still Present
 
-- Password creation has an end-to-end array-clearing defect.
-- Registration correction can lose the generated password hash.
+- Failed-password persistence and counting do not currently use the same reason value.
+- Failed-login policy evaluation excludes the current attempt.
+- Complete password and registration flows lack end-to-end tests.
+- Repository-level password-hash validation and structured outcomes are incomplete.
 - Access requests still use default job and role values.
 - Approval, rejection, and activation workflows do not exist.
 - Recovery's final account lookup is not limited to system accounts.
-- Failed-login thresholds exclude the current attempt.
-- Menu, submenu, and service routing remain incomplete.
+- Four admin actions, the local-admin dashboard, logout, and a repeated menu loop are not implemented.
+- Service-layer role/action authorization is incomplete.
 - Logging migration remains partial.
 - Naming and repository result handling remain inconsistent.
-- Automated tests do not cover complete flows or repositories.
+- Automated tests do not cover repositories or complete runtime flows.
 - Patient-management product features are not implemented.

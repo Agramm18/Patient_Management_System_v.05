@@ -1,243 +1,191 @@
-%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Arial, sans-serif", "fontSize": "15px", "primaryTextColor": "#1f2937", "lineColor": "#64748b", "clusterBkg": "#f8fafc", "clusterBorder": "#cbd5e1", "edgeLabelBackground": "#ffffff"}, "flowchart": {"curve": "basis", "nodeSpacing": 46, "rankSpacing": 58, "padding": 14}}}%%
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Arial, sans-serif", "fontSize": "15px", "primaryTextColor": "#1f2937", "lineColor": "#64748b", "clusterBkg": "#f8fafc", "clusterBorder": "#cbd5e1", "edgeLabelBackground": "#ffffff"}, "flowchart": {"curve": "basis", "nodeSpacing": 42, "rankSpacing": 54, "padding": 12}}}%%
 flowchart TD
   %% Patient Management System V5.01
-  %% Last synchronized: 2026-07-18
-  %% Diagram type: current activity flow plus selected class and method map
+  %% Last synchronized: 2026-07-23
+  %% Current connected runtime; planned or unused elements use dashed links.
 
-  Start([Start application]):::terminal
-  MainEntry["Main.main<br/>Create Scanner<br/>Show StartMSG"]:::entry
-  BootEntry["BootConfigService.displayLoader<br/>BootConfigService.systemConfig<br/>Create controllers and dispatcher"]:::entry
+  Start([Start]):::terminal
+  Main["Main.main<br/>Create Scanner<br/>Show StartMSG"]:::entry
+  Boot["BootConfigService<br/>Create controllers and FrontController"]:::entry
+  Fatal["BootConfigService catches RuntimeException<br/>Print generic config error<br/>System.exit(1)"]:::error
+  ExitProgram(["Authentication choice 4<br/>System.exit(0)"]):::terminal
+  EndProgram([Current flow ends]):::terminal
 
-  Start --> MainEntry --> BootEntry
+  Start --> Main --> Boot
 
-  subgraph MainFlow["Runtime control flow"]
+  subgraph Configuration["1. Configuration"]
     direction TD
+    ConfigRequest["FrontController(CONFIG)"]:::controller
+    ConfigController["ConfigController.execute"]:::controller
+    Env["EnvValidationService<br/>EnvSetup: validate 13 values"]:::step
+    SqlTest["SQLValidationService<br/>Build and test JDBC URL"]:::step
+    DbRuntime["DBManager.initialize<br/>Store static DB values"]:::data
+    RecoveryHash["HandleRecoveryKey<br/>BCrypt cost 12"]:::secure
+    PersistRecovery["SetRecoveryKey<br/>Upsert row ID 1"]:::data
+    StarterAccounts["CheckForDefaultAccounts<br/>Create missing roles 1 and 2"]:::data
+    ConfigOK{"Configuration successful?"}:::decision
 
-    subgraph ConfigFlow["1. System configuration"]
-      direction TD
-      ConfigCtl["FrontController.callController<br/>RequestType.CONFIG"]:::controller
-      ConfigExec["ConfigController.execute"]:::controller
-      EnvValidate["EnvValidationService.envStatus<br/>Load .env file"]:::step
-      EnvSetupNode["EnvSetup record<br/>Validate 13 values and port range"]:::data
-      SqlValidate["SQLValidationService.dbConnection<br/>Build and test JDBC URL"]:::step
-      DbInit["DBManager.initialize<br/>Store global DB runtime config"]:::data
-      RecoveryKey["HandleRecoveryKey.plainKey<br/>HandleRecoveryKey.hashedKey<br/>Hash RECOVERY_KEY"]:::secure
-      StoreRecovery["SetRecoveryKey.keyValue<br/>Persist recovery key hash"]:::data
-      DefaultAccounts["CheckForDefaultAccounts.dbAccounts<br/>CreateDefaultAccounts.defaultAccounts"]:::data
-      ConfigOk{"Configuration OK?"}:::decision
-
-      ConfigCtl --> ConfigExec --> EnvValidate --> EnvSetupNode --> SqlValidate --> DbInit --> RecoveryKey --> StoreRecovery --> DefaultAccounts --> ConfigOk
-    end
-
-    subgraph AuthLoopFlow["2. Authentication menu loop"]
-      direction TD
-      AuthHeader["AuthMSG.msg"]:::ui
-      AuthRoute["FrontController.callController<br/>RequestType.AUTH"]:::controller
-      AuthControllerNode["AuthController.verifyAccountStatus"]:::controller
-      AuthMenuNode["AuthMenu.authMenu"]:::ui
-      AuthChoice{"User choice"}:::decision
-
-      AuthHeader --> AuthRoute --> AuthControllerNode --> AuthMenuNode --> AuthChoice
-    end
-
-    subgraph RegisterFlow["2a. Register branch"]
-      direction TD
-      RegistrationFlowNode["RegistrationFlow.user"]:::flow
-      RegistrationServiceNode["RegistrationService.userAccunt<br/>Collect username, email, phone"]:::step
-      RegistrationPassword["PasswordFlow.policy<br/>PasswordService.userPWSD<br/>Known risk: original array cleared before hash input conversion"]:::secure
-      RegistrationSave["CreateAccount.newAccount<br/>Save account"]:::data
-      RegistrationCorrection["Known correction defect<br/>Returned hash is not stored in RegistrationService"]:::warning
-
-      RegistrationFlowNode --> RegistrationServiceNode --> RegistrationPassword --> RegistrationCorrection --> RegistrationSave
-    end
-
-    subgraph LoginFlow["2b. Login branch"]
-      direction TD
-      LoginFlowNode["LoginFlow.user<br/>Login loop"]:::flow
-      LoginInputNode["LoginInputCollector.user<br/>Collect username and password"]:::step
-      LoginVerify["LoginVerification.loggedUser"]:::secure
-      UserExists{"CheckUserInDB.checkUserInDB<br/>User exists?"}:::decision
-      PasswordOk{"CheckUserInDB.checkPWSD<br/>Password valid?"}:::decision
-      FailedPolicy["CountFailedLoginAttempts.Logs<br/>ExecutePWSDPolicy status update<br/>Current failed attempt is stored afterward"]:::secure
-      SaveFailed["logsRepository.CollectLogs.loginAttempts<br/>Save failed attempt"]:::data
-      StatusCheck["CheckUserInDB.checkUserStatus"]:::data
-      Status{"Account status"}:::decision
-
-      LoginFlowNode --> LoginInputNode --> LoginVerify --> UserExists
-      UserExists -->|No| SaveFailed --> LoginInputNode
-      UserExists -->|Yes| PasswordOk
-      PasswordOk -->|No| FailedPolicy --> SaveFailed
-      PasswordOk -->|Yes| StatusCheck --> Status
-    end
-
-    subgraph LoginStatusFlow["2c. Login status outcomes"]
-      direction TD
-      ActiveStatus["active<br/>CollectLoginValues.loginValues"]:::success
-      SessionObject["CurrentUser<br/>CurrentSession.setCurrentUser"]:::success
-      SaveSuccess["logsRepository.CollectLogs.loginAttempts<br/>Save successful attempt"]:::data
-      PendingStatus["pending<br/>FirstLogin.firstSetup"]:::warning
-      PasswordChangeStatus["waiting_for_password_change<br/>PasswordService.userPWSD<br/>UpdateUserPassword.dbValues"]:::secure
-      SuspiciousStatus["suspicious<br/>Warn user, continue without active menu session"]:::warning
-      BlockedStatus["disabled, locked, quarantine<br/>Reject login"]:::error
-      UnknownStatus["unknown or null<br/>Reject login"]:::error
-      SessionReady{"CurrentSession exists<br/>menu access true<br/>status active?"}:::decision
-
-      Status -->|active| ActiveStatus --> SessionObject --> SaveSuccess --> SessionReady
-      Status -->|pending| PendingStatus
-      Status -->|password change| PasswordChangeStatus --> SaveSuccess
-      Status -->|suspicious| SuspiciousStatus --> SaveSuccess
-      Status -->|blocked| BlockedStatus --> SaveFailed
-      Status -->|unknown| UnknownStatus --> SaveFailed
-    end
-
-    subgraph PendingSetupFlow["2d. Pending user setup"]
-      direction TD
-      DepartmentMenuNode["DepartmentMenu.departments"]:::ui
-      CollectDepartment["CollectUserDepartment.department<br/>CollectUserDepartment.getSelectedDepartment"]:::step
-      DepartmentChoice{"Selected department"}:::decision
-      DepartmentJobs["Department job menus<br/>Medical, Emergency, Laboratory, Pharmacy,<br/>IT, Security, Finance, Office,<br/>Administration, Training, System"]:::ui
-      SystemAccess{"HasAssignedDepartment.status<br/>Assigned to department 11 or 5?"}:::decision
-      AccessRequest["CreateAccessRequest.accessManagement<br/>Store selected department<br/>Default job and role"]:::data
-
-      PendingStatus --> DepartmentMenuNode --> CollectDepartment --> DepartmentChoice
-      DepartmentChoice -->|Normal department| DepartmentJobs --> AccessRequest
-      DepartmentChoice -->|System department| SystemAccess
-      SystemAccess -->|Yes| DepartmentJobs
-      SystemAccess -->|No, jobs hidden| AccessRequest
-      AccessRequest --> SaveSuccess
-    end
-
-    subgraph RecoveryFlow["2e. Recovery branch"]
-      direction TD
-      RecoveryStart["RecoveryFlow.SystemAccounts"]:::flow
-      RecoveryInput["ValidateRecoveryKey.keyValues<br/>ValidateRecoveryKey.getEnteredHashByUser"]:::secure
-      RecoveryHashLoad["GetRecoveryKeyHash.key<br/>GetRecoveryKeyHash.getDbValue"]:::data
-      RecoveryCheck["CheckKeyStatus.Value"]:::secure
-      RecoveryValid{"Recovery key valid?"}:::decision
-      RecoveryRetry["Retry counter<br/>max 4"]:::warning
-      DisplayRecoverable["FindRecoverableUser.systemAccounts<br/>Display system accounts"]:::data
-      SelectRecoverUser["SelectUserForRecovery.username<br/>SelectUserForRecovery.getRecoverUsername"]:::step
-      RecoverUserExists{"SelectUserForRecover.inDB<br/>Any account exists?<br/>Not limited to system accounts"}:::decision
-      ResetSystemPassword["PasswordService.userPWSD<br/>UpdateSystemAccountPassword.sqlQuerry"]:::data
-
-      RecoveryStart --> RecoveryInput --> RecoveryHashLoad --> RecoveryCheck --> RecoveryValid
-      RecoveryValid -->|No| RecoveryRetry
-      RecoveryRetry -->|Retry left| RecoveryInput
-      RecoveryRetry -->|Limit reached| AuthMenuNode
-      RecoveryValid -->|Yes| DisplayRecoverable --> SelectRecoverUser --> RecoverUserExists
-      RecoverUserExists -->|No| AuthMenuNode
-      RecoverUserExists -->|Yes| ResetSystemPassword --> AuthMenuNode
-    end
-
-    subgraph MenuServiceFlow["3. Menu and service"]
-      direction TD
-      BootAccess{"BootConfigService reads<br/>CurrentSession.getCurrentUser<br/>hasAccessToMenu?"}:::decision
-      MenuRoute["FrontController.callController<br/>RequestType.MENU"]:::controller
-      MenuControllerNode["MenuController.routeMenu<br/>Read CurrentUser.getRole"]:::controller
-      RoleChoice{"User role"}:::decision
-      LocalAdminNode["LocalAdminMenu.localAdminMenu<br/>Heading only<br/>Parent and child context 0"]:::ui
-      AdminNode["AdminMenu.showMenu<br/>Five parent options<br/>AdminMenu.getMenuSize"]:::ui
-      AdminChoiceNode["MenuFlow.chooseOption<br/>MenuValues parent, role, child 0"]:::step
-      NoRoleNode["No switch case implemented"]:::warning
-      ServiceRoute["FrontController.callController<br/>RequestType.SERVICE"]:::controller
-      ServiceControllerNode["ServiceController.routeService<br/>Dispatch by role"]:::controller
-      ServiceRoleChoice{"Service role"}:::decision
-      LocalAdminServiceNode["startLocalAdminService<br/>Log service start only"]:::placeholder
-      AdminServiceNode["startAdminService<br/>Log service start only"]:::placeholder
-      SubMenuNode["SubMenuController<br/>Empty and not dispatched"]:::placeholder
-      RequestMenuNode["RequestMenu<br/>Empty"]:::placeholder
-      ShowRequestsNode["ShowCurrentRequests.CurrentRequests<br/>Query exists but is disconnected"]:::placeholder
-      Done([End of current implemented flow]):::terminal
-
-      BootAccess -->|Yes| MenuRoute --> MenuControllerNode --> RoleChoice
-      RoleChoice -->|Local admin| LocalAdminNode --> ServiceRoute
-      RoleChoice -->|Admin| AdminNode --> AdminChoiceNode --> ServiceRoute
-      RoleChoice -->|Other| NoRoleNode --> FatalExit
-      ServiceRoute --> ServiceControllerNode --> ServiceRoleChoice
-      ServiceRoleChoice -->|Local admin| LocalAdminServiceNode --> Done
-      ServiceRoleChoice -->|Admin| AdminServiceNode --> Done
-      AdminChoiceNode -. child context planned .-> SubMenuNode
-      SubMenuNode -. planned .-> RequestMenuNode
-      AdminServiceNode -. repository not connected .-> ShowRequestsNode
-    end
+    ConfigRequest --> ConfigController --> Env --> SqlTest --> DbRuntime
+    DbRuntime --> RecoveryHash --> PersistRecovery --> StarterAccounts --> ConfigOK
   end
 
-  BootEntry --> ConfigCtl
-  ConfigOk -->|No| FatalExit["Print config error<br/>Log failure<br/>System.exit 1"]:::error
-  ConfigOk -->|Yes| AuthHeader
-  AuthChoice -->|Register| RegistrationFlowNode
-  RegistrationSave --> AuthMenuNode
-  AuthChoice -->|Login| LoginFlowNode
-  AuthChoice -->|Recovery| RecoveryStart
-  AuthChoice -->|Exit| ExitProgram["System.exit 0"]:::terminal
-  AuthChoice -->|Invalid input| AuthMenuNode
-  SessionReady -->|No| AuthMenuNode
-  SessionReady -->|Yes| BootAccess
-  BootAccess -->|No| FatalExit
+  Boot --> ConfigRequest
+  ConfigOK -->|"No"| Fatal
 
-  subgraph MethodMap["4. Selected class and public method map"]
+  subgraph Authentication["2. Authentication loop"]
     direction TD
+    AuthHeader["AuthMSG"]:::ui
+    AuthRequest["FrontController(AUTH)"]:::controller
+    AuthController["AuthController.verifyAccountStatus"]:::controller
+    AuthMenu["AuthMenu<br/>Register / Login / Recovery / Exit"]:::ui
+    AuthChoice{"Choice"}:::decision
 
-    subgraph AppAndControllers["Application and controllers"]
-      direction LR
-      AppMethods["Main.main<br/>BootConfigService.displayLoader<br/>BootConfigService.systemConfig<br/>FrontController.callController<br/>RequestType enum: CONFIG, AUTH, MENU, SERVICE, UI, EXIT"]:::catalog
-      ControllerMethods["ConfigController.execute<br/>AuthController.verifyAccountStatus<br/>MenuController.routeMenu<br/>ServiceController.routeService<br/>SubMenuController placeholder<br/>UIController placeholder"]:::catalog
-    end
-
-    subgraph ConfigMethods["Configuration and logging"]
-      direction LR
-      EnvMethods["EnvSetup record and compact validation<br/>EnvValidationService.envStatus<br/>EnvValidationService.getHost<br/>EnvValidationService.getPort<br/>EnvValidationService.getDBName<br/>EnvValidationService.getUser<br/>EnvValidationService.getPassword"]:::catalog
-      SqlMethods["SQLValidationService.dbConnection<br/>SQLValidationService.getSqlUser<br/>SQLValidationService.getSqlPassword<br/>SQLValidationService.getSqlURL<br/>DBManager.initialize<br/>DBManager.getConnection"]:::catalog
-      RecoveryConfigMethods["HandleRecoveryKey.plainKey<br/>HandleRecoveryKey.hashedKey<br/>HandleRecoveryKey.getRecoveryKeyHashed<br/>LogManager typed category methods<br/>Ten program-state enums"]:::catalog
-    end
-
-    subgraph AuthMethods["Authentication flows and services"]
-      direction LR
-      FlowMethods["RegistrationFlow.user<br/>LoginFlow.user<br/>PasswordFlow.policy<br/>RecoveryFlow.SystemAccounts<br/>CurrentSession.setCurrentUser<br/>CurrentSession.getCurrentUser"]:::catalog
-      RegistrationMethods["RegistrationService.userAccunt<br/>RegistrationService.getUserName<br/>RegistrationService.getEmailAddress<br/>RegistrationService.getPhoneNumber<br/>RegistrationService.getHashedPWSD<br/>PasswordService.userPWSD<br/>PasswordService.getHashedPWSD"]:::catalog
-      LoginMethods["LoginInputCollector.user<br/>LoginInputCollector.getEnteredUserName<br/>LoginInputCollector.getEnteredPWSD<br/>LoginVerification.loggedUser<br/>UserStatus enum<br/>CurrentUser.loginResult<br/>CurrentUser.getUserID<br/>CurrentUser.getUserName<br/>CurrentUser.isSystemAccount<br/>CurrentUser.getAccountStatus<br/>CurrentUser.hasAccessToMenu<br/>CurrentUser.getRole"]:::catalog
-      SecurityMethods["FirstLogin.firstSetup<br/>CollectUserDepartment.department<br/>CollectUserDepartment.getSelectedDepartment<br/>CollectUserRole.requestRoles<br/>CollectUserJob placeholder<br/>AccountPolicy placeholder<br/>Audit CollectLogs.isSuccess<br/>Audit CollectLogs.getFailureReason"]:::catalog
-      RecoveryMethods["ValidateRecoveryKey.keyValues<br/>ValidateRecoveryKey.getEnteredHashByUser<br/>CheckKeyStatus.Value<br/>SelectUserForRecovery.username<br/>SelectUserForRecovery.getRecoverUsername"]:::catalog
-    end
-
-    subgraph RepositoryMethods["Repositories"]
-      direction LR
-      ConfigRepos["CheckForDefaultAccounts.dbAccounts<br/>CheckForDefaultAccounts.checkLocalAdmin<br/>CheckForDefaultAccounts.checkAdmin<br/>CheckForDefaultAccounts.validateResults<br/>CreateDefaultAccounts.defaultAccounts<br/>SetRecoveryKey.keyValue"]:::catalog
-      LoginRepos["CheckUserInDB.checkUserInDB<br/>CheckUserInDB.checkPWSD<br/>CheckUserInDB.checkUserStatus<br/>CollectLoginValues.loginValues<br/>CollectLoginValues.gethasAccesToMenu<br/>CollectLoginValues.getUserStatus<br/>CollectLoginValues.getUserID<br/>CollectLoginValues.isSystemAccount<br/>CollectLoginValues.getUserRole<br/>logsRepository.CollectLogs.loginAttempts"]:::catalog
-      AuthMgmtRepos["CountFailedLoginAttempts.Logs<br/>CountFailedLoginAttempts.getRETRY_COUNT_24_H<br/>CreateAccessRequest.accessManagement<br/>HasAssignedDepartment.status<br/>HasAssignedRole.userRole<br/>SetNewStatus placeholder"]:::catalog
-      PasswordRepos["ExecutePWSDPolicy.locked<br/>ExecutePWSDPolicy.suspicious<br/>ExecutePWSDPolicy.quarantine<br/>UpdateUserPassword.dbValues<br/>UpdateSystemAccountPassword.sqlQuerry<br/>SystemAccountRequiresPasswordChange.checkUserStatus"]:::catalog
-      RecoveryRepos["GetRecoveryKeyHash.key<br/>GetRecoveryKeyHash.getDbValue<br/>FindRecoverableUser.systemAccounts<br/>SelectUserForRecover.inDB<br/>CreateAccount.newAccount"]:::catalog
-      ServiceRepos["ShowCurrentRequests.CurrentRequests"]:::catalog
-    end
-
-    subgraph UiMethods["CLI text and menu classes"]
-      direction LR
-      DisplayMethods["StartMSG.startMSG<br/>LoaderMSG.message<br/>AuthMSG.msg<br/>ConfigMSG.configMSG<br/>DefaultAccountsMSG.msg"]:::catalog
-      ProgramMenus["AuthMenu.authMenu<br/>roleMenu.roles<br/>DepartmentMenu.departments<br/>AdminMenu.showMenu<br/>AdminMenu.getMenuSize<br/>LocalAdminMenu.localAdminMenu<br/>RequestMenu placeholder"]:::catalog
-      JobMenus["MedicalJobsMenu.jobsMenu<br/>EmergencyJobsMenu.jobsMenu<br/>LaboratoryJobsMenu.jobsMenu<br/>PharmacyJobsMenu.jobsMenu<br/>itJobsMenu.jobsMenu<br/>SecurityJobsMenu.jobsMenu<br/>FinanceJobsMenu.jobsMenu<br/>OfficeJobsMenu.jobsMenu<br/>AdministrationJobsMenu.jobsMenu<br/>TrainingJobsMenu.jobsMenu<br/>SystemJobsMenu.jobsMenu"]:::catalog
-      MenuRuntime["MenuFlow.chooseOption<br/>MenuValues record: parentKonext, userRole, childKontext<br/>RouteService.userChoice placeholder"]:::catalog
-    end
+    AuthHeader --> AuthRequest --> AuthController --> AuthMenu --> AuthChoice
   end
 
-  subgraph QualityMap["5. Logging and test baseline"]
+  ConfigOK -->|"Yes"| AuthHeader
+  AuthChoice -->|"Exit"| ExitProgram
+  AuthChoice -->|"Invalid"| AuthMenu
+
+  subgraph Registration["2a. Registration"]
+    direction TD
+    RegistrationFlow["RegistrationFlow.user"]:::flow
+    RegistrationService["RegistrationService<br/>Collect, validate, correct, confirm"]:::step
+    RegistrationPassword["PasswordService<br/>Validate, compare, convert, hash,<br/>then clear both arrays"]:::secure
+    RegistrationSave["CreateAccount<br/>Insert pending role-9 account"]:::data
+
+    RegistrationFlow --> RegistrationService --> RegistrationPassword --> RegistrationSave
+  end
+
+  AuthChoice -->|"Register"| RegistrationFlow
+  RegistrationSave --> AuthMenu
+
+  subgraph Login["2b. Login and status routing"]
+    direction TD
+    LoginFlow["LoginFlow.user<br/>One credential attempt"]:::flow
+    LoginInput["LoginService.CollectLoginValues<br/>Scanner username + Console password"]:::step
+    SetupSession["SetupCurrentSession.configurateSessionObject"]:::secure
+    UserExists{"CheckUserInDB<br/>Account exists?"}:::decision
+    PasswordValid{"BCrypt password valid?"}:::decision
+    FailedPolicy["CallPasswordPolicyRules<br/>Count stored failures and update status"]:::secure
+    CountMismatch["Current mismatch<br/>Query expects INVALID_PASSWORD<br/>New rows store 'to many false attempts'"]:::warning
+    StatusLookup["CheckUserInDB.checkUserStatus"]:::data
+    Status{"Account status"}:::decision
+    StatusTasks["HandleAccountStatusTasks"]:::step
+
+    Active["active"]:::success
+    LoadSession["LoginRepository.CollectLoginValues<br/>Load account values"]:::data
+    SessionRecord["CurrentAccountInSessionValues<br/>record with ID, name, status,<br/>menu flag, system flag, role"]:::data
+    CurrentSession["CurrentSession.setCurrentAccount"]:::success
+
+    Pending["pending<br/>FirstLoginFlow<br/>CreateAccessRequest"]:::warning
+    PasswordChange["waiting_for_password_change<br/>PasswordService + UpdateUserPassword"]:::secure
+    Blocked["disabled / locked / on_quarantine<br/>Reject"]:::error
+    Suspicious["suspicious<br/>Warn and reject"]:::warning
+    UnknownStatus["unknown or unsupported<br/>Return failed result"]:::error
+
+    ActiveResult["LogsForDB<br/>canUseSystem = true"]:::data
+    NonSessionSuccess["LogsForDB<br/>canUseSystem = true<br/>but no session"]:::warning
+    FailedResult["LogsForDB<br/>canUseSystem = false"]:::data
+    PersistAttempt["logsRepository.CollectLogs<br/>Insert login_attempts row"]:::data
+    SessionGate{"Current session exists,<br/>menu access true,<br/>status ID 1?"}:::decision
+
+    LoginFlow --> LoginInput --> SetupSession --> UserExists
+    UserExists -->|"No"| FailedResult
+    UserExists -->|"Yes"| PasswordValid
+    PasswordValid -->|"No"| FailedPolicy --> FailedResult
+    FailedPolicy -. reason mismatch .-> CountMismatch
+    PasswordValid -->|"Yes"| StatusLookup --> Status --> StatusTasks
+
+    StatusTasks -->|"active"| Active --> LoadSession --> SessionRecord --> CurrentSession --> ActiveResult
+    StatusTasks -->|"pending"| Pending --> NonSessionSuccess
+    StatusTasks -->|"password change"| PasswordChange --> NonSessionSuccess
+    StatusTasks -->|"blocked"| Blocked --> FailedResult
+    StatusTasks -->|"suspicious"| Suspicious --> FailedResult
+    StatusTasks -->|"unknown"| UnknownStatus --> FailedResult
+
+    ActiveResult --> PersistAttempt
+    NonSessionSuccess --> PersistAttempt
+    FailedResult --> PersistAttempt
+    PersistAttempt --> SessionGate
+  end
+
+  AuthChoice -->|"Login"| LoginFlow
+  SessionGate -->|"No"| AuthMenu
+
+  subgraph Recovery["2c. Recovery"]
+    direction TD
+    RecoveryFlow["RecoveryFlow.SystemAccounts"]:::flow
+    RecoveryInput["ValidateRecoveryKey<br/>Hidden Console input"]:::secure
+    RecoveryStored["GetRecoveryKeyHash<br/>Load row ID 1"]:::data
+    RecoveryCheck{"BCrypt key valid?"}:::decision
+    RecoveryRetry["Retry counter<br/>four invalid keys end branch"]:::warning
+    ListSystem["FindRecoverableUser<br/>Display system accounts"]:::data
+    SelectRecover["SelectUserForRecover<br/>Current query accepts any account"]:::warning
+    RecoveryPassword["PasswordService"]:::secure
+    UpdateRecovery["UpdateSystemAccountPassword<br/>Update password_hash only"]:::data
+
+    RecoveryFlow --> RecoveryInput --> RecoveryStored --> RecoveryCheck
+    RecoveryCheck -->|"No"| RecoveryRetry
+    RecoveryRetry -->|"Retry left"| RecoveryInput
+    RecoveryCheck -->|"Yes"| ListSystem --> SelectRecover
+    SelectRecover -->|"Found"| RecoveryPassword --> UpdateRecovery
+  end
+
+  AuthChoice -->|"Recovery"| RecoveryFlow
+  RecoveryRetry -->|"Limit reached"| AuthMenu
+  SelectRecover -->|"Not found"| AuthMenu
+  UpdateRecovery --> AuthMenu
+
+  subgraph MenuAndService["3. Action-based menu and service routing"]
+    direction TD
+    MenuRequest["FrontController(MENU)"]:::controller
+    MenuController["MenuControllerParent.routeRole"]:::controller
+    Role{"Numeric role ID"}:::decision
+    LocalAdminMenu["Role 1<br/>LocalAdminMenu heading"]:::ui
+    LocalContext["MenuContextStructure<br/>LOCAL_ADMIN_DASHBOARD"]:::data
+    AdminMenu["Role 2<br/>AdminMenu with five MenuOption records"]:::ui
+    MenuChoice["MenuFlow.chooseOption"]:::step
+    AdminContext["MenuContextStructure<br/>Selected ServiceAction"]:::data
+    ServiceRequest["FrontController(SERVICE)"]:::controller
+    ServiceController["ServiceController.routeService"]:::controller
+    Action{"ServiceAction"}:::decision
+    Requests["ADMIN_USER_REQUESTS"]:::success
+    ShowRequests["ShowCurrentRequests.CurrentRequests<br/>Join and print all access requests"]:::data
+    Unsupported["Other four admin actions or<br/>LOCAL_ADMIN_DASHBOARD<br/>IllegalStateException"]:::error
+
+    MenuRequest --> MenuController --> Role
+    Role -->|"1"| LocalAdminMenu --> LocalContext
+    Role -->|"2"| AdminMenu --> MenuChoice --> AdminContext
+    LocalContext --> ServiceRequest
+    AdminContext --> ServiceRequest
+    ServiceRequest --> ServiceController --> Action
+    Action -->|"Requests"| Requests --> ShowRequests
+    Action -->|"Other"| Unsupported
+  end
+
+  SessionGate -->|"Yes"| MenuRequest
+  Role -->|"Other"| Fatal
+  Unsupported --> Fatal
+  ShowRequests --> EndProgram
+
+  subgraph CrossCutting["4. Cross-cutting and currently disconnected"]
     direction LR
-    LoggingNode["LogManager and state enums<br/>Eight active logger fields<br/>Recovery currently routes to SYSTEM"]:::catalog
-    LogbackNode["src/main/resources/logback.xml<br/>Console and category files<br/>No rotation or retention"]:::catalog
-    TestNode["JUnit 5 and Surefire<br/>11 PasswordService tests<br/>42 RegistrationService tests<br/>53 passing"]:::catalog
+    Logging["LogManager<br/>8 active logger fields<br/>10 state enums"]:::catalog
+    Logback["logback.xml<br/>Console + 10 non-rolling files"]:::catalog
+    ClearSession["CurrentSession.clear<br/>Exists but has no caller"]:::placeholder
+    DeclaredRequests["FrontController UI and EXIT<br/>Declared but not dispatched"]:::placeholder
+    EmptyComponents["UIController / RequestMenu / RouteService<br/>Empty; AccountRoles unused"]:::placeholder
+    Tests["JUnit 5 + Surefire<br/>15 password + 40 registration<br/>55 passing"]:::catalog
 
-    LoggingNode --> LogbackNode
+    Logging --> Logback
   end
 
-  ConfigCtl -. method map .-> AppMethods
-  EnvValidate -. details .-> EnvMethods
-  LoginVerify -. details .-> LoginMethods
-  StatusCheck -. repository details .-> LoginRepos
-  DepartmentJobs -. menu details .-> JobMenus
-  ServiceControllerNode -. selected values .-> MenuRuntime
-  ShowRequestsNode -. repository details .-> ServiceRepos
-  BootEntry -. logging .-> LoggingNode
-  RegistrationServiceNode -. validation coverage .-> TestNode
-  RegistrationPassword -. method-level coverage .-> TestNode
+  Boot -. logs .-> Logging
+  CurrentSession -. unused reset .-> ClearSession
+  Boot -. constructed or declared .-> DeclaredRequests
+  ServiceController -. remaining placeholders .-> EmptyComponents
+  RegistrationService -. validation tests .-> Tests
 
   classDef terminal fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c2d48;
   classDef entry fill:#eaf3ff,stroke:#2563eb,stroke-width:1.5px,color:#0f172a;

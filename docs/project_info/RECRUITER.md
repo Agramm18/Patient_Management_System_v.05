@@ -1,8 +1,10 @@
 # Recruiter Overview
 
-Last synchronized: 2026-07-18.
+Last synchronized: 2026-07-23.
 
-Patient Management System V5.01 is a Java 21 console-based learning and portfolio project. It demonstrates the incremental development of a database-backed application with configuration validation, authentication, account security, runtime sessions, access-management foundations, logging, unit testing, and technical documentation.
+Patient Management System V5.01 is a Java 21 console-based learning and portfolio project. It demonstrates incremental development of a database-backed application with configuration validation, authentication, account security, runtime sessions, typed menu routing, access-management foundations, logging, unit testing, and technical documentation.
+
+It is intentionally presented as an in-progress engineering project, not as a finished hospital product.
 
 ## Demonstrated Skills
 
@@ -13,59 +15,81 @@ Patient Management System V5.01 is a Java 21 console-based learning and portfoli
 - Runtime configuration through `.env` and a validated `EnvSetup` record
 - BCrypt password and recovery-key hashing
 - Authentication and account-status handling
-- Login-attempt auditing and persisted status changes
-- Runtime session modeling through `Unknown` and `CurrentSession`
-- Early role-aware parent-menu routing
+- Login-attempt auditing and database-backed policy foundations
+- Immutable runtime state through `CurrentAccountInSessionValues`
+- Static session lifecycle methods through `CurrentSession`
+- Typed menu modeling through records and enums
+- Role-aware controller and service routing
 - Typed logging state through SLF4J and Logback
 - JUnit 5 unit testing
 - Markdown and Mermaid documentation
-- Git-based incremental development
+- Git-based incremental development and refactoring
 
 ## Current Technical Baseline
 
 - Fail-fast environment and database validation before authentication
 - Automatic creation of missing local-admin and admin starter accounts
-- Registration of pending accounts with username, email, and international phone validation
-- BCrypt login verification
+- Registration of pending accounts with username, email, international phone, and password validation
+- BCrypt login verification and login-attempt persistence
 - First-login password replacement for starter accounts
 - Recovery-key verification with a four-attempt limit
-- Database-backed login-attempt history
-- Persisted locked, suspicious, and quarantine states
-- Active-user session creation with account ID, status, role, system-account flag, and menu access
+- Account-status-specific behavior separated into `HandleAccountStatusTasks`
+- Active-user session creation with account ID, name, status, role, system-account flag, and menu access
 - Pending department access requests
-- Parent-menu routing for local-admin and admin roles
+- Five immutable admin `MenuOption` entries mapped to typed `ServiceAction` values
+- `MenuContextStructure(userRole, action)` routing through `MenuControllerParent` and `ServiceController`
+- A connected `ADMIN_USER_REQUESTS` action that invokes the access-request listing query
 - Console and per-category file logging through `logback.xml`
-- 53 passing unit tests: 11 password-service tests and 42 registration-service tests
 
-## Current Architecture Work
+The 2026-07-23 source snapshot contains 93 production Java files and two test classes. A verified Windows Maven Wrapper run completed 55 tests successfully:
 
-The project is in an active menu and service-routing refactor. `MenuValues` now carries parent, role, and child context, and a `SubMenuController` plus `RequestMenu` have been introduced as placeholders. The admin menu has five parent options. Role-based service dispatch exists, but its handlers do not yet invoke business services.
+- 15 `PasswordServiceTest` tests
+- 40 `RegistrationServiceTest` tests
+- 0 failures, 0 errors, and 0 skipped tests
 
-An access-request listing repository already exists, but it is currently disconnected from the runtime. This is tracked explicitly rather than presented as a finished workflow.
+## Recent Refactoring
 
-## Engineering Risks Being Addressed
+Password creation now converts the original character input before hashing and clears both password arrays afterward. Registration now returns corrected profile data to one confirmation step and stores the hash returned by `PasswordFlow`.
 
-- The full password creation path clears the original character array before constructing the value to hash.
-- Registration correction does not retain the password hash returned by `PasswordFlow`.
-- Failed-login policy evaluation excludes the current failed attempt.
-- Recovery displays system accounts but accepts any existing account in its final lookup.
-- Repositories often print and swallow failures instead of returning structured results.
-- Automated tests cover validators but not database-backed or end-to-end authentication flows.
-- Logging migration and category alignment remain incomplete.
+The former numeric menu contexts were replaced by `MenuOption`, `ServiceAction`, and `MenuContextStructure`. `MenuController` and `SubMenuController` were removed from the active design, and the Requests option is connected to `ShowCurrentRequests`.
+
+The login path was separated into focused components:
+
+- `CollectLoginValues` collects credentials.
+- `SetupCurrentSession` verifies the account, password, and status.
+- `HandleAccountStatusTasks` executes status-specific behavior.
+- `CurrentAccountInSessionValues` models the active account.
+- `CurrentSession` stores, reports, and clears the active account reference.
+- `LogsForDB` carries the login-attempt values persisted by the repository.
+- `CallPasswordPolicyRules` contains the failed-password policy call path.
+
+## Current Engineering Limitations
+
+- Invalid-password persistence and counting use different reason strings, so the current 24-hour policy thresholds do not advance coherently.
+- The current attempt is evaluated before it is written to the login-attempt table.
+- Complete password, login, recovery, database, session, and routing workflows are not covered by automated tests.
+- Missing-terminal password creation reaches the generic fatal bootstrap handler instead of a controlled authentication result.
+- Registration repositories do not return structured outcomes or independently reject null and blank hashes.
+- Recovery's final account lookup is not restricted to the system accounts displayed to the user.
+- Access requests still use a default job and role and have no connected approval or activation transaction.
+- Four displayed admin actions and the local-admin dashboard are not implemented.
+- `ServiceController` does not independently authorize role/action combinations.
+- Logout and a repeated menu loop are not connected, although `CurrentSession.clear()` exists.
+- Repository error handling and logging migration remain incomplete.
 
 ## Development Stage
 
-This repository is not presented as a finished hospital system. Patient records, appointments, treatment, billing, reporting, complete administrator workflows, JavaFX, REST APIs, and deployment tooling remain future work.
+Patient records, appointments, treatment, billing, reporting, complete administrator workflows, JavaFX, REST APIs, continuous integration, and deployment tooling remain future work.
 
-The current engineering focus is to stabilize password handling, registration integrity, recovery scope, status policies, session lifecycle, submenu and service routing, access approval, and integration-test coverage.
+The current engineering focus is to repair failed-login policy accounting, finish authorized service actions and logout, harden recovery and repository outcomes, complete access approval, and add integration-level test coverage.
 
 ## Repository Reading Order
 
-1. `../../README.md`
-2. `CURRENT_STATUS.md`
-3. `ToDo.md`
-4. `../architecture/PROJECT_STRUCTURE.md`
-5. `../architecture/TECHNICHAL.md`
-6. `../setup/ENV_SETUP.md`
-7. `../setup/DB_SETUP.md`
-8. `../architecture/diagramms/patient-management-uml.md`
+1. [README](../../README.md)
+2. [Current project status](CURRENT_STATUS.md)
+3. [Project backlog](ToDo.md)
+4. [Project structure](../architecture/PROJECT_STRUCTURE.md)
+5. [Technical overview](../architecture/TECHNICHAL.md)
+6. [Environment setup](../setup/ENV_SETUP.md)
+7. [Database setup](../setup/DB_SETUP.md)
+8. [Program-flow diagram](../architecture/diagramms/patient-management-uml.md)
