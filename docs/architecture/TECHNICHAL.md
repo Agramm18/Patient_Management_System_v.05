@@ -176,7 +176,7 @@ The current gaps are structural:
 - `MenuValues.childKontext` is never populated.
 - Both `ServiceController` role handlers only log startup.
 - `ShowCurrentRequests` is disconnected.
-- Other role IDs are rejected by `MenuController`.
+- Other role IDs are rejected by `MenuControllerParrent`.
 - There is no logout or session clearing.
 
 ## Logging Architecture

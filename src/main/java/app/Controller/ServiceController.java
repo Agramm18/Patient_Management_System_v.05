@@ -1,34 +1,32 @@
 package app.Controller;
 
+import app.Auth.Flow.CurrentSession;
 import app.Menu.MenuContextStructure;
 import app.Logging.LogManager;
 import app.Logging.Enums.ProgrammState.*;
+import java.util.Map;
+import java.util.function.Consumer;
 
 import java.util.Scanner;
 
+import app.Repository.ServiceRepository.AdminServices.ShowCurrentRequests;
+
 public class ServiceController {
 
+    public ServiceController() {
+
+    }
+
     public void routeService(MenuContextStructure values, Scanner scanner) {
-        int role = values.userRole();
 
-        switch (role) {
-            case 1:
-                startLocalAdminService(values, scanner);
-                break;
+        switch (values.action()) {
+            case ADMIN_USER_REQUESTS -> {
+                System.out.println("[INFO] Welcome admin: " + CurrentSession.getCurrentUser().getUserName());
+                LogManager.menu(MenuState.INFO, "The admin has started to display the current requests");
+                new ShowCurrentRequests().CurrentRequests();
+            }
 
-            case 2:
-                startAdminService(values, scanner);
-                break;
+            default -> throw new IllegalStateException("[ERROR] The User Action is unknown");
         }
-    }
-
-
-    private void startLocalAdminService(MenuContextStructure values, Scanner scanner) {
-        LogManager.system(SystemState.INFO, "Starting LocalAdmin Service");
-    }
-
-    private void startAdminService(MenuContextStructure values, Scanner scanner) {
-        LogManager.system(SystemState.INFO, "Starting Admin Service");
-
     }
 }

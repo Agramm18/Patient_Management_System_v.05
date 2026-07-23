@@ -1,5 +1,7 @@
 package app.Menu;
 
-public record MenuContextStructure(int parentKonext, int userRole, int childKontext) {
+import app.Menu.Enums.ServiceAction;
+
+public record MenuContextStructure(int userRole, ServiceAction action) {
 
 }

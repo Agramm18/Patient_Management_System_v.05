@@ -12,6 +12,8 @@ import app.Auth.Flow.CurrentSession;
 
 import java.util.Scanner;
 
+import app.Controller.MenuControllerParent;
+
 public class BootConfigService {
 
     public void displayLoader() {
@@ -22,12 +24,11 @@ public class BootConfigService {
     public void systemConfig(Scanner scanner) {
         AuthController auth = new AuthController();
         ConfigController config = new ConfigController();
-        MenuController menu = new MenuController();
-        SubMenuController subMenu = new SubMenuController();
+        MenuControllerParent menu = new MenuControllerParent();
         ServiceController service = new ServiceController();
         UIController ui = new UIController();
 
-        FrontController dispatcher = new FrontController(auth, config, menu, subMenu, service, ui);
+        FrontController dispatcher = new FrontController(auth, config, menu, service, ui);
 
         LogManager.boot(BootState.INFO, "Starting Boot Process");
         LogManager.boot(BootState.INFO, "Running Controller classes");
@@ -61,6 +62,7 @@ public class BootConfigService {
                 LogManager.menu(MenuState.SUCCESS, "The User have access to the menu");
                 dispatcher.callController(FrontController.RequestType.MENU, scanner);
 
+                LogManager.auth(AuthState.INFO, "Calling submenu controller to route the service");
                 dispatcher.callController(FrontController.RequestType.SERVICE, scanner);
 
             } else {

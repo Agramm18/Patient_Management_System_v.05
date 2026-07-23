@@ -276,7 +276,7 @@ Both accounts:
 - Requested job
 - Requested role name
 
-The current query does not filter by `request_status`, so it can display more than only pending requests when older approved or rejected rows exist. The repository is not currently connected to `MenuController`, `SubMenuController`, or `ServiceController`; the active service handlers only log startup.
+The current query does not filter by `request_status`, so it can display more than only pending requests when older approved or rejected rows exist. The repository is not currently connected to `MenuControllerParrent`, `SubMenuController`, or `ServiceController`; the active service handlers only log startup.
 
 ### Password and Status Updates
 

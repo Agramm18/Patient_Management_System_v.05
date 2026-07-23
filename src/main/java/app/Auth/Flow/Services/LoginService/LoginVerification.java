@@ -119,12 +119,13 @@ public class LoginVerification {
                     boolean hasAccessToMenu = sessionObject.gethasAccesToMenu();
                     int accountStatus = sessionObject.getUserStatus();
                     int accountID = sessionObject.getUserID();
+                    String accountName = sessionObject.getAccount();
                     boolean isSystemAccount = sessionObject.isSystemAccount();
                     int userRole = sessionObject.getUserRole();
 
                     this.RETRYS = 0;
 
-                    CurrentUser session = new CurrentUser(Username, accountID, hasAccessToMenu, accountStatus, isSystemAccount, userRole);
+                    CurrentUser session = new CurrentUser(accountName, accountID, hasAccessToMenu, accountStatus, isSystemAccount, userRole);
                     session.loginResult();
 
                     CurrentSession.setCurrentUser(session);

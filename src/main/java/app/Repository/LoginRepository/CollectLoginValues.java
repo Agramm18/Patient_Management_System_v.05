@@ -12,6 +12,7 @@ import app.Logging.Enums.ProgrammState.*;
 public class CollectLoginValues {
 
     private int userID;
+    private String account;
     private int userStatus;
     private boolean hasAccessToMenu;
     private boolean isSystemAccount;
@@ -29,6 +30,7 @@ public class CollectLoginValues {
 
             if (rs.next()) {
                 this.userID = rs.getInt("id");
+                this.account = rs.getString("account_name");
                 this.hasAccessToMenu = rs.getBoolean("has_access_to_menu");
                 this.userStatus = rs.getInt("account_status");
                 this.isSystemAccount = rs.getBoolean("is_system_account");
@@ -45,6 +47,8 @@ public class CollectLoginValues {
         return this.hasAccessToMenu;
     }
 
+    public String getAccount() {return this.account;}
+
     public int getUserStatus() {
         return this.userStatus;
     }
@@ -60,4 +64,5 @@ public class CollectLoginValues {
     public int getUserRole() {
         return this.userRole;
     }
+
 }

@@ -24,8 +24,7 @@ import app.Menu.MenuContextStructure;
 public class FrontController {
     private final AuthController authController;
     private final ConfigController configController;
-    private final MenuController menuController;
-    private final SubMenuController subMenuController;
+    private final MenuControllerParent menuControllerParent;
     private final ServiceController serviceController;
     private final UIController UIController;
     private MenuContextStructure menuChoice;
@@ -42,11 +41,10 @@ public class FrontController {
         EXIT
     }
 
-    public FrontController(AuthController authController, ConfigController configController, MenuController menuController, SubMenuController subMenuController, ServiceController serviceController, UIController UIController) {
+    public FrontController(AuthController authController, ConfigController configController, MenuControllerParent menuControllerParent, ServiceController serviceController, UIController UIController) {
         this.authController = authController;
         this.configController = configController;
-        this.menuController = menuController;
-        this.subMenuController = subMenuController;
+        this.menuControllerParent = menuControllerParent;
         this.serviceController = serviceController;
         this.UIController = UIController;
     }
@@ -63,7 +61,7 @@ public class FrontController {
                 return true;
 
             case MENU:
-                menuController.routeMenu(scanner);
+                this.menuChoice = menuControllerParent.routeRole(scanner);
                 return true;
 
             case SERVICE:

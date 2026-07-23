@@ -92,7 +92,7 @@ The project was rebuilt in Java to practice larger application structure, Maven,
 
 ### First Menu and Service Baseline
 
-- `MenuController` introduced for local-admin and admin role routing
+- `MenuControllerParrent` introduced for local-admin and admin role routing
 - `MenuFlow` introduced for validated numeric choices
 - `MenuValues` introduced to transfer role and menu choice
 - `ServiceController` introduced as a role-aware dispatcher

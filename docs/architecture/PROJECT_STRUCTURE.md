@@ -214,7 +214,7 @@ src/test/java/app/Auth/Flow/Services/
 - `FrontController` routes `CONFIG`, `AUTH`, `MENU`, and `SERVICE` through `callController`.
 - `ConfigController` validates configuration, initializes database access, stores the recovery-key hash, and checks starter accounts.
 - `AuthController` owns the authentication menu loop.
-- `MenuController` displays the local-admin or admin parent menu and returns `MenuValues`.
+- `MenuControllerParrent` displays the local-admin or admin parent menu and returns `MenuValues`.
 - `ServiceController` dispatches by user role, but both current role handlers only log startup.
 - `SubMenuController` is injected into `FrontController` but is empty and has no request route.
 - `UIController` is an empty placeholder.
@@ -259,7 +259,7 @@ Contains user-facing console messages and menus. `AdminMenu` displays five paren
 
 ### `app.Menu`
 
-`MenuFlow` validates numeric menu input and returns a valid selected option. `MenuValues` carries `parentKonext`, `userRole`, and `childKontext` from `MenuController` to `ServiceController`; the child context is currently always 0.
+`MenuFlow` validates numeric menu input and returns a valid selected option. `MenuValues` carries `parentKonext`, `userRole`, and `childKontext` from `MenuControllerParrent` to `ServiceController`; the child context is currently always 0.
 
 ### `app.Repository`
 

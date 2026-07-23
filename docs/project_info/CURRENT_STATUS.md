@@ -154,7 +154,7 @@ Job selection, role selection, duplicate-request handling, approval, rejection, 
 - `SubMenuController` and `RequestMenu` are empty placeholders.
 - `ServiceController` dispatches by role, but both private handlers only write a service-start log entry.
 - `ShowCurrentRequests` contains a JDBC query for access requests, but no current controller or service invokes it.
-- Roles other than 1 and 2 fail in `MenuController` with an unknown-role exception.
+- Roles other than 1 and 2 fail in `MenuControllerParrent` with an unknown-role exception.
 
 ## Logging
 

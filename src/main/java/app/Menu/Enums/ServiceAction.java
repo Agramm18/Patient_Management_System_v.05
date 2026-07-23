@@ -1,0 +1,12 @@
+package app.Menu.Enums;
+
+public enum ServiceAction {
+    ADMIN_USER_REQUESTS,
+    ADMIN_DISPLAY_ACCOUNTS,
+    ADMIN_SECURITY_OPTIONS,
+    ADMIN_VIEW_LOGS,
+    ADMIN_LOGOUT,
+
+    LOCAL_ADMIN_DASHBOARD
+}
+
