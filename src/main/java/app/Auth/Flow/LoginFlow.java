@@ -8,6 +8,8 @@ import app.Repository.logsRepository.CollectLogs;
 
 import app.Logging.LogManager;
 import app.Logging.Enums.ProgrammState.*;
+import app.Auth.Flow.Services.LoginService.SetupCurrentSession;
+import app.Auth.Flow.Services.LoginService.LogsForDB;
 /*
     Just sub controller to rout to the Login flow and to collect the logs
 */
@@ -18,7 +20,7 @@ public class LoginFlow {
     public void user(Scanner scanner) {
 
         //Build Obj to call the Login flow
-        SetupCurrentSession check = new SetupCurrentSession();
+        SetupCurrentSession run = new SetupCurrentSession();
         CollectLogs store = new CollectLogs();
 
         while (true) {
@@ -26,22 +28,18 @@ public class LoginFlow {
             login.user(scanner);
 
             //Check if Username & Password is Valid
-            String Username = login.getEnteredUserName();
-            String PWSD = login.getEnteredPWSD();
+            String username = login.getEnteredUserName();
+            String password = login.getEnteredPWSD();
 
-            app.Auth.Flow.Services.AuthSecurityService.Audit.CollectLogs result = check.loggedUser(Username, PWSD, scanner);
+            LogsForDB result = run.configurateSessionObject(username, password, scanner);
 
-            //Collect values for logs
-            store.loginAttempts(
-                    Username,
-                    result.isSuccess(),
-                    result.getFailureReason()
-            );
-            
-            if (result.isSuccess()) {
-                LogManager.auth(AuthState.SUCCESS, "The Login was a Success");
-                return;
-            }
+            store.loginAttempts(result.accountName(), result.canUseSystem(), result.reason());
+
+            if (result.canUseSystem()) {
+                LogManager.auth(AuthState.SUCCESS, "The login was successfully");
+            };
+
+            return;
         }
     }
 

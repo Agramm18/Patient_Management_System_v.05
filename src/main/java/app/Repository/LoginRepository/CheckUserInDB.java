@@ -50,7 +50,7 @@ public class CheckUserInDB {
         return false;
     }
 
-    public boolean checkPWSD(String pwsd, String username) throws SQLException {
+    public boolean checkPWSD(String password, String username) throws SQLException {
         System.out.println("\n[INFO] Checking User password");
 
         String sql = "SELECT password_hash FROM accounts WHERE account_name = ?";
@@ -64,7 +64,7 @@ public class CheckUserInDB {
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     String storedHASH = rs.getString("password_hash");
-                    boolean matchesUserInput = BCrypt.checkpw(pwsd, storedHASH);
+                    boolean matchesUserInput = BCrypt.checkpw(password, storedHASH);
 
                     if (matchesUserInput) {
                         LogManager.security(SecurityState.SUCCESS, "The Password is Correct");

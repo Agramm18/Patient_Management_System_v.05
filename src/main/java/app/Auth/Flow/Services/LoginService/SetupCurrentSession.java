@@ -1,21 +1,12 @@
 package app.Auth.Flow.Services.LoginService;
 
-import java.sql.SQLException;
-import java.util.Scanner;
-
-import app.Auth.Flow.Services.AuthSecurityService.Audit.CollectLogs;
-import app.Auth.Flow.Services.PasswordService.PasswordService;
-import app.Repository.AuthRepository.Management.CountFailedLoginAttempts;
-import app.Repository.AuthRepository.Password.ExecutePWSDPolicy;
-import app.Repository.AuthRepository.Password.UpdateUserPassword;
+import app.Auth.Flow.Services.PasswordService.CallPasswordPolicyRules;
 import app.Repository.LoginRepository.CheckUserInDB;
-
-import app.Auth.Flow.CurrentSession;
-
 import app.Logging.LogManager;
 import app.Logging.Enums.ProgrammState.*;
-import app.Repository.LoginRepository.CollectLoginValues;
-import app.Auth.Flow.Services.LoginService.CurrentAccountInSessionValues;
+
+import java.sql.SQLException;
+import java.util.Scanner;
 
 /*
      This Section Checks the Username and Validate how to proceed after the first Login
@@ -27,151 +18,68 @@ import app.Auth.Flow.Services.LoginService.CurrentAccountInSessionValues;
 */
 
 public class SetupCurrentSession {
-    private int RETRYS = 0;
-    private int RETRYS_MAX = 5;
-    private int RETRYS_FOR_SUSPICOUS = 6;
-    private int RETRYS_FOR_QUARANTINE = 25;
-
-    private CurrentSession currentSession;
 
     private final CheckUserInDB repository = new CheckUserInDB();
 
-    private String AccountStatus;
-
-    public CollectLogs loggedUser(String Username, String PWSD, Scanner scanner) {
+    public LogsForDB configurateSessionObject(String username, String password, Scanner scanner) {
 
         try {
-            boolean userValid = repository.checkUserInDB(Username);
+            LogManager.auth(AuthState.INFO, "Starting the first Account Setup");
+            boolean userExists = checkAccount(username);
 
-            if (!userValid) {
-                LogManager.account(AccountState.USERNAME_NOT_FOUND, "The Username " + Username + " Where not found");
-                return new CollectLogs(false, "USERNAME_NOT_FOUND");
+            if (!userExists) {
+                LogManager.auth(AuthState.ERROR, "Unknown Username");
+                return new LogsForDB(username, false, "USERNAME_NOT_FOUND");
             }
 
-            System.out.println("[OK] The User exists continue with password check");
-            LogManager.auth(AuthState.INFO, "The User " + Username + "exists continue with password check");
-            boolean passwordOK = repository.checkPWSD(PWSD, Username);
+            LogManager.auth(AuthState.INFO, "Continue with the Password Check");
+            boolean passwordMatchesWithDB = checkPassword(password, username);
 
-            if (!passwordOK) {
+            if (!passwordMatchesWithDB) {
+                LogManager.auth(AuthState.ERROR, "The Password does not match with the DB entry");
 
-                System.out.println("[INFO] Please Notice if retry >=5 your account will be locked");
-                System.out.println("[INFO] If you have 25 Failed Passwords the Accounts will be set to quarantine");
-
-                LogManager.security(SecurityState.WARN, "The User entered a wrong Password");
-
-                System.out.println("\n[WARNING] Invalid Password detected");
-
-                this.RETRYS++;
-
-                LogManager.security(SecurityState.WARN, "Failed Passwords: " + this.RETRYS);
-                System.out.println("[INFO] Failed Passwords: " + this.RETRYS + "\n");
-
-                CountFailedLoginAttempts count = new CountFailedLoginAttempts();
-                int failedAttempts = count.Logs(Username);
-
-                LogManager.security(SecurityState.WARN, "Failed Passwords in 24 Hours: " + failedAttempts);
-                System.out.println("\n[INFO] FAILED PWSD Im 24 Hours: " + failedAttempts + "\n");
-
-                ExecutePWSDPolicy changeStatusTo = new ExecutePWSDPolicy();
-
-                if (failedAttempts >= this.RETRYS_FOR_QUARANTINE) {
-                    System.out.println("\n[WARNING] Malicious Activities Recognized you Account will be set to quarantine\n");
-                    changeStatusTo.quarantine(Username);
-                    return new CollectLogs(false, "Account is on Quarantine");
-                } else if (failedAttempts >= this.RETRYS_FOR_SUSPICOUS) {
-                    System.out.println("\n[INFO] Due to your current activities your account will be set to suspicious\n");
-                    changeStatusTo.suspicious(Username);
-                    return new CollectLogs(false, "To many Login Attempts");
-                } else if (failedAttempts >= this.RETRYS_MAX) {
-                    changeStatusTo.locked(Username);
-                    System.out.println("\n[WARNING] To many requests you account will be locked\n");
-                    return new CollectLogs(false, "To Many Login Attempts");
-                }
-
-                return new CollectLogs(false, "INVALID_PASSWORD");
+                CallPasswordPolicyRules call = new CallPasswordPolicyRules();
+                return call.passwordPolicies(username);
             }
 
-            String userStatus = repository.checkUserStatus(Username);
+            LogManager.auth(AuthState.INFO, "Continuing with the Account status check");
 
-            if (userStatus == null) {
-                return new CollectLogs(false, "Unknown Account Status");
+            String status = checkAccountStatus(username);
+
+            if (status == null) {
+                LogManager.auth(AuthState.INFO, "Unknown Account Status");
+                return new LogsForDB(username, false, "UNKNOWN_ACCOUNT-STATUS");
             }
 
-            switch (userStatus) {
-                case "active":
-                    LogManager.auth(AuthState.INFO, "The User Status is active");
-                    System.out.println("[OK] The User account is active");
-
-                    CollectLoginValues sessionObject = new CollectLoginValues();
-                    sessionObject.loginValues(Username);
-
-                    int accountID = sessionObject.getUserID();
-                    String accountName = sessionObject.getAccount();
-                    int accountStatus = sessionObject.getUserStatus();
-                    boolean hasAccessToMenu = sessionObject.gethasAccesToMenu();
-                    boolean isSystemAccount = sessionObject.isSystemAccount();
-                    int userRole = sessionObject.getUserRole();
-
-                    CurrentAccountInSessionValues sessionValues = new CurrentAccountInSessionValues(accountID, accountName, accountStatus, hasAccessToMenu, isSystemAccount, userRole);
-
-                    CurrentSession.setCurrentAccount(sessionValues);
-                    this.RETRYS = 0;
-
-                    return new CollectLogs(true, null);
-                case "disabled":
-                    LogManager.auth(AuthState.INFO, "The User Status is disabled");
-                    System.out.println("[WARNING] This account is Locked an must be activated by an administrator");
-                    return new CollectLogs(false, "Account is Locked");
-                case "pending":
-                    LogManager.auth(AuthState.INFO, "The User Status is pending");
-                    System.out.println("[INFO] This account is not fully activated");
-
-                    FirstLoginFlow run = new FirstLoginFlow();
-                    run.firstSetup(Username, scanner);
-
-                    return new CollectLogs(true, "Must be authorized");
-                case "locked":
-                    LogManager.auth(AuthState.INFO, "The User Status is locked");
-                    System.out.println("[WARNING] This account is locked and must be activated by an administrator");
-                    return new CollectLogs(false, "Account is locked");
-                case "on_quarantine":
-                    LogManager.auth(AuthState.INFO, "The User Status is on_quarantine");
-                    System.out.println("[FATAL] This account is on quarantine and must be checked");
-                    return new CollectLogs(false, "Account is on quarantine based on malicious activities");
-                case "waiting_for_password_change":
-                    LogManager.auth(AuthState.INFO, "The User Status is waiting_for_password_change");
-                    System.out.println("\n[INFO] First Login for a System Account recognized");
-                    System.out.println("[INFO] Please change your current password to continue\n");
-
-                    PasswordService update = new PasswordService();
-                    update.userPWSD(scanner);
-
-                    String hashedPWSD = update.getHashedPWSD();
-
-                    System.out.println("[INFO] Updating User PWSD");
-
-                    UpdateUserPassword change = new UpdateUserPassword();
-                    boolean changeSuccess = change.dbValues(Username, hashedPWSD);
-
-                    if (changeSuccess) {
-                        LogManager.security(SecurityState.INFO, "The password was changed successfully");
-                        return new CollectLogs(true, "password is changed successfully");
-                    } else {
-                        return new CollectLogs(false, "something went wrong with the password change");
-                    }
-
-                case "suspicious":
-                    LogManager.auth(AuthState.INFO, "The User Status is suspicious");
-                    System.out.println("[INFO] You account is set to suspicious maybe you need to change your password");
-                    return new CollectLogs(true, "You account is set to suspicious maybe you need to change your password");
-            }
-
-            return new CollectLogs(true, null);
+            HandleAccountStatusTasks run = new HandleAccountStatusTasks();
+            return run.accountStatusBehaviour(status, username, scanner);
 
         } catch (SQLException error) {
+            System.out.println(error.getMessage());
             LogManager.sql(SqlState.ERROR, error.getMessage());
-            System.out.println("[ERROR] SQL error during login: " + error.getMessage());
-            return new CollectLogs(false, "SQL_EXCEPTION");
+            return new LogsForDB(username, false, "SQL Exception");
+        } catch (IllegalStateException error) {
+            System.out.println(error.getMessage());
+            LogManager.auth(AuthState.ERROR, error.getMessage());
+            return new LogsForDB(username, false, error.getMessage());
         }
+    }
+
+    //Check if the User exists in the DB
+    boolean checkAccount(String username) throws SQLException {
+        CheckUserInDB check = new CheckUserInDB();
+        return check.checkUserInDB(username);
+    }
+
+    //Check if the entered password matches with the password in the db
+    boolean checkPassword(String password, String username) throws SQLException {
+        CheckUserInDB check = new CheckUserInDB();
+        return check.checkPWSD(password, username);
+    }
+
+    //Check the Account status
+    String checkAccountStatus(String username) throws SQLException {
+        CheckUserInDB check = new CheckUserInDB();
+        return check.checkUserStatus(username);
     }
 }
