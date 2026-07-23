@@ -80,6 +80,8 @@ public class HandleAccountStatus {
 
                 if (changeSuccess) {
                     LogManager.security(SecurityState.INFO, "The password was changed successfully");
+
+                    return new StoreLogs(username, true, null);
                 };
 
                 return new StoreLogs(username, false, null);

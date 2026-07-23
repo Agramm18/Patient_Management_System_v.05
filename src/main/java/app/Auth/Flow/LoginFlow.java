@@ -36,9 +36,8 @@ public class LoginFlow {
 
             if (result.canUseSystem()) {
                 LogManager.auth(AuthState.SUCCESS, "The login was successfully");
-            };
-
-            return;
+                return;
+            }
         }
     }
 

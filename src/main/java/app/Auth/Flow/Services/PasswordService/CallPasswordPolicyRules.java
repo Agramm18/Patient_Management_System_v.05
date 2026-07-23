@@ -37,21 +37,21 @@ public class CallPasswordPolicyRules {
         if (failedAttempts >= this.RETRYS_FOR_QUARANTINE) {
             System.out.println("\n[WARNING] Malicious Activities Recognized you Account will be set to quarantine\n");
             changeStatusTo.quarantine(username);
-            return new StoreLogs(username, false, "to many false attempts");
+            return new StoreLogs(username, false, "INVALID_PASSWORD");
 
         } else if (failedAttempts >= this.RETRYS_FOR_SUSPICOUS) {
             System.out.println("\n[INFO] Due to your current activities your account will be set to suspicious\n");
             changeStatusTo.suspicious(username);
 
-            return new StoreLogs(username, false, "to many false attempts");
+            return new StoreLogs(username, false, "INVALID_PASSWORD");
 
         } else if (failedAttempts >= this.RETRYS_MAX) {
             changeStatusTo.locked(username);
             System.out.println("\n[WARNING] To many requests you account will be locked\n");
 
-            return new StoreLogs(username, false, "to many false attempts");
+            return new StoreLogs(username, false, "INVALID_PASSWORD");
         }
 
-        return new StoreLogs(username, false, "to many false attempts");
+        return new StoreLogs(username, false, "INVALID_PASSWORD");
     }
 }
