@@ -2,27 +2,28 @@ package app.Auth.Flow.Services.PasswordService;
 
 import app.Auth.Flow.Services.LoginService.LoginBehaviour.LoginOutcome;
 import app.Auth.Flow.Services.LoginService.LoginBehaviour.StoreLogs;
+import app.Auth.Flow.Services.PasswordService.PolicieBehaviour.TimePeriod;
+import app.Logging.Enums.ProgrammState.AuthState;
 import app.Logging.Enums.ProgrammState.SecurityState;
 import app.Logging.LogManager;
 import app.Repository.AuthRepository.Management.CountFailedLoginAttempts;
 import app.Repository.AuthRepository.Password.ExecutePWSDPolicy;
+import app.Auth.Flow.Services.PasswordService.PolicieBehaviour.PolicyThreshold;
+
+import java.time.LocalDateTime;
 
 public class CallPasswordPolicyRules {
 
-    private int RETRYS = 0;
-    private int RETRYS_MAX = 5;
-    private int RETRYS_FOR_SUSPICOUS = 6;
-    private int RETRYS_FOR_QUARANTINE = 25;
+    private static final int RETRYS = 0;
 
     public StoreLogs passwordPolicies(String username) {
+
         System.out.println("[INFO] Please Notice if retry >=5 your account will be locked");
         System.out.println("[INFO] If you have 25 Failed Passwords the Accounts will be set to quarantine");
 
         LogManager.security(SecurityState.WARN, "The User entered a wrong Password");
 
         System.out.println("\n[WARNING] Invalid Password detected");
-
-        this.RETRYS++;
 
         LogManager.security(SecurityState.WARN, "Failed Passwords: " + this.RETRYS);
         System.out.println("[INFO] Failed Passwords: " + this.RETRYS + "\n");
@@ -55,4 +56,18 @@ public class CallPasswordPolicyRules {
 
         return new StoreLogs(username, LoginOutcome.INVALID_PASSWORD, "INVALID_PASSWORD");
     }
+
+
+    public LocalDateTime setLocalDateTime() {
+        LogManager.auth(AuthState.INFO, "Calculation the current Time Period in the DB");
+
+        try {
+            LocalDateTime now = LocalDateTime.now();
+
+            for (TimePeriod period : TimePeriod.values()) {
+                LocalDateTime cutoff = now.minus(period.getPeriod());
+            }
+        }
+    }
+
 }
