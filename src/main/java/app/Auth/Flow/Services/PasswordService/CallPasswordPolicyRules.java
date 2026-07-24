@@ -1,5 +1,6 @@
 package app.Auth.Flow.Services.PasswordService;
 
+import app.Auth.Flow.Services.LoginService.LoginBehaviour.LoginOutcome;
 import app.Auth.Flow.Services.LoginService.LoginBehaviour.StoreLogs;
 import app.Logging.Enums.ProgrammState.SecurityState;
 import app.Logging.LogManager;
@@ -37,21 +38,21 @@ public class CallPasswordPolicyRules {
         if (failedAttempts >= this.RETRYS_FOR_QUARANTINE) {
             System.out.println("\n[WARNING] Malicious Activities Recognized you Account will be set to quarantine\n");
             changeStatusTo.quarantine(username);
-            return new StoreLogs(username, false, "INVALID_PASSWORD");
+            return new StoreLogs(username, LoginOutcome.INVALID_PASSWORD, "INVALID_PASSWORD");
 
         } else if (failedAttempts >= this.RETRYS_FOR_SUSPICOUS) {
             System.out.println("\n[INFO] Due to your current activities your account will be set to suspicious\n");
             changeStatusTo.suspicious(username);
 
-            return new StoreLogs(username, false, "INVALID_PASSWORD");
+            return new StoreLogs(username, LoginOutcome.INVALID_PASSWORD, "INVALID_PASSWORD");
 
         } else if (failedAttempts >= this.RETRYS_MAX) {
             changeStatusTo.locked(username);
             System.out.println("\n[WARNING] To many requests you account will be locked\n");
 
-            return new StoreLogs(username, false, "INVALID_PASSWORD");
+            return new StoreLogs(username, LoginOutcome.INVALID_PASSWORD, "INVALID_PASSWORD");
         }
 
-        return new StoreLogs(username, false, "INVALID_PASSWORD");
+        return new StoreLogs(username, LoginOutcome.INVALID_PASSWORD, "INVALID_PASSWORD");
     }
 }

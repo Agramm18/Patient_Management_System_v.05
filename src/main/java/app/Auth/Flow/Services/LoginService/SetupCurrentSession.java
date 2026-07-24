@@ -1,6 +1,7 @@
 package app.Auth.Flow.Services.LoginService;
 
 import app.Auth.Flow.Services.LoginService.LoginBehaviour.HandleAccountStatus;
+import app.Auth.Flow.Services.LoginService.LoginBehaviour.LoginOutcome;
 import app.Auth.Flow.Services.LoginService.LoginBehaviour.StoreLogs;
 import app.Auth.Flow.Services.PasswordService.CallPasswordPolicyRules;
 import app.Repository.LoginRepository.CheckUserInDB;
@@ -33,7 +34,7 @@ public class SetupCurrentSession {
 
             if (!userExists) {
                 LogManager.auth(AuthState.ERROR, "Unknown Username");
-                return new StoreLogs(username, false, "USERNAME_NOT_FOUND");
+                return new StoreLogs(username, LoginOutcome.USERNAME_NOT_FOUNT, "USERNAME_NOT_FOUND");
             }
 
             LogManager.auth(AuthState.INFO, "Continue with the Password Check");
@@ -52,7 +53,7 @@ public class SetupCurrentSession {
 
             if (status == null) {
                 LogManager.auth(AuthState.INFO, "Unknown Account Status");
-                return new StoreLogs(username, false, "UNKNOWN_ACCOUNT-STATUS");
+                return new StoreLogs(username, LoginOutcome.USERNAME_NOT_FOUNT, "UNKNOWN_ACCOUNT-STATUS");
             }
 
             HandleAccountStatus run = new HandleAccountStatus();
@@ -61,11 +62,11 @@ public class SetupCurrentSession {
         } catch (SQLException error) {
             System.out.println(error.getMessage());
             LogManager.sql(SqlState.ERROR, error.getMessage());
-            return new StoreLogs(username, false, "SQL Exception");
+            return new StoreLogs(username, LoginOutcome.SQL_EXCEPTION, "SQL Exception");
         } catch (IllegalStateException error) {
             System.out.println(error.getMessage());
             LogManager.auth(AuthState.ERROR, error.getMessage());
-            return new StoreLogs(username, false, error.getMessage());
+            return new StoreLogs(username, LoginOutcome.INPUT_ERROR, error.getMessage());
         }
     }
 }

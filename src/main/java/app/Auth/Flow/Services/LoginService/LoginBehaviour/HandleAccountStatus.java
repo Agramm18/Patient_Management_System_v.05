@@ -36,13 +36,13 @@ public class HandleAccountStatus {
 
                 CurrentSession.setCurrentAccount(sessionValues);
 
-                return new StoreLogs(username, true, "account status is active");
+                return new StoreLogs(username, LoginOutcome.PERMITTED, "account status is active");
 
             case "disabled":
                 LogManager.auth(AuthState.INFO, "The User Status is disabled");
                 System.out.println("[WARNING] This account is Locked an must be activated by an administrator");
 
-                return new StoreLogs(username, false, "account status is disabled");
+                return new StoreLogs(username, LoginOutcome.REJECTED, "account status is disabled");
 
             case "pending":
                 LogManager.auth(AuthState.INFO, "The User Status is pending");
@@ -51,17 +51,17 @@ public class HandleAccountStatus {
                 FirstLoginFlow run = new FirstLoginFlow();
                 run.firstSetup(username, scanner);
 
-                return new StoreLogs(username, true, "account status is pending");
+                return new StoreLogs(username, LoginOutcome.PENDING_REQUEST, "account status is pending");
 
             case "locked":
                 LogManager.auth(AuthState.INFO, "The User Status is locked");
                 System.out.println("[WARNING] This account is locked and must be activated by an administrator");
-                return new StoreLogs(username, false, "account status is locked");
+                return new StoreLogs(username, LoginOutcome.REJECTED, "account status is locked");
 
             case "on_quarantine":
                 LogManager.auth(AuthState.INFO, "The User Status is on_quarantine");
                 System.out.println("[FATAL] This account is on quarantine and must be checked");
-                return new StoreLogs(username, false, "account status is on_quarantine");
+                return new StoreLogs(username, LoginOutcome.REJECTED, "account status is on_quarantine");
 
             case "waiting_for_password_change":
                 LogManager.auth(AuthState.INFO, "The User Status is waiting_for_password_change");
@@ -81,15 +81,15 @@ public class HandleAccountStatus {
                 if (changeSuccess) {
                     LogManager.security(SecurityState.INFO, "The password was changed successfully");
 
-                    return new StoreLogs(username, true, null);
+                    return new StoreLogs(username, LoginOutcome.PASSWORD_CHANGED, "PASSWORD_CHANGED");
                 };
 
-                return new StoreLogs(username, false, null);
+                return new StoreLogs(username, LoginOutcome.WAITING_FOR_PASSWORD_CHANGE, null);
 
             case "suspicious":
                 LogManager.auth(AuthState.INFO, "The User Status is suspicious");
                 System.out.println("[INFO] You account is set to suspicious maybe you need to change your password");
-                return new StoreLogs(username, false, "account status is suspicious");
+                return new StoreLogs(username, LoginOutcome.REJECTED, "account status is suspicious");
 
             default:
                 LogManager.auth(AuthState.ERROR, "Invalid Account status");

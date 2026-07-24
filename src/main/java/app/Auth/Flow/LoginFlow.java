@@ -9,6 +9,8 @@ import app.Repository.logsRepository.CollectLogs;
 import app.Logging.LogManager;
 import app.Logging.Enums.ProgrammState.*;
 import app.Auth.Flow.Services.LoginService.LoginBehaviour.StoreLogs;
+
+import app.Auth.Flow.Services.LoginService.LoginBehaviour.LoginOutcome;
 /*
     Just sub controller to rout to the Login flow and to collect the logs
 */
@@ -32,11 +34,25 @@ public class LoginFlow {
 
             StoreLogs result = run.configurateSessionObject(username, password, scanner);
 
-            store.loginAttempts(result.accountName(), result.canUseSystem(), result.reason());
+            LoginOutcome outcome = result.outcome();
 
-            if (result.canUseSystem()) {
-                LogManager.auth(AuthState.SUCCESS, "The login was successfully");
-                return;
+            boolean authenticated = outcome == LoginOutcome.PERMITTED;
+
+            store.loginAttempts(result.accountName(), authenticated, result.reason());
+
+            switch (outcome) {
+                case PERMITTED -> {
+                    LogManager.auth(AuthState.SUCCESS, "The login was successful");
+                    return;
+                }
+
+                case PASSWORD_CHANGED, PENDING_REQUEST -> {
+                    return;
+                }
+
+                default -> {
+                    continue;
+                }
             }
         }
     }

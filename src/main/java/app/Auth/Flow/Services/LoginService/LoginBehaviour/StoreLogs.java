@@ -1,8 +1,10 @@
 package app.Auth.Flow.Services.LoginService.LoginBehaviour;
 
+import app.Auth.Flow.Services.LoginService.LoginBehaviour.LoginOutcome;
+
 public record StoreLogs(
         String accountName,
-        boolean canUseSystem,
+        LoginOutcome outcome,
         String reason
 ) {
 }

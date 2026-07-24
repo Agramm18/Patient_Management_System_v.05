@@ -11,6 +11,7 @@ import app.Logging.Enums.ProgrammState.*;
 public class UpdateUserPassword {
 
     public boolean dbValues (String Username, String hashedPWSD) {
+
         String sqlUpdateData = "UPDATE accounts SET password_hash = ? WHERE account_name = ?";
 
         try (Connection connection = DBManager.getConnection();
@@ -32,6 +33,9 @@ public class UpdateUserPassword {
                 System.out.println("[INFO] Rows affected: " + rows + "\n");
                 return true;
             } else {
+
+
+
                 throw new IllegalStateException("[ERROR] The Username where not found in the DB");
             }
 

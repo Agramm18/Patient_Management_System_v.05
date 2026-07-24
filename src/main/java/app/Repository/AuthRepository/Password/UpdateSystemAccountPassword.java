@@ -13,13 +13,16 @@ public class UpdateSystemAccountPassword {
 
     public void sqlQuerry(String Username, String password) {
 
-        String sql = "UPDATE accounts SET password_hash = ? WHERE account_name = ?";
+        int changedStatus = 1;
+
+        String sql = "UPDATE accounts SET password_hash = ?, account_status = ? WHERE account_name = ?";
 
         try (Connection connection = DBManager.getConnection();
             PreparedStatement stmt = connection.prepareStatement(sql);
         ) {
             stmt.setString(1, password);
-            stmt.setString(2, Username);
+            stmt.setInt(2, changedStatus);
+            stmt.setString(3, Username);
 
             int rows = stmt.executeUpdate();
 
