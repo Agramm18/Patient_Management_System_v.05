@@ -228,7 +228,7 @@ Unknown usernames are stored with `account_id = NULL`.
 - The starter-account password-change branch returns `is_success = true` even if the repository update reports failure. It does not create a session, so the caller must log in again.
 - A pending account is also stored as successful after creating an access request, although no session is created.
 
-`CountFailedLoginAttempts` counts only rows where `failure_reason = 'INVALID_PASSWORD'` from the previous 24 hours. `CallPasswordPolicyRules` now returns `to many false attempts`, so newly written wrong-password rows do not match the count query. As a result, current wrong-password attempts do not advance the locked, suspicious, or quarantine thresholds unless matching legacy rows already exist. Policy evaluation also occurs before the current attempt is inserted.
+`CountFailedLoginAttempts` counts only rows where `failure_reason = 'INVALID_PASSWORD'` from the previous 24 hours. `PasswordPolicies` now returns `to many false attempts`, so newly written wrong-password rows do not match the count query. As a result, current wrong-password attempts do not advance the locked, suspicious, or quarantine thresholds unless matching legacy rows already exist. Policy evaluation also occurs before the current attempt is inserted.
 
 When matching historical rows do exist, the ordered checks set status ID 5 at 25 or more rows, status ID 7 at 6 through 24 rows, and status ID 4 at exactly 5 rows.
 

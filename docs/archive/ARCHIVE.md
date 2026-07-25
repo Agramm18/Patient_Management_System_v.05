@@ -93,7 +93,7 @@ On 2026-07-23, the login and session structure changed:
 - Credential and account-status verification moved to `SetupCurrentSession`.
 - Status-specific work moved to `HandleAccountStatus`.
 - Login-attempt output moved into the `StoreLogs` record.
-- Failed-password policy calls moved to `CallPasswordPolicyRules`.
+- Failed-password policy calls moved to `PasswordPolicies`.
 
 The refactor left a failure-reason contract mismatch: the new policy path returns `to many false attempts`, while the counting query accepts only `INVALID_PASSWORD`. The policy also evaluates the stored count before the current attempt is persisted.
 

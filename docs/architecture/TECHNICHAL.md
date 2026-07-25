@@ -149,7 +149,7 @@ Only an `active` account creates `SessionAccount`. The record stores:
 
 ## Failed-Login Policy
 
-`CallPasswordPolicyRules` asks `CountFailedLoginAttempts` for the previously stored count and contains these ordered thresholds:
+`PasswordPolicies` asks `CountFailedLoginAttempts` for the previously stored count and contains these ordered thresholds:
 
 | Previously counted rows | Intended update |
 | --- | --- |
@@ -160,10 +160,10 @@ Only an `active` account creates `SessionAccount`. The record stores:
 The current implementation has a critical persistence mismatch:
 
 - `CountFailedLoginAttempts` counts only rows whose `failure_reason` is exactly `INVALID_PASSWORD`.
-- `CallPasswordPolicyRules` now returns the reason `to many false attempts`.
+- `PasswordPolicies` now returns the reason `to many false attempts`.
 - `LoginFlow` stores that returned reason after policy evaluation.
 
-New invalid-password rows therefore do not increase the count queried by the policy. Unless matching legacy rows already exist, repeated wrong passwords remain at a stored count of zero and do not reach the lock, suspicious, or quarantine thresholds. The in-memory `RETRYS` field is also ineffective because a new `CallPasswordPolicyRules` instance is created for each failed attempt.
+New invalid-password rows therefore do not increase the count queried by the policy. Unless matching legacy rows already exist, repeated wrong passwords remain at a stored count of zero and do not reach the lock, suspicious, or quarantine thresholds. The in-memory `RETRYS` field is also ineffective because a new `PasswordPolicies` instance is created for each failed attempt.
 
 There is no successful-login or administrator reset for historical failed attempts.
 

@@ -40,7 +40,7 @@ The last verified `.\mvnw.cmd test` run passed 55 tests on 2026-07-23: 15 `Passw
 - [x] Add the pending-user department-request baseline.
 - [x] Store active-account state in the `SessionAccount` record and static `CurrentSession`.
 - [x] Add `CurrentSession.isLoggedIn()` and `CurrentSession.clear()`.
-- [x] Split login orchestration into `SetupCurrentSession`, `HandleAccountStatus`, and `CallPasswordPolicyRules`.
+- [x] Split login orchestration into `SetupCurrentSession`, `HandleAccountStatus`, and `PasswordPolicies`.
 - [x] Add the `StoreLogs` result record used by login-attempt persistence.
 
 ### Menu and Access Foundation
@@ -73,7 +73,7 @@ Current focus: correct the refactored login outcome and failed-attempt contracts
 
 - [x] Replace the former `LoginVerification` class with smaller credential, status, and password-policy components.
 - [x] Replace the mutable current-user object with `SessionAccount`.
-- [ ] Use one canonical invalid-password reason in both `CallPasswordPolicyRules` and `CountFailedLoginAttempts`; the writer currently stores `to many false attempts` while the query counts only `INVALID_PASSWORD`.
+- [ ] Use one canonical invalid-password reason in both `PasswordPolicies` and `CountFailedLoginAttempts`; the writer currently stores `to many false attempts` while the query counts only `INVALID_PASSWORD`.
 - [ ] Include the current invalid-password attempt before applying the 5, 6, and 25 thresholds.
 - [ ] Replace the ambiguous `canUseSystem` boolean with explicit outcomes for authenticated, pending-requested, password-changed, and rejected flows.
 - [ ] Do not persist pending or failed password-update flows as successful authenticated logins.

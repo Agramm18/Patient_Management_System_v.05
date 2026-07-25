@@ -27,6 +27,6 @@ public enum TimePeriod {
     }
 
     public int calculateThreshold(PolicyThreshold threshold) {
-        return Math.multiplyExact(threshold.getRetryCount(), threshold.getRetryCount());
+        return Math.multiplyExact(threshold.getRetryCount(), threshholdFactor);
     }
 }

@@ -45,7 +45,7 @@ The current implementation is a Java 21 Maven console application. It can:
 
 The password creation sequence now converts the validated password before hashing and clears both character arrays only after the hash input is no longer needed. Registration now stores the hash returned by `PasswordFlow` after the final confirmation step, including after profile corrections. These fixes remove the two critical hash-handling defects documented in the previous baseline.
 
-The 2026-07-23 login refactor separates credential and status work across `SetupCurrentSession`, `HandleAccountStatus`, `StoreLogs`, and `CallPasswordPolicyRules`. Active account data is stored in the immutable `SessionAccount` record, and `CurrentSession` provides `setCurrentAccount`, `getCurrentAccount`, `isLoggedIn`, and `clear`.
+The 2026-07-23 login refactor separates credential and status work across `SetupCurrentSession`, `HandleAccountStatus`, `StoreLogs`, and `PasswordPolicies`. Active account data is stored in the immutable `SessionAccount` record, and `CurrentSession` provides `setCurrentAccount`, `getCurrentAccount`, `isLoggedIn`, and `clear`.
 
 The menu refactor uses immutable `MenuOption` entries, typed `ServiceAction` values, and `MenuContextStructure(userRole, action)`. `MenuControllerParent` maps all five displayed admin options to actions. Only `ADMIN_USER_REQUESTS` currently invokes a service; the other four admin actions and `LOCAL_ADMIN_DASHBOARD` reach the unsupported-action exception. The application also completes only one menu and service pass after authentication.
 
@@ -63,7 +63,7 @@ The tests cover individual password rules, password retype and array clearing, m
 
 ## Current Limitations
 
-- Failed-password policy counting is not currently coherent: `CallPasswordPolicyRules` returns the stored reason `to many false attempts`, while `CountFailedLoginAttempts` counts only `INVALID_PASSWORD`. Policy evaluation also occurs before the current attempt is persisted.
+- Failed-password policy counting is not currently coherent: `PasswordPolicies` returns the stored reason `to many false attempts`, while `CountFailedLoginAttempts` counts only `INVALID_PASSWORD`. Policy evaluation also occurs before the current attempt is persisted.
 - Without a terminal console, `PasswordService.userPWSD` propagates an exception to the generic fatal bootstrap handler instead of returning a controlled authentication result; complete password/hash behavior is also not covered end to end.
 - `CreateAccount` has no repository-level null or blank hash guard and does not return an explicit result.
 - Recovery displays system accounts but the final target lookup still accepts any existing account.

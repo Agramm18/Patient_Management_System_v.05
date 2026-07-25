@@ -3,7 +3,7 @@ package app.Auth.Flow.Services.LoginService;
 import app.Auth.Flow.Services.LoginService.LoginBehaviour.HandleAccountStatus;
 import app.Auth.Flow.Services.LoginService.LoginBehaviour.LoginOutcome;
 import app.Auth.Flow.Services.LoginService.LoginBehaviour.StoreLogs;
-import app.Auth.Flow.Services.PasswordService.CallPasswordPolicyRules;
+import app.Auth.Flow.Services.PasswordService.PasswordPolicies;
 import app.Repository.LoginRepository.CheckUserInDB;
 import app.Logging.LogManager;
 import app.Logging.Enums.ProgrammState.*;
@@ -43,7 +43,7 @@ public class SetupCurrentSession {
             if (!passwordMatchesWithDB) {
                 LogManager.auth(AuthState.ERROR, "The Password does not match with the DB entry");
 
-                CallPasswordPolicyRules call = new CallPasswordPolicyRules();
+                PasswordPolicies call = new PasswordPolicies();
                 return call.passwordPolicies(username);
             }
 

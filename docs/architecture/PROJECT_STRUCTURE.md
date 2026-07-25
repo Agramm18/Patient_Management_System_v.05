@@ -253,7 +253,7 @@ There is no `MenuController` or `SubMenuController` class in the current source 
 - `RegistrationService` validates profile data, supports repeated confirmation/correction, requires a nonblank generated hash, and uses libphonenumber for international phone validation.
 - `PasswordService` validates passwords, creates BCrypt hashes, and clears both character arrays after hashing.
 - Login services are split into input collection (`CollectLoginValues`), credential/status orchestration (`SetupCurrentSession`), status-specific work (`HandleAccountStatus`), session data (`SessionAccount`), persistence results (`StoreLogs`), and pending-user setup (`FirstLoginFlow`).
-- `CallPasswordPolicyRules` reads stored failed-login counts and calls status-update repositories after an invalid password.
+- `PasswordPolicies` reads stored failed-login counts and calls status-update repositories after an invalid password.
 - Recovery services collect, validate, and route recovery input.
 - Management services contain department and role input plus the empty `CollectUserJob` placeholder.
 - `AuthSecurityService.Audit.CollectLogs` is an older disconnected value object; active login persistence uses `LoginService.LogsForDB` and `Repository.logsRepository.CollectLogs`.

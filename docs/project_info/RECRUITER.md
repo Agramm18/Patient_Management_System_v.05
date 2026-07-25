@@ -61,7 +61,7 @@ The login path was separated into focused components:
 - `SessionAccount` models the active account.
 - `CurrentSession` stores, reports, and clears the active account reference.
 - `StoreLogs` carries the login-attempt values persisted by the repository.
-- `CallPasswordPolicyRules` contains the failed-password policy call path.
+- `PasswordPolicies` contains the failed-password policy call path.
 
 ## Current Engineering Limitations
 

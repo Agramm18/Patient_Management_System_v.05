@@ -99,7 +99,7 @@ The current login path is split into focused types:
 
 - `CollectLoginValues` collects the username and hidden password.
 - `SetupCurrentSession` verifies account existence, password, and status.
-- `CallPasswordPolicyRules` handles invalid-password thresholds.
+- `PasswordPolicies` handles invalid-password thresholds.
 - `HandleAccountStatus` handles account-status behavior.
 - `StoreLogs` carries `accountName`, `canUseSystem`, and `reason` to the login-attempt repository.
 - `SessionAccount` stores account ID, name, status ID, menu access, system-account flag, and role ID.
@@ -126,7 +126,7 @@ The `canUseSystem` name does not match all outcomes. Pending and password-change
 This path currently has a blocking contract defect:
 
 1. `CountFailedLoginAttempts` counts rows whose `failure_reason` is exactly `INVALID_PASSWORD` during the preceding 24 hours.
-2. `CallPasswordPolicyRules` returns the text `to many false attempts`.
+2. `PasswordPolicies` returns the text `to many false attempts`.
 3. `LoginFlow` persists that returned text as the new failure reason.
 
 Consequently, new invalid-password rows do not increase the count used by the policy. Historical rows with `INVALID_PASSWORD` can still trigger the checks, but the current attempt is evaluated before it is stored.
@@ -139,7 +139,7 @@ When a matching historical count exists, the ordered policy is:
 | 6 through 24 | `suspicious`, ID 7 |
 | 5 | `locked`, ID 4 |
 
-There is no reset or archival policy after successful login, recovery, or administrator action. The in-memory retry counter in `CallPasswordPolicyRules` is recreated for each failed login and does not track retries across authentication-menu iterations.
+There is no reset or archival policy after successful login, recovery, or administrator action. The in-memory retry counter in `PasswordPolicies` is recreated for each failed login and does not track retries across authentication-menu iterations.
 
 All login outcomes are inserted into `login_attempts`. Unknown usernames use a null `account_id`. Successful active rows currently also receive the non-null reason `account status is active`.
 
