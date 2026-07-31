@@ -1,76 +1,65 @@
 # About This Project
 
-Last synchronized: 2026-07-23.
+Last synchronized: 2026-07-31.
 
 ## Purpose
 
-Patient Management System V5.01 is a long-term Java learning and portfolio project. It develops the foundations of a larger database-backed business application while providing practical experience with architecture, persistence, authentication, security, testing, and technical documentation.
-
-The repository currently focuses on platform foundations rather than patient-management product features:
-
-- Application bootstrap and controller routing
-- `.env` validation and MySQL connectivity
-- Database-backed registration and authentication
-- BCrypt password and recovery-key hashing
-- Login-attempt persistence and account-status policies
-- Runtime session state through `SessionAccount` and `CurrentSession`
-- Pending-user access requests
-- Typed role-aware menu and service-action routing
-- SLF4J and Logback logging
-- JUnit 5 tests for registration and password validation
+Patient Management System V5.01 is a Java learning and portfolio project for building the foundations of a database-backed business application. The current repository focuses on configuration, authentication, account security, access requests, menu routing, logging, testing, and technical documentation. Patient-management product features have not been implemented yet.
 
 This is not a production-ready hospital system and must not be used with real patient data.
 
 ## Background
 
-The first version was written in Python while learning programming fundamentals and Object-Oriented Programming. The Java rebuild began during vocational training in application development and is intended to improve the architecture, persistence model, security behavior, testability, and maintainability.
+The first version was written in Python while learning programming and Object-Oriented Programming. The Java rebuild began during vocational training in application development and is intended to improve architecture, persistence, security behavior, testability, and maintainability.
 
 The original Python project is available in the [Patient Management System repository](https://github.com/Agramm18/Patient-Management-System).
 
 ## Current Implementation
 
-The current implementation is a Java 21 Maven console application. It can:
+The project is a Java 21 Maven console application backed by MySQL. It currently provides:
 
-- Validate all 13 required environment values and a MySQL connection
-- Hash and persist the configured recovery key
-- Create missing local-admin and admin starter accounts
-- Register pending users with validated profile and password input
-- Authenticate accounts with BCrypt and persist login attempts
-- Route account-status-specific login behavior
-- Reset a selected account password after recovery-key verification
-- Create an active runtime session
-- Collect a pending user's requested department and create an access request
-- Display local-admin or admin parent menus
-- Route the admin Requests option to the current access-request listing query
+- Validation of 13 required `.env` values and the initial database connection
+- BCrypt persistence of a recovery key and automatic creation of missing starter accounts
+- Registration with username, email, international phone, and password validation
+- BCrypt login verification and login-attempt persistence
+- Typed login results through `LoginOutcome` and `StoreLogs`
+- Account-status-specific handling for active, disabled, pending, locked, quarantined, password-change, and suspicious accounts
+- A multi-window failed-password policy using day, week, month, year, five-year, and ten-year counts
+- Runtime session state through the immutable `SessionAccount` record and static `CurrentSession`
+- Pending department access requests
+- Typed menu actions through `MenuOption`, `ServiceAction`, and `MenuContextStructure`
+- One connected admin service for listing access requests
+- SLF4J and Logback logging
+- JUnit 5 tests for password and registration helpers
 
-The password creation sequence now converts the validated password before hashing and clears both character arrays only after the hash input is no longer needed. Registration now stores the hash returned by `PasswordFlow` after the final confirmation step, including after profile corrections. These fixes remove the two critical hash-handling defects documented in the previous baseline.
+The current login implementation stores `INVALID_PASSWORD` consistently and includes the current failed attempt in policy evaluation before the attempt row is written. Only the `PERMITTED` outcome is persisted as a successful login. Pending requests and starter-account password changes return to authentication without creating an authenticated session.
 
-The 2026-07-23 login refactor separates credential and status work across `SetupCurrentSession`, `HandleAccountStatus`, `StoreLogs`, and `PasswordPolicies`. Active account data is stored in the immutable `SessionAccount` record, and `CurrentSession` provides `setCurrentAccount`, `getCurrentAccount`, `isLoggedIn`, and `clear`.
+## Verified Baseline
 
-The menu refactor uses immutable `MenuOption` entries, typed `ServiceAction` values, and `MenuContextStructure(userRole, action)`. `MenuControllerParent` maps all five displayed admin options to actions. Only `ADMIN_USER_REQUESTS` currently invokes a service; the other four admin actions and `LOCAL_ADMIN_DASHBOARD` reach the unsupported-action exception. The application also completes only one menu and service pass after authentication.
+On 2026-07-31, `\.\mvnw.cmd test` completed successfully with:
 
-## Verified Quality Baseline
-
-On 2026-07-23, `.\mvnw.cmd test` completed successfully with:
-
-- 93 production Java files under `src/main/java`
+- 98 production Java files under `src/main/java`
 - 2 test source files under `src/test/java`
 - 15 passing `PasswordServiceTest` tests
 - 40 passing `RegistrationServiceTest` tests
 - 55 tests in total, with 0 failures, 0 errors, and 0 skipped tests
 
-The tests cover individual password rules, password retype and array clearing, missing-console detection at the input-method level, registration fields, confirmation and correction input, and the registration password-hash guard. They do not cover complete interactive, database-backed, session, recovery, or menu-routing workflows.
+The tests are unit-level helper tests. They do not connect to MySQL or cover complete registration, login, recovery, session, menu, or service workflows.
 
 ## Current Limitations
 
-- Failed-password policy counting is not currently coherent: `PasswordPolicies` returns the stored reason `to many false attempts`, while `CountFailedLoginAttempts` counts only `INVALID_PASSWORD`. Policy evaluation also occurs before the current attempt is persisted.
-- Without a terminal console, `PasswordService.userPWSD` propagates an exception to the generic fatal bootstrap handler instead of returning a controlled authentication result; complete password/hash behavior is also not covered end to end.
-- `CreateAccount` has no repository-level null or blank hash guard and does not return an explicit result.
-- Recovery displays system accounts but the final target lookup still accepts any existing account.
-- Pending access requests store job `unassigned` and role ID 9; selection, duplicate handling, approval, rejection, and activation are incomplete.
-- `ServiceController` does not yet enforce role/action authorization independently of the supplied menu context.
-- Four admin actions, the local-admin dashboard, logout, a controlled menu loop, and non-admin role menus are not implemented.
-- Repository failures are often printed and swallowed rather than returned as structured results.
+- An active account receives a session and `PERMITTED` even when `has_access_to_menu` is false.
+- Failed-login counting, status updates, and attempt persistence are separate operations and are not transactional.
+- Policy windows mix calendar and rolling SQL semantics, and the multi-window thresholds have no automated coverage.
+- The displayed per-session password retry count is recreated for each invalid attempt.
+- Missing terminal-backed hidden input can still terminate the runtime through the generic bootstrap error path.
+- Registration repositories do not independently reject blank hashes or return structured outcomes.
+- Recovery displays system accounts but accepts any existing account as the final target.
+- Recovery now sets the password and status ID 1, but it does not reconcile password-change flags, menu access, or session state.
+- Access requests still store job `unassigned` and role ID 9 and have no approval or activation workflow.
+- Four admin actions, the local-admin dashboard, logout, and a repeated menu loop are not implemented.
+- `ServiceController` does not enforce role/action authorization independently.
+- Repository failures are often printed and swallowed.
 - Logging migration and automated integration coverage remain incomplete.
 
 Patient records, appointments, treatments, billing, reporting, JavaFX, REST APIs, continuous integration, and deployment automation are not implemented.
@@ -80,12 +69,10 @@ Patient records, appointments, treatments, billing, reporting, JavaFX, REST APIs
 - Java and Object-Oriented Programming
 - Controller, flow, service, and repository separation
 - MySQL schema design and JDBC access
-- Authentication and authorization foundations
+- Authentication, authorization, and account-status policies
 - BCrypt password and recovery-key hashing
-- Role-Based Access Control concepts
-- Immutable runtime and menu context records
-- Menu and service-action routing
-- Security policy implementation
+- Immutable records and enum-based outcomes
+- Role-aware menu and service routing
 - SLF4J and Logback configuration
 - JUnit 5 unit testing
 - Maven dependency and build management
@@ -94,10 +81,10 @@ Patient records, appointments, treatments, billing, reporting, JavaFX, REST APIs
 
 ## Documentation
 
-- [Current project status](CURRENT_STATUS.md) describes verified behavior and current limitations.
-- [Project backlog](ToDo.md) is the active implementation backlog.
-- [Future plans](FUTURE_PLANS.md) describes the planned product and engineering direction.
-- [Recruiter overview](RECRUITER.md) provides a concise portfolio-oriented summary.
+- [Current project status](CURRENT_STATUS.md) describes verified behavior and limitations.
+- [Project backlog](ToDo.md) contains unfinished work only.
+- [Future plans](FUTURE_PLANS.md) describes the planned direction.
+- [Recruiter overview](RECRUITER.md) provides a concise portfolio summary.
 - [Project structure](../architecture/PROJECT_STRUCTURE.md) maps packages and responsibilities.
-- [Technical overview](../architecture/TECHNICHAL.md) explains the technical design.
+- [Technical overview](../architecture/TECHNICHAL.md) explains the current design.
 - [Environment setup](../setup/ENV_SETUP.md) and [database setup](../setup/DB_SETUP.md) describe local setup.

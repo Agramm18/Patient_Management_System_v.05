@@ -1,10 +1,10 @@
 # Recruiter Overview
 
-Last synchronized: 2026-07-23.
+Last synchronized: 2026-07-31.
 
-Patient Management System V5.01 is a Java 21 console-based learning and portfolio project. It demonstrates incremental development of a database-backed application with configuration validation, authentication, account security, runtime sessions, typed menu routing, access-management foundations, logging, unit testing, and technical documentation.
+Patient Management System V5.01 is a Java 21 console-based learning and portfolio project. It demonstrates incremental development of a database-backed application with configuration validation, authentication, account security, runtime sessions, access-management foundations, typed routing, logging, unit testing, and technical documentation.
 
-It is intentionally presented as an in-progress engineering project, not as a finished hospital product.
+It is an in-progress engineering project, not a finished hospital product and not suitable for real patient data.
 
 ## Demonstrated Skills
 
@@ -12,76 +12,67 @@ It is intentionally presented as an in-progress engineering project, not as a fi
 - Maven project organization and dependency management
 - MySQL schema design and JDBC repositories
 - Controller, flow, service, and repository separation
-- Runtime configuration through `.env` and a validated `EnvSetup` record
+- Runtime configuration through `.env` and the `EnvSetup` record
 - BCrypt password and recovery-key hashing
 - Authentication and account-status handling
-- Login-attempt auditing and database-backed policy foundations
-- Immutable runtime state through `SessionAccount`
-- Static session lifecycle methods through `CurrentSession`
-- Typed menu modeling through records and enums
-- Role-aware controller and service routing
-- Typed logging state through SLF4J and Logback
+- Enum-based login outcomes and immutable record types
+- Multi-window failed-login policy modeling
+- Static session lifecycle through `CurrentSession`
+- Typed menu actions and role-aware routing
+- SLF4J and Logback configuration
 - JUnit 5 unit testing
 - Markdown and Mermaid documentation
-- Git-based incremental development and refactoring
+- Git-based incremental refactoring
 
 ## Current Technical Baseline
 
-- Fail-fast environment and database validation before authentication
-- Automatic creation of missing local-admin and admin starter accounts
-- Registration of pending accounts with username, email, international phone, and password validation
-- BCrypt login verification and login-attempt persistence
+- Fail-fast environment and initial database validation
+- Automatic local-admin and admin starter-account creation
+- Pending-account registration with profile and password validation
+- BCrypt login verification and attempt persistence
+- Explicit `LoginOutcome` values carried by `StoreLogs`
+- Successful-attempt persistence only for `PERMITTED`
+- Consistent `INVALID_PASSWORD` persistence and counting
+- Failed-attempt evaluation across six time windows with scaled thresholds
 - First-login password replacement for starter accounts
 - Recovery-key verification with a four-attempt limit
-- Account-status-specific behavior separated into `HandleAccountStatus`
-- Active-user session creation with account ID, name, status, role, system-account flag, and menu access
+- Active-user session records through `SessionAccount`
 - Pending department access requests
-- Five immutable admin `MenuOption` entries mapped to typed `ServiceAction` values
-- `MenuContextStructure(userRole, action)` routing through `MenuControllerParent` and `ServiceController`
-- A connected `ADMIN_USER_REQUESTS` action that invokes the access-request listing query
-- Console and per-category file logging through `logback.xml`
+- Five admin options mapped to typed `ServiceAction` values
+- One connected request-listing service
+- Console and category file logging
 
-The 2026-07-23 source snapshot contains 93 production Java files and two test classes. A verified Windows Maven Wrapper run completed 55 tests successfully:
+The 2026-07-31 source snapshot contains 98 production Java files and two test classes. `\.\mvnw.cmd test` completed 55 tests successfully:
 
 - 15 `PasswordServiceTest` tests
 - 40 `RegistrationServiceTest` tests
 - 0 failures, 0 errors, and 0 skipped tests
 
-## Recent Refactoring
+## Recent Engineering Work
 
-Password creation now converts the original character input before hashing and clears both password arrays afterward. Registration now returns corrected profile data to one confirmation step and stores the hash returned by `PasswordFlow`.
+The login path now separates credential input, input checking, session setup, status handling, outcomes, and persisted attempt data. The failed-password policy uses named threshold and time-period enums plus a record containing counts for day, week, month, year, five years, and ten years. The current attempt is included before evaluation, and only a permitted login is stored as successful.
 
-The former numeric menu contexts were replaced by `MenuOption`, `ServiceAction`, and `MenuContextStructure`. `MenuController` and `SubMenuController` were removed from the active design, and the Requests option is connected to `ShowCurrentRequests`.
-
-The login path was separated into focused components:
-
-- `CollectLoginValues` collects credentials.
-- `SetupCurrentSession` verifies the account, password, and status.
-- `HandleAccountStatus` executes status-specific behavior.
-- `SessionAccount` models the active account.
-- `CurrentSession` stores, reports, and clears the active account reference.
-- `StoreLogs` carries the login-attempt values persisted by the repository.
-- `PasswordPolicies` contains the failed-password policy call path.
+The menu layer uses immutable `MenuOption` records, `ServiceAction`, and `MenuContextStructure`. The Requests option is connected to `ShowCurrentRequests`; the remaining actions still need implementation.
 
 ## Current Engineering Limitations
 
-- Invalid-password persistence and counting use different reason strings, so the current 24-hour policy thresholds do not advance coherently.
-- The current attempt is evaluated before it is written to the login-attempt table.
-- Complete password, login, recovery, database, session, and routing workflows are not covered by automated tests.
-- Missing-terminal password creation reaches the generic fatal bootstrap handler instead of a controlled authentication result.
-- Registration repositories do not return structured outcomes or independently reject null and blank hashes.
-- Recovery's final account lookup is not restricted to the system accounts displayed to the user.
-- Access requests still use a default job and role and have no connected approval or activation transaction.
-- Four displayed admin actions and the local-admin dashboard are not implemented.
-- `ServiceController` does not independently authorize role/action combinations.
-- Logout and a repeated menu loop are not connected, although `CurrentSession.clear()` exists.
-- Repository error handling and logging migration remain incomplete.
+- Login policy queries and threshold transitions have no automated coverage and are not transactional with attempt persistence.
+- Active accounts can receive a permitted session even when menu access is false.
+- Policy windows mix calendar and rolling semantics.
+- Missing terminal input can still terminate through generic bootstrap handling.
+- Registration and access-request repositories do not return structured outcomes.
+- Recovery target selection is not limited to displayed system accounts.
+- Recovery leaves password-change, menu-access, and session fields inconsistent.
+- Access-request job and role selection, approval, rejection, and activation are incomplete.
+- Four admin actions, local-admin services, logout, and a menu loop are not implemented.
+- Service-layer role/action authorization is incomplete.
+- Repository error handling, logging migration, and integration tests remain incomplete.
 
 ## Development Stage
 
 Patient records, appointments, treatment, billing, reporting, complete administrator workflows, JavaFX, REST APIs, continuous integration, and deployment tooling remain future work.
 
-The current engineering focus is to repair failed-login policy accounting, finish authorized service actions and logout, harden recovery and repository outcomes, complete access approval, and add integration-level test coverage.
+The current focus is to test and harden login policies, enforce session and service authorization, finish account recovery and access approval, implement remaining menu actions, and add integration-level coverage.
 
 ## Repository Reading Order
 

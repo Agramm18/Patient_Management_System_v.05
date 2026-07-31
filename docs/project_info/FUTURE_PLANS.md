@@ -1,126 +1,86 @@
 # Future Plans
 
-Last synchronized: 2026-07-23.
+Last synchronized: 2026-07-31.
 
-The project is still completing its authentication, security, access-management, menu, logging, and test foundations. Patient-management features should follow only after those paths are reliable.
+The project is still completing authentication, authorization, access management, menu routing, recovery, logging, and test foundations. Patient-management features should follow only after those paths are reliable.
 
-## Recently Completed Baseline
-
-The following work is now part of the current implementation rather than future work:
-
-- Password input is converted and hashed before sensitive character arrays are cleared.
-- Both password arrays are cleared after the hash input is no longer needed.
-- Registration returns corrected profile values to one confirmation loop and stores the resulting password hash.
-- Helper-level registration checks reject null and blank collected hashes.
-- The menu layer uses `MenuOption`, `ServiceAction`, and `MenuContextStructure` instead of numeric parent and child contexts.
-- `MenuControllerParent` forwards the selected typed action to `ServiceController`.
-- `ADMIN_USER_REQUESTS` invokes `ShowCurrentRequests`.
-- The active session value is the immutable `SessionAccount` record.
-- Credential verification, account-status behavior, login-log values, and failed-password policy calls have been separated into dedicated login services.
-- The Windows Maven Wrapper runs the complete 55-test suite successfully.
+The active, itemized backlog is maintained in [ToDo.md](ToDo.md). This document describes direction and sequencing rather than completed work.
 
 ## Immediate Stabilization
 
-1. Use one stable failure-reason value for invalid passwords in both login-attempt persistence and `CountFailedLoginAttempts`.
-2. Include the current failed attempt in policy evaluation and define non-overlapping locked, suspicious, and quarantine transitions.
-3. Add boundary tests for the failed-attempt thresholds at 5, 6, and 25 attempts.
-4. Add an end-to-end password test that verifies the generated BCrypt hash against the original password.
-5. Make the full password flow terminate cleanly when `System.console()` is unavailable and handle a missing retyped password safely.
-6. Add a repository-level null and blank hash guard to `CreateAccount`.
-7. Return explicit success or failure from account creation, password updates, access-request inserts, and recovery-key persistence.
-8. Restrict recovery updates to system accounts and handle a missing or blank recovery-key hash before BCrypt verification.
+1. Test and harden the multi-window failed-login policy, including SQL window semantics and all scaled thresholds.
+2. Make attempt persistence and account-status transitions report failures consistently and use transactions where required.
+3. Require active status and menu access before a session is considered permitted.
+4. Make starter-account password and activation changes atomic.
+5. Handle missing or cancelled terminal input as controlled authentication outcomes.
+6. Add repository-level password-hash validation and explicit persistence results.
+7. Restrict recovery targets and reconcile all account fields changed by recovery.
+8. Add complete login, session, password, registration, recovery, and menu-routing tests.
 
-## Menu and Service-Action Direction
+## Menu and Authorization Direction
 
 The current connected route is:
 
 ```text
-active CurrentSession
+CurrentSession
 -> MenuControllerParent
--> AdminMenu MenuOption
--> MenuContextStructure(userRole, ServiceAction)
+-> MenuOption and ServiceAction
+-> MenuContextStructure
 -> ServiceController
 -> ADMIN_USER_REQUESTS
 -> ShowCurrentRequests
 ```
 
-Near-term routing work:
+Near-term work will implement the remaining admin actions, local-admin services, logout, and a persistent menu loop. The service layer must validate every role/action combination against the active session, even when a context is constructed directly. Repository results should be returned as structured data and rendered by the CLI layer.
 
-- Implement `ADMIN_DISPLAY_ACCOUNTS`.
-- Implement `ADMIN_SECURITY_OPTIONS`.
-- Implement `ADMIN_VIEW_LOGS`.
-- Connect `ADMIN_LOGOUT` to `CurrentSession.clear()` and return to authentication.
-- Implement `LOCAL_ADMIN_DASHBOARD` instead of sending it to the unsupported-action exception.
-- Add a controlled menu loop so a session does not end after one menu and service pass.
-- Enforce role/action authorization in the service layer even when a context is constructed directly.
-- Validate null and unsupported actions with controlled user-facing results.
-- Map database role IDs explicitly or remove the currently unused `AccountRoles` enum.
-- Define menu behavior for roles other than local admin and admin.
-- Decide whether the empty `RequestMenu` is still required as a submenu or should be removed.
-- Separate command execution and returned data from console rendering.
-
-## Access Requests
-
-- Collect and store a real requested job.
-- Return and store the selected requested role.
-- Connect job and role selection to `FirstLoginFlow`.
-- Prevent unintended duplicate pending requests.
-- Add an optional request reason if the workflow requires it.
-- Return structured request data instead of printing rows from `ShowCurrentRequests`.
-- Filter request listings by status.
-- Implement authorized approval and rejection transactions.
-- Apply approved department, job, role, permission, account status, and menu access atomically.
-- Record the approving administrator, decision timestamp, and rejection reason.
+## Access-Request Direction
 
 The intended workflow is:
 
 ```text
-valid registration
+validated registration
 -> pending account
--> complete department, job, and role request
+-> department, job, and role request
 -> authorized administrator review
--> approval or rejection
--> account activation and permissions
--> active current-account session
--> parent menu
--> authorized service action
+-> approval or rejection transaction
+-> atomic account activation and permission update
+-> active session
+-> authorized service actions
 -> logout and session cleanup
 ```
 
+The workflow needs duplicate handling, request reasons where required, pending-only queries, approver and decision metadata, and rollback-safe updates.
+
 ## Authentication and Security
 
-- Define one explicit outcome model for authenticated, rejected, password-changed, pending-requested, and suspicious results.
-- Decide whether suspicious accounts are blocked, restricted, or forced to change passwords.
-- Decide whether starter accounts are logged in automatically after their first password change.
-- Prevent stale static session state across repeated authentication attempts.
-- Reset or archive failed-login history after successful recovery or an administrator action.
-- Replace status, role, and department magic numbers with named constants or typed values.
-- Define which account fields recovery changes in addition to `password_hash`.
-- Reduce identity and account-state details in logs.
+- Keep login outcomes and persisted reasons typed and stable.
+- Define remediation for suspicious, locked, and quarantined accounts.
+- Define reset and retention rules for failed-login history.
+- Replace numeric status, role, and department values with named types.
+- Prevent stale static session state between authentication attempts.
+- Reduce personal and account-state details in logs.
 - Separate security audit events from operational diagnostics.
+- Replace or formally define the purpose of the stored bootstrap key.
 
 ## Testing and Build Quality
 
 - Add complete-flow tests for password creation and registration correction.
-- Add login tests for unknown users, wrong passwords, every account status, and active-session creation.
-- Add failed-attempt persistence and policy-boundary tests.
-- Add recovery retry, missing-key, and system-account-scope tests.
-- Add tests for option-to-action mapping, request delegation, unsupported actions, unknown roles, local-admin routing, and logout.
-- Add repository integration tests against an isolated MySQL database.
+- Add login tests for unknown users, wrong passwords, every account status, and session creation.
+- Add policy tests for all time windows, factors, boundaries, persistence failures, and status transitions.
+- Add recovery tests for retry limits, missing keys, target restrictions, and account-field updates.
+- Add menu, authorization, service-dispatch, and logout tests.
+- Add MySQL integration tests against an isolated database.
 - Separate unit and integration-test execution.
-- Use Maven `release` 21 instead of separate `source` and `target` values.
-- Add formatting, linting, static analysis, and coverage reporting.
-- Add continuous integration after tests are independent of local terminal and database state.
+- Use Maven `release` 21.
+- Add formatting, static analysis, coverage, and continuous integration.
 
 ## Logging Improvements
 
-- Complete the migration from direct diagnostic printing to `LogManager`.
-- Keep intentional CLI messages as console output.
-- Align `LogManager` categories with all Logback appenders or remove unused appenders.
-- Route recovery events consistently.
-- Add rolling files, retention limits, and a production-safe log-level policy.
-- Avoid logging credentials, recovery values, and unnecessary personal data.
-- Add configuration tests only where logger routing and filesystem behavior are part of the contract.
+- Complete the migration from direct diagnostic printing to structured logging.
+- Keep intentional CLI output separate from diagnostics.
+- Align active loggers and configured appenders.
+- Add rolling files, retention limits, and environment-specific levels.
+- Avoid credentials, recovery values, and unnecessary personal data.
 
 ## First Functional Release Goals
 
@@ -128,40 +88,31 @@ valid registration
 - Complete access-request and approval workflow
 - Enforced role, department, permission, and action authorization
 - Working admin and local-admin console services
-- Patient record creation and search
+- Patient record creation, lookup, and updates
 - Appointment scheduling
 - Staff and department management
 - Audit and security-event review
-- Consistent error handling and logging
-- Automated unit and repository integration tests
+- Consistent error handling and automated unit and integration tests
 
-## Long-Term Product Plans
+## Long-Term Product Direction
 
-### User Interfaces and APIs
+### Interfaces and APIs
 
-- Complete and stabilize the console workflows first.
-- Add a JavaFX desktop interface.
-- Add a REST API only after service boundaries and authorization are stable.
-- Add external service integrations only for defined product requirements.
+- Complete console workflows first.
+- Add a JavaFX desktop interface after service boundaries stabilize.
+- Add a REST API after authorization is enforced independently of the UI.
+- Add external integrations only for defined product requirements.
 
 ### Infrastructure
 
 - Add Docker after local setup and integration tests are stable.
-- Add cloud deployment after a usable application release exists.
-- Evaluate Kubernetes only if operational complexity justifies it.
-- Evaluate Redis only for a defined caching or session use case.
+- Add deployment automation after a usable release exists.
+- Evaluate cloud hosting, Kubernetes, or Redis only for concrete operational requirements.
 
-### Monitoring and Security
+### Monitoring and Data
 
-- Structured audit logging
-- Application metrics
-- Prometheus and Grafana
-- Security monitoring and alerting
+- Structured audit logging and application metrics
+- Prometheus and Grafana where operationally justified
 - Documented retention and access rules
-
-### Data and Reporting
-
-- Reporting and analytics
-- Secure data export and import
-- Python-based data processing
+- Reporting, analytics, and audited data export
 - Machine-learning experiments only for a concrete, ethically reviewed use case
