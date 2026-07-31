@@ -2,7 +2,7 @@
 
 Status date: 2026-07-31.
 
-The current tree contains 98 production Java files, 2 test files, and 55 JUnit test methods. `\.\mvnw.cmd test` passed on 2026-07-31 with 55 tests, 0 failures, 0 errors, and 0 skipped tests.
+The current tree contains 98 production Java files, 2 test files, and 55 JUnit test methods. `.\mvnw.cmd test` passed on 2026-07-31 with 55 tests, 0 failures, 0 errors, and 0 skipped tests.
 
 This file contains unfinished work only. Completed milestones are recorded in [CURRENT_STATUS.md](CURRENT_STATUS.md) and [ARCHIVE.md](../archive/ARCHIVE.md) so the active backlog remains concise.
 

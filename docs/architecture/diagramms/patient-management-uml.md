@@ -1,35 +1,38 @@
 # Patient Management Program Flow
 
-Last synchronized: 2026-07-23.
+Last synchronized: 2026-07-31.
 
 The renderable Mermaid source is maintained in `patient-management-uml.mmd`.
 
-The diagram shows the current connected console runtime rather than a proposed final architecture. It covers:
+The diagram represents the connected console runtime, not a proposed final architecture. It covers:
 
 - Startup through `Main`, `BootConfigService`, and `FrontController`
-- `.env` validation, JDBC setup, recovery-key persistence, and starter-account creation
-- Registration with the corrected password conversion/clearing order
-- The current login split across `CollectLoginValues`, `SetupCurrentSession`, `HandleAccountStatus`, and `StoreLogs`
+- Environment validation, JDBC initialization, recovery-key persistence, and starter-account creation
+- Registration and BCrypt password creation
+- Login through `CollectLoginValues`, `CheckInput`, `SetupCurrentSession`, and `HandleAccountStatus`
+- Typed `LoginOutcome` and `StoreLogs` results
+- Successful-attempt persistence only for `PERMITTED`
 - `SessionAccount` and static `CurrentSession` creation for active accounts
-- The failed-login reason mismatch that prevents new wrong-password rows from advancing the stored threshold count
-- Pending access-request setup and system-account recovery
-- Action-based routing through `ServiceAction`, `MenuOption`, and `MenuContextStructure`
+- The six-window password policy using `PolicyThreshold`, `TimePeriod`, and `PolicieThresholdStructure`
+- Canonical `INVALID_PASSWORD` persistence and in-memory inclusion of the current attempt
+- Pending access requests and system-account recovery
+- Action routing through `ServiceAction`, `MenuOption`, and `MenuContextStructure`
 - The connected `ADMIN_USER_REQUESTS -> ShowCurrentRequests` service
-- Fatal routing for all other currently unsupported service actions
-- Disconnected session clearing, unhandled `UI`/`EXIT` request types, empty placeholders, logging, and the 55-test baseline
+- Fatal handling for currently unsupported actions
+- Disconnected session clearing, unhandled `UI`/`EXIT` requests, placeholders, logging, and the 55-test baseline
 
 ## Reading the Current Flow
 
-The most important runtime boundaries are:
+1. Configuration must succeed before authentication starts.
+2. `AuthController` returns only when `CurrentSession` contains an active, menu-enabled account.
+3. `LoginFlow` repeats rejected or invalid credential outcomes internally.
+4. `PASSWORD_CHANGED` and `PENDING_REQUEST` are stored as unsuccessful and return to the authentication menu without a session.
+5. Only `PERMITTED` is stored as a successful login attempt.
+6. Invalid-password counts are read before the attempt row is inserted; `includingAttempt()` adds that attempt in memory for threshold evaluation.
+7. `MenuControllerParent` converts a role-specific selection into a `ServiceAction`.
+8. `ServiceController` implements only `ADMIN_USER_REQUESTS`.
+9. Request listing runs once and reaches the end of `main`; unsupported actions throw and exit through bootstrap's generic fatal handler.
 
-1. `FrontController(CONFIG)` must succeed before authentication starts.
-2. `AuthController` keeps showing its menu until an active account exists in `CurrentSession`, has menu access, and has status ID 1.
-3. `LoginFlow` processes one attempt; the outer authentication controller provides repetition.
-4. Pending and password-change outcomes are stored as successful login attempts because their `LogsForDB.canUseSystem` value is `true`, but neither creates a usable session.
-5. `MenuControllerParent` converts role-specific menu selection into a `ServiceAction`.
-6. `ServiceController` implements only `ADMIN_USER_REQUESTS`.
-7. The request-list action runs once and reaches the end of `main`. Unsupported actions throw, are caught by `BootConfigService`, and exit with status 1.
-
-Dashed links identify logging, tests, or code that exists but is not connected to the primary runtime. Warning and error nodes identify observed behavior in the current source, not future design goals.
+Dashed links in the Mermaid source identify logging, tests, or code that exists but is not connected to the primary runtime. Warning and error nodes describe current source behavior.
 
 Open `patient-management-uml.mmd` in a Mermaid-capable editor or viewer to render the diagram.

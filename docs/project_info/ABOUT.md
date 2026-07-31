@@ -36,7 +36,7 @@ The current login implementation stores `INVALID_PASSWORD` consistently and incl
 
 ## Verified Baseline
 
-On 2026-07-31, `\.\mvnw.cmd test` completed successfully with:
+On 2026-07-31, `.\mvnw.cmd test` completed successfully with:
 
 - 98 production Java files under `src/main/java`
 - 2 test source files under `src/test/java`

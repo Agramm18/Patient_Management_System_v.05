@@ -16,7 +16,7 @@ Patient Management System V5.01 is a Java 21 Maven console application. Its curr
 | Java target | Java 21 through Maven `source` and `target` properties |
 | Maven Wrapper | Wrapper 3.3.4 configured for Maven 3.9.16 |
 
-`\.\mvnw.cmd test` completed successfully in Windows PowerShell on 2026-07-31. The suite does not connect to MySQL and does not exercise complete console workflows.
+`.\mvnw.cmd test` completed successfully in Windows PowerShell on 2026-07-31. The suite does not connect to MySQL and does not exercise complete console workflows.
 
 ## Connected Runtime
 
@@ -89,7 +89,7 @@ Remaining gaps:
 | `active` | Loads a `SessionAccount`, stores it in `CurrentSession`, and returns `PERMITTED`. |
 | `disabled`, `locked`, `on_quarantine`, `suspicious` | Returns `REJECTED` and continues the login loop. |
 | `pending` | Runs `FirstLoginFlow`, returns `PENDING_REQUEST`, and returns to the authentication menu without a session. |
-| `waiting_for_password_change` | Attempts password and activation updates; returns to authentication without a session. |
+| `waiting_for_password_change` | A successful update returns `PASSWORD_CHANGED` to authentication without a session; a failed update returns `WAITING_FOR_PASSWORD_CHANGE` and repeats the credential loop. |
 | SQL or input error inside setup | Returns a typed failure and continues the login loop. |
 
 Current session limitations:

@@ -42,7 +42,7 @@ It is an in-progress engineering project, not a finished hospital product and no
 - One connected request-listing service
 - Console and category file logging
 
-The 2026-07-31 source snapshot contains 98 production Java files and two test classes. `\.\mvnw.cmd test` completed 55 tests successfully:
+The 2026-07-31 source snapshot contains 98 production Java files and two test classes. `.\mvnw.cmd test` completed 55 tests successfully:
 
 - 15 `PasswordServiceTest` tests
 - 40 `RegistrationServiceTest` tests

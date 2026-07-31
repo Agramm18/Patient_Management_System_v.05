@@ -1,6 +1,6 @@
 # Environment Setup
 
-Last synchronized: 2026-07-23.
+Last synchronized: 2026-07-31.
 
 This document describes the `.env` values required by the current Java implementation.
 
@@ -147,6 +147,6 @@ mvn test
 mvn exec:java
 ```
 
-The Maven Wrapper was verified successfully in Windows PowerShell on 2026-07-23. The current suite passes 55 tests: 15 in `PasswordServiceTest` and 40 in `RegistrationServiceTest`.
+The Maven Wrapper test command was verified successfully in Windows PowerShell on 2026-07-31. The current suite passes 55 tests: 15 in `PasswordServiceTest` and 40 in `RegistrationServiceTest`.
 
 These are unit tests for password and registration helpers. They do not connect to MySQL and do not verify environment loading, bootstrap accounts, login, recovery, session behavior, repositories, or the schema in `DB_SETUP.md`.

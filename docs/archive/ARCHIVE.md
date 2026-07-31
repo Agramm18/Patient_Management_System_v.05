@@ -1,6 +1,6 @@
 # Project Archive
 
-Last synchronized: 2026-07-23.
+Last synchronized: 2026-07-31.
 
 This document records completed milestones, later refactors, and superseded statements. It is historical context, not the active task list.
 
@@ -95,7 +95,30 @@ On 2026-07-23, the login and session structure changed:
 - Login-attempt output moved into the `StoreLogs` record.
 - Failed-password policy calls moved to `PasswordPolicies`.
 
-The refactor left a failure-reason contract mismatch: the new policy path returns `to many false attempts`, while the counting query accepts only `INVALID_PASSWORD`. The policy also evaluates the stored count before the current attempt is persisted.
+At that point, the refactor left a failure-reason contract mismatch: the policy returned `to many false attempts`, while the counting query accepted only `INVALID_PASSWORD`. It also evaluated only the previously persisted count.
+
+### Typed Login Outcomes
+
+On 2026-07-24:
+
+- `StoreLogs` replaced its ambiguous success boolean with `LoginOutcome`.
+- `LoginFlow` began persisting success only for `PERMITTED`.
+- Pending requests and password changes began returning to authentication as unsuccessful login attempts.
+- Rejected and invalid outcomes began repeating inside the credential loop.
+- A failed first password update began returning `WAITING_FOR_PASSWORD_CHANGE` instead of unconditional success.
+
+### Multi-Period Failed-Login Policy
+
+On 2026-07-24 and 2026-07-25:
+
+- `PolicyThreshold` introduced named base thresholds for locked, suspicious, and quarantine transitions.
+- `TimePeriod` introduced day, week, month, year, five-year, and ten-year windows with scaling factors.
+- `PolicieThresholdStructure` added a typed record for the six counts.
+- Wrong-password persistence and counting were aligned on `INVALID_PASSWORD`.
+- `includingAttempt()` added the current attempt in memory before threshold evaluation.
+- `CountFailedLoginAttempts` expanded from one count to six SQL queries.
+
+The policy still performs counting, status updates, and attempt persistence as separate operations and has no automated boundary or integration coverage.
 
 ### Recovery
 
@@ -106,6 +129,8 @@ The refactor left a failure-reason contract mismatch: the new policy path return
 - Four-attempt key limit implemented
 - System-account list display implemented
 - Selected account password update implemented
+
+On 2026-07-24, recovery password updates also began setting account status ID 1. They still do not reconcile `requires_password_change`, menu access, or session state, and the final target lookup still accepts any existing account.
 
 The final account lookup still accepts any existing account rather than only the system accounts displayed to the user.
 
@@ -171,6 +196,7 @@ The remaining four admin actions and `LOCAL_ADMIN_DASHBOARD` currently reach the
 - libphonenumber-based validation covered by phone tests
 - On 2026-07-18, 53 tests passed: 11 password-service tests and 42 registration-service tests
 - On 2026-07-23, the reorganized suite passed 55 tests: 15 password-service tests and 40 registration-service tests
+- On 2026-07-31, the same 55-test suite passed after the typed outcome and multi-period policy changes
 
 The current suite has 0 failures, 0 errors, and 0 skipped tests, but it remains limited to service-level validation helpers.
 
@@ -180,6 +206,7 @@ The current suite has 0 failures, 0 errors, and 0 skipped tests, but it remains 
 - Wrapper configured for Maven 3.9.16
 - An earlier Windows PowerShell run exposed a generated-wrapper null-target issue
 - On 2026-07-23, `.\mvnw.cmd test` ran successfully in Windows PowerShell
+- On 2026-07-31, `.\mvnw.cmd test` again ran successfully in Windows PowerShell
 
 ### Documentation
 
@@ -189,6 +216,7 @@ The current suite has 0 failures, 0 errors, and 0 skipped tests, but it remains 
 - All files under `docs` synchronized with the 89-source and 53-test snapshot on 2026-07-18
 - `ToDo.md` updated for the typed menu baseline and 55-test suite on 2026-07-23
 - All 11 Markdown documents under `docs` and the supporting Mermaid source synchronized with the 93-source/55-test snapshot on 2026-07-23
+- All 11 Markdown documents under `docs` and the supporting Mermaid source synchronized with the 98-source/55-test snapshot on 2026-07-31
 
 ## Superseded Statements
 
@@ -196,13 +224,18 @@ The following older claims are no longer current:
 
 - There are no automated tests. There are now 55 passing unit tests.
 - The suite contains 11 password tests and 42 registration tests. It now contains 15 and 40 respectively.
-- The project contains 76, 89, or 91 production Java files. It now contains 93.
-- The Windows Maven Wrapper cannot start in PowerShell. The wrapper completed the verified 2026-07-23 run.
+- The project contains 76, 89, 91, or 93 production Java files. It now contains 98.
+- The Windows Maven Wrapper cannot run the test suite in PowerShell. The wrapper completed the verified 2026-07-31 test run.
 - Active session data is stored in `Unknown` or `CurrentUser`. It is stored in `SessionAccount`.
 - `CurrentSession` has no clear method. `clear()` now exists, although logout does not call it.
 - Menu routing uses `MenuValues` or numeric parent and child contexts. It now uses a typed `ServiceAction`.
 - `SubMenuController` is injected but unused. The class and dependency were removed.
 - `ShowCurrentRequests` is disconnected. It is invoked by `ADMIN_USER_REQUESTS`.
+- Login persistence uses a `canUseSystem` boolean. It now uses `LoginOutcome`, and only `PERMITTED` is stored as successful.
+- Invalid-password persistence uses `to many false attempts` while counting uses `INVALID_PASSWORD`. Both now use `INVALID_PASSWORD`.
+- Policy evaluation excludes the current attempt. `includingAttempt()` now adds it in memory before evaluation.
+- Failed-password policy uses only a 24-hour count. It now evaluates six scaled time windows.
+- Recovery changes only `password_hash`. It now changes the hash and account status ID 1.
 - Both role-specific service handlers only log startup. The service now switches on actions and implements request listing.
 - Password creation hashes an already-cleared array. The conversion and cleanup order was fixed.
 - Registration correction loses the returned hash. Password collection now follows the final confirmation loop.
@@ -216,13 +249,15 @@ The following older claims are no longer current:
 
 ## Historical Limitations Still Present
 
-- Failed-password persistence and counting do not currently use the same reason value.
-- Failed-login policy evaluation excludes the current attempt.
+- Failed-login counts, status updates, and attempt persistence are not transactional.
+- Multi-window SQL semantics and scaled thresholds lack automated coverage.
+- The in-memory retry count is recreated for each invalid password.
+- Active accounts can receive `PERMITTED` and a session without menu access.
 - Complete password and registration flows lack end-to-end tests.
 - Repository-level password-hash validation and structured outcomes are incomplete.
 - Access requests still use default job and role values.
 - Approval, rejection, and activation workflows do not exist.
-- Recovery's final account lookup is not limited to system accounts.
+- Recovery's final account lookup is not limited to system accounts, and recovery leaves menu and password-change fields inconsistent.
 - Four admin actions, the local-admin dashboard, logout, and a repeated menu loop are not implemented.
 - Service-layer role/action authorization is incomplete.
 - Logging migration remains partial.

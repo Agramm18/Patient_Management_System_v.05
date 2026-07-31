@@ -1,6 +1,6 @@
 # Database Setup
 
-Last synchronized: 2026-07-23.
+Last synchronized: 2026-07-31.
 
 This document defines the MySQL schema and reference IDs expected by the current Java implementation.
 
@@ -223,14 +223,27 @@ Unknown usernames are stored with `account_id = NULL`.
 `LoginFlow` inserts the `StoreLogs` result after each completed login attempt. The current values have several important consequences:
 
 - An unknown username is stored with reason `USERNAME_NOT_FOUND`.
-- A wrong password is stored with reason `to many false attempts`.
-- Active and pending status results are stored with `is_success = true` and a non-null status description.
-- The starter-account password-change branch returns `is_success = true` even if the repository update reports failure. It does not create a session, so the caller must log in again.
-- A pending account is also stored as successful after creating an access request, although no session is created.
+- A wrong password is stored with reason `INVALID_PASSWORD`.
+- Only `LoginOutcome.PERMITTED` is stored with `is_success = true`.
+- Active accounts are stored as successful and currently retain the reason `account status is active`.
+- Pending access requests and successful starter-account password changes are stored with `is_success = false`; both return to authentication without a session.
+- A failed starter-account password update is stored as unsuccessful with a null reason.
+- Disabled, locked, quarantined, and suspicious accounts are stored as unsuccessful and return to the credential loop.
 
-`CountFailedLoginAttempts` counts only rows where `failure_reason = 'INVALID_PASSWORD'` from the previous 24 hours. `PasswordPolicies` now returns `to many false attempts`, so newly written wrong-password rows do not match the count query. As a result, current wrong-password attempts do not advance the locked, suspicious, or quarantine thresholds unless matching legacy rows already exist. Policy evaluation also occurs before the current attempt is inserted.
+`CountFailedLoginAttempts` and `PasswordPolicies` now use the same `INVALID_PASSWORD` reason. Before evaluation, `PolicieThresholdStructure.includingAttempt()` adds the current attempt to every count in memory. `LoginFlow` persists the actual row afterward.
 
-When matching historical rows do exist, the ordered checks set status ID 5 at 25 or more rows, status ID 7 at 6 through 24 rows, and status ID 4 at exactly 5 rows.
+The policy counts six windows and scales its base thresholds by a window factor:
+
+| Window | Current SQL semantics | Locked | Suspicious | Quarantine |
+| --- | --- | ---: | ---: | ---: |
+| Day | Current calendar day from `CURDATE()` | 5 | 6 | 25 |
+| Week | From `CURDATE() - INTERVAL 7 DAY` | 10 | 12 | 50 |
+| Month | Current calendar month | 20 | 24 | 100 |
+| Year | Rolling 365 days | 40 | 48 | 200 |
+| Five years | From `CURDATE() - INTERVAL 5 YEAR` | 125 | 150 | 625 |
+| Ten years | From `CURDATE() - INTERVAL 10 YEAR` | 250 | 300 | 1250 |
+
+Evaluation checks quarantine, then suspicious, then locked, and triggers when any window reaches its threshold. Counting, status updates, and attempt insertion are separate operations. A status can therefore change even if the later attempt insert fails, and counter query failures currently return zero.
 
 `failure_reason` is only 50 characters in this schema, but one path can forward a longer `IllegalStateException` message. In strict SQL mode that login-attempt insert can fail. Repository code logs or prints the SQL exception and continues.
 
@@ -312,7 +325,7 @@ The admin menu's Requests option maps to `ServiceAction.ADMIN_USER_REQUESTS`, an
 ### Password and Status Updates
 
 - `UpdateUserPassword` changes the password hash, sets status ID `1`, clears the password-change flag, and enables menu access.
-- `UpdateSystemAccountPassword` changes only the password hash.
+- `UpdateSystemAccountPassword` changes the password hash and sets account status ID `1`.
 - `ExecutePWSDPolicy` sets status ID `4`, `5`, or `7`.
 
 The previously documented end-to-end password and registration-correction defects are fixed:
@@ -324,7 +337,7 @@ Remaining defects:
 
 - `CreateAccount.newAccount` has no repository-level null or blank hash guard, and repository failures are swallowed instead of returned.
 - `UpdateUserPassword` changes the hash and activation fields in two separate connections without a transaction. Its first update can report success even if the second update fails.
-- `UpdateSystemAccountPassword` returns no result and recovery does not update status, `requires_password_change`, menu access, or session state.
+- `UpdateSystemAccountPassword` returns no result. Recovery sets status ID `1` but does not clear `requires_password_change`, enable menu access, or update session state.
 - Password re-entry has no retry loop; a mismatch exits that password-service call.
 
 ## Migration for Existing Databases
@@ -371,7 +384,7 @@ Use this document as the current database setup source until versioned migration
 
 ## Verified Test State
 
-The Maven Wrapper was verified in Windows PowerShell on 2026-07-23:
+The Maven Wrapper test command was verified in Windows PowerShell on 2026-07-31:
 
 ```powershell
 .\mvnw.cmd test

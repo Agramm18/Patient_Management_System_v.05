@@ -1,8 +1,8 @@
 # Technical Overview
 
-Last synchronized: 2026-07-23.
+Last synchronized: 2026-07-31.
 
-The filename is retained for compatibility with existing repository links. It should eventually be renamed to `TECHNICAL.md` together with every reference.
+The filename is retained for compatibility with existing links. A future cleanup should rename it to `TECHNICAL.md` and update all references.
 
 ## Technology Stack
 
@@ -16,23 +16,17 @@ The filename is retained for compatibility with existing repository links. It sh
 | Environment loading | dotenv-java 3.0.0 |
 | Password hashing | jBCrypt 0.4 |
 | Phone validation | libphonenumber 9.0.31 |
-| Logging | SLF4J API through Logback Classic 1.5.18 |
+| Logging | Logback Classic 1.5.18 and its SLF4J API |
 | Unit testing | JUnit Jupiter 5.13.4 and Surefire 3.5.3 |
 | Documentation | Markdown and Mermaid |
 
-The project does not declare a framework, dependency-injection container, ORM, connection pool, GUI toolkit, or web stack.
+The project has no application framework, dependency-injection container, ORM, connection pool, GUI toolkit, or web stack.
 
 ## Verified Build State
 
-On 2026-07-23, the Windows wrapper ran successfully:
+On 2026-07-31, the Windows wrapper compiled 98 production sources and 2 test sources, then completed 55 tests with 0 failures, 0 errors, and 0 skipped tests.
 
-```text
-Apache Maven 3.9.16
-Java runtime 26.0.1 (Oracle)
-Windows 11
-```
-
-The configured compilation target remains Java 21; the Java 26 value above describes only the local verification runtime. `.\mvnw.cmd test` completed with 55 tests, 0 failures, 0 errors, and 0 skipped tests.
+The build emits a compiler warning because `source` and `target` 21 are configured without `release` 21. The tests cover service-level password and registration helpers only.
 
 ## Runtime Architecture
 
@@ -43,271 +37,127 @@ Main
 -> ConfigController
 -> FrontController(AUTH)
 -> AuthController
--> FrontController(MENU) after an active, menu-enabled session
+-> FrontController(MENU) after authentication
 -> MenuControllerParent
 -> FrontController(SERVICE)
 -> ServiceController
 ```
 
-`FrontController` actively dispatches `CONFIG`, `AUTH`, `MENU`, and `SERVICE`. `UI` and `EXIT` are declared request types without switch cases. `UIController` is constructed and injected but empty. There is no current `SubMenuController`.
+Controllers coordinate flows, repositories execute JDBC, CLI classes render text, and records/enums carry outcomes and routing context. Dependencies are constructed directly. Database settings and the current session are static global state.
 
-The implementation separates:
-
-- Controllers for top-level routing
-- Authentication flows for registration, login, password creation, and recovery
-- Login services for credential collection, session setup, status-specific behavior, and database-log result data
-- Repositories for JDBC operations
-- CLI classes for menus and user-facing messages
-- Records and enums for session and action-routing context
-- A typed logging facade plus Logback configuration
-
-Dependencies are constructed directly. Database settings and the current session are static global state, and repositories normally open a new connection per operation. There is no application-wide transaction boundary across multi-step workflows.
+`FrontController` does not implement its declared `UI` and `EXIT` requests. `BootConfigService` performs only one menu/service pass and reports any runtime exception as `System Config Failed` before exiting with status 1.
 
 ## Bootstrap and Configuration
 
-`EnvValidationService` requires `.env` in the process working directory and constructs `EnvSetup`, a record containing 13 values:
+`EnvValidationService` requires `.env` in the working directory and constructs an `EnvSetup` record with five database values, three local-admin values, three admin values, `BOOTSTRAP_KEY`, and `RECOVERY_KEY`. All string values must be nonblank; the port must be 1 through 65535.
 
-- Five database values
-- Three local-admin values
-- Three admin values
-- `BOOTSTRAP_KEY`
-- `RECOVERY_KEY`
-
-The record rejects null or blank string values and database ports outside 1 through 65535. Only the five database settings are copied into `EnvValidationService` fields. `CreateDefaultAccounts` and `HandleRecoveryKey` load their values again directly through dotenv.
-
-`SQLValidationService` builds and tests:
-
-```text
-jdbc:mysql://<DB_HOST>:<DB_PORT>/<DB_NAME>
-```
-
-`DBManager.initialize` stores the URL, username, and password in static fields. `DBManager.getConnection()` then opens a new JDBC connection for repository operations.
+`SQLValidationService` tests `jdbc:mysql://<DB_HOST>:<DB_PORT>/<DB_NAME>`. `DBManager.initialize` then stores URL and credentials in static fields. Repositories open a new connection for each operation.
 
 After database initialization:
 
 1. `HandleRecoveryKey` hashes `RECOVERY_KEY` with BCrypt cost 12.
-2. `SetRecoveryKey` upserts that new hash into `recovery_keys.id = 1`.
+2. `SetRecoveryKey` upserts row ID 1.
 3. `CheckForDefaultAccounts` searches for role IDs 1 and 2.
-4. `CreateDefaultAccounts` creates either missing starter account.
+4. `CreateDefaultAccounts` inserts either missing starter account.
 
-Important behavior and risks:
+The recovery key is re-salted on every startup that reaches this stage. `SetRecoveryKey` catches SQL errors without returning failure. Starter-account fallback checks use fixed account IDs, and the bootstrap key is stored unchanged.
 
-- The recovery key receives a new salt and replaces its database hash on every successful startup.
-- `SetRecoveryKey` catches SQL errors and returns no status, so recovery-key persistence failure does not fail configuration.
-- Several repositories print and swallow SQL failures.
-- Starter-account post-insert fallback checks still use fixed account IDs 1 and 2.
-- Any later `RuntimeException` in authentication, menu, or service routing is caught by `BootConfigService` under the misleading console message `System Config Failed` before exit status 1.
+## Authentication Result Model
 
-## Authentication and Session Design
-
-`AuthController` repeatedly offers:
-
-1. Registration
-2. Login
-3. System-account recovery
-4. Exit
-
-`LoginFlow` handles one credential pair per call. Retry behavior comes from the surrounding `AuthController` loop, not from the effectively single-iteration `while` in `LoginFlow`.
-
-The active login service path is:
+The active login path is:
 
 ```text
 LoginService.CollectLoginValues
+-> CheckInput
 -> SetupCurrentSession
--> CheckUserInDB
--> CallPasswordPolicyRules on an invalid password
-   or HandleAccountStatusTasks after valid credentials
--> LogsForDB
+   -> PasswordPolicies for an invalid password
+   -> HandleAccountStatus for valid credentials
+-> StoreLogs(accountName, LoginOutcome, reason)
 -> logsRepository.CollectLogs
 ```
 
-Only an `active` account creates `SessionAccount`. The record stores:
+`LoginOutcome` includes permitted, rejected, pending-request, password-changed, waiting-for-password-change, invalid-password, unknown-status, username-not-found, SQL, and input outcomes. Some identifiers are currently misspelled.
 
-- Account ID
-- Account name
-- Account-status ID
-- Menu-access flag
-- System-account flag
-- Role ID
+`LoginFlow` persists `is_success = true` only for `PERMITTED`. It returns to `AuthController` after `PASSWORD_CHANGED` or `PENDING_REQUEST`; every other non-permitted result repeats credential collection inside `LoginFlow`.
 
-`CurrentSession` holds one static record and exposes `setCurrentAccount`, `getCurrentAccount`, `isLoggedIn`, and `clear`. The `clear` method is not called anywhere in production code, so there is still no connected logout or session-reset action.
+### Status Behavior
 
-### Status Outcomes
-
-| Account status | Current behavior |
+| Status | Result |
 | --- | --- |
-| `active` | Loads account fields, stores `SessionAccount`, and returns `canUseSystem = true`. |
-| `disabled` | Rejects access and returns `false`. |
-| `pending` | Runs department/request setup without a session but returns `canUseSystem = true`. |
-| `locked` | Rejects access and returns `false`. |
-| `on_quarantine` | Rejects access and returns `false`. |
-| `waiting_for_password_change` | Runs password creation/update without a session and returns `true`, even if the repository update reports failure. |
-| `suspicious` | Warns the user, creates no session, and returns `false`. |
-| Unknown or unsupported | Returns a failed result; an unsupported status is thrown inside the status handler and converted by `SetupCurrentSession`. |
+| `active` | Loads account data, stores `SessionAccount`, returns `PERMITTED`. |
+| `disabled` | Returns `REJECTED`. |
+| `pending` | Creates a default access request, returns `PENDING_REQUEST`, no session. |
+| `locked` | Returns `REJECTED`. |
+| `on_quarantine` | Returns `REJECTED`. |
+| `waiting_for_password_change` | Runs password update; returns `PASSWORD_CHANGED` only when the first repository update reports success. |
+| `suspicious` | Returns `REJECTED`. |
 
-`LoginFlow` persists `LogsForDB.canUseSystem` as `login_attempts.is_success`. Consequently, pending setup and first password-change attempts are recorded as successful even though they do not create a usable session. `AuthController` still returns to its menu unless the static session is non-null, has menu access, and has status ID 1.
+The active branch does not check menu access before setting the session. `AuthController` does check it before returning, which can leave an active but unusable session set while authentication continues. There is no connected logout.
 
 ## Failed-Login Policy
 
-`PasswordPolicies` asks `CountFailedLoginAttempts` for the previously stored count and contains these ordered thresholds:
+Wrong passwords use canonical reason `INVALID_PASSWORD`. `CountFailedLoginAttempts` loads the account ID and independently counts six windows. `includingAttempt()` adds the current attempt in memory before evaluation.
 
-| Previously counted rows | Intended update |
-| --- | --- |
-| 25 or more | `on_quarantine`, status ID 5 |
-| 6 through 24 | `suspicious`, status ID 7 |
-| Exactly 5 | `locked`, status ID 4 |
+| `TimePeriod` | SQL window | Factor |
+| --- | --- | ---: |
+| `DAY` | Current calendar day | 1 |
+| `WEEK` | Since midnight seven days ago | 2 |
+| `MONTH` | Current calendar month | 4 |
+| `YEAR` | Rolling 365 days | 8 |
+| `FIVE_YEARS` | Rolling five years from the current date | 25 |
+| `TEN_YEARS` | Rolling ten years from the current date | 50 |
 
-The current implementation has a critical persistence mismatch:
+Base thresholds are 5 for locked, 6 for suspicious, and 25 for quarantine. Each window multiplies the base by its factor. Policy evaluation checks quarantine first, then suspicious, then locked, and triggers when any window reaches its threshold.
 
-- `CountFailedLoginAttempts` counts only rows whose `failure_reason` is exactly `INVALID_PASSWORD`.
-- `PasswordPolicies` now returns the reason `to many false attempts`.
-- `LoginFlow` stores that returned reason after policy evaluation.
+Technical limitations:
 
-New invalid-password rows therefore do not increase the count queried by the policy. Unless matching legacy rows already exist, repeated wrong passwords remain at a stored count of zero and do not reach the lock, suspicious, or quarantine thresholds. The in-memory `RETRYS` field is also ineffective because a new `PasswordPolicies` instance is created for each failed attempt.
+- Six counts, the status update, and the later attempt insert are separate database operations.
+- The status can change even when the attempt insert later fails.
+- SQL failures in the counter return zero and enforcement fails open.
+- `TimePeriod.getPeriod()` is not used to construct the SQL windows.
+- The day and month queries are calendar-based while other queries are rolling.
+- `PasswordPolicies.RETRY_COUNT` is ineffective because a new policy instance is created per invalid password.
+- There is no success/reset policy and no automated policy coverage.
 
-There is no successful-login or administrator reset for historical failed attempts.
+## Password and Registration Design
 
-## Password Design
+Passwords require at least 10 characters and uppercase, lowercase, numeric, and special-character content. User-created and recovery passwords use BCrypt cost 15. Starter passwords and the startup recovery-key hash use cost 12.
 
-Password policy requires:
+The creation sequence validates original input, reads a retype, converts the original array, hashes it, and clears both arrays in `finally`. Hidden input requires `System.console()`. Missing console input during login occurs before setup error handling and reaches bootstrap's fatal handler. Password re-entry has no retry loop and does not safely handle a null array.
 
-- At least 10 characters
-- At least one uppercase character
-- At least one lowercase character
-- At least one digit
-- At least one special character
+Registration validates usernames of 6 through 19 characters, custom email structure up to 253 characters, and international phone numbers through libphonenumber. Corrected profile data returns to full confirmation, and the confirmed password hash is retained.
 
-User-created and recovery passwords use `BCrypt.gensalt(15)`. Starter-account passwords and the startup recovery-key hash use cost 12. Login verification uses `BCrypt.checkpw`.
-
-The current creation sequence is:
-
-```text
-read original password
--> validate policy
--> read and compare retyped password
--> convert the original character array to a String
--> hash the String
--> clear both character arrays in a finally block
-```
-
-The former defect that cleared the original array before conversion is no longer present. The tests now cover array clearing, but there is still no end-to-end test that creates a password through console input and verifies the produced BCrypt hash against the original input.
-
-All hidden input relies on `System.console()`:
-
-- Login without a terminal throws `IllegalStateException`; it reaches `BootConfigService`, which exits with status 1.
-- Recovery without a terminal ends the recovery branch and returns to the authentication menu.
-- `PasswordService.userPWSD` propagates its no-console `RuntimeException` to `BootConfigService`, which exits with status 1 instead of returning a controlled authentication result.
-
-## Registration Validation
-
-`RegistrationService` validates:
-
-- Usernames of 6 through 19 characters
-- Nonblank email strings of 6 through 253 characters with an `@`, nonblank domain name, dot, and suffix
-- International phone strings beginning with `+`, containing digits only after the plus sign, and accepted by libphonenumber
-- `y` or `n` confirmation values
-- Correction choices 1 through 3
-- A non-null, nonblank password hash before registration data is returned
-
-If the user selects correction, only username, email, or phone can be changed. The loop then displays the updated data and asks for full confirmation again. Password creation occurs only after a final `y`, and its returned hash is assigned to `hashedPWSD`.
-
-Remaining limitations:
-
-- Username and email uniqueness depend on database constraints.
-- `CreateAccount` itself does not guard against a null or blank hash.
-- Repository insertion failures are caught and printed instead of being returned to `RegistrationFlow`.
-- Validation is custom and does not fully implement email-address standards.
+`CreateAccount` inserts status 3, role 9, department 12, no menu access, and a non-system flag. It has no repository-level blank-hash guard and no result contract. Database constraints provide uniqueness.
 
 ## Recovery Design
 
-During recovery:
+Recovery reads hidden input, loads `recovery_keys.id = 1`, verifies BCrypt, and stops after four invalid keys. It displays system accounts, but the final lookup accepts any existing username.
 
-1. `ValidateRecoveryKey` reads hidden input.
-2. `GetRecoveryKeyHash` loads row ID 1.
-3. `CheckKeyStatus` verifies the key with BCrypt.
-4. Four invalid keys end the recovery flow.
-5. `FindRecoverableUser` displays accounts with `is_system_account = true`.
-6. The user enters an account name.
-7. `SelectUserForRecover` accepts any existing account, not only the displayed system accounts.
-8. `PasswordService` creates a new hash.
-9. `UpdateSystemAccountPassword` updates only `password_hash`.
-
-The stored recovery hash is not checked for null or malformed data before `BCrypt.checkpw`. Recovery does not change account status, `requires_password_change`, menu access, or session state.
+`UpdateSystemAccountPassword` updates `password_hash` and sets account status ID 1 in one statement. It returns no result and leaves `requires_password_change`, menu access, and session state unchanged. The stored recovery hash is not checked for missing or malformed data before BCrypt verification.
 
 ## Pending Access Requests
 
-A pending user chooses department ID 1 through 11. `FirstLoginFlow` displays a department-specific job menu, but no job value is collected. System jobs are displayed only if the account's existing department is ID 11 or 5.
+Pending users choose department ID 1 through 11. A job menu is displayed, but no job value is collected. `CreateAccessRequest` stores the selected department, job `unassigned`, role ID 9, and the database's default request status.
 
-`CreateAccessRequest` stores:
-
-- The requesting account ID
-- The selected department ID
-- Job `unassigned`
-- Role ID 9
-- The database default request status
-
-`CollectUserJob` is empty. Role selection, job selection, duplicate-request handling, reasons, approval, rejection, account activation, and authorization checks are not connected.
+Job/role collection, duplicate handling, structured results, approval, rejection, activation, and authorization are not connected.
 
 ## Menu and Service Routing
 
-The former numeric parent/child `MenuValues` model has been replaced by action-based records:
+`ServiceAction` declares five admin actions and `LOCAL_ADMIN_DASHBOARD`. `MenuOption` binds labels to actions, and `MenuContextStructure` carries `(userRole, action)`.
 
-- `ServiceAction` declares five admin actions and `LOCAL_ADMIN_DASHBOARD`.
-- `MenuOption` pairs a label with an action.
-- `MenuContextStructure` carries `(userRole, action)`.
+Role ID 1 returns `LOCAL_ADMIN_DASHBOARD`. Role ID 2 displays five admin options. Only `ADMIN_USER_REQUESTS` is implemented; it joins and prints all access requests without status filtering. All other actions throw and terminate through the generic bootstrap handler.
 
-`MenuControllerParent` routes:
-
-- Role ID 1 to `LocalAdminMenu`, then directly to `LOCAL_ADMIN_DASHBOARD`.
-- Role ID 2 to `AdminMenu`, which displays Requests, User, Security, Logs, and Logout and returns the selected action.
-- Any other role to `IllegalArgumentException`.
-
-`ServiceController` currently implements only:
-
-```text
-ADMIN_USER_REQUESTS
--> ShowCurrentRequests.CurrentRequests
-```
-
-`ShowCurrentRequests` joins `access_management`, `accounts`, `departments`, and `roles`, prints all returned rows, and does not filter by request status.
-
-The other four admin actions and `LOCAL_ADMIN_DASHBOARD` reach the default branch, throw `IllegalStateException`, and cause `BootConfigService` to exit with status 1. There is no persistent menu loop: the Requests action runs once, returns through `main`, and the application ends naturally.
-
-`RequestMenu`, `RouteService`, and `UIController` remain empty. `AccountRoles` is declared but unused; active routing still depends on numeric role IDs.
+The service layer does not independently authorize the context against the active session. `RequestMenu`, `RouteService`, and `UIController` remain empty.
 
 ## Logging Architecture
 
-`LogManager` exposes typed methods backed by ten program-state enums. Its eight active SLF4J logger fields are:
+`LogManager` exposes eight active logger names: `AUTH`, `CONFIG`, `SECURITY`, `SYSTEM`, `SQL`, `CREDENTIALS`, `BOOT`, and `MENU`. Logback defines those plus unused `ACCESS` and `DATABASE` categories. Recovery writes through `SYSTEM`.
 
-- `AUTH`
-- `CONFIG`
-- `SECURITY`
-- `SYSTEM`
-- `SQL`
-- `CREDENTIALS`
-- `BOOT`
-- `MENU`
-
-`src/main/resources/logback.xml` defines a console appender plus non-rolling files under `logs/` for:
-
-- `AUTH`
-- `CONFIG`
-- `SECURITY`
-- `ACCESS`
-- `DATABASE`
-- `SYSTEM`
-- `SQL`
-- `CREDENTIALS`
-- `BOOT`
-- `MENU`
-
-`ACCESS` and `DATABASE` have configured loggers and appenders but no matching `LogManager` fields. Recovery events are routed to `SYSTEM`. The configuration has no root logger, rotation, size limit, or retention policy.
-
-Logging migration remains partial. User-facing messages and diagnostics are mixed, and production classes still contain extensive `System.out` output. Some logs include account names, account status, JDBC URLs, and other operational details.
+All ten file appenders are non-rolling and have no retention limit. Diagnostic logging and user-facing console output remain mixed, and some messages contain account names or detailed state.
 
 ## Database Model
 
-The Java code expects these core tables:
+The Java code expects:
 
 - `roles`
 - `account_status`
@@ -317,39 +167,26 @@ The Java code expects these core tables:
 - `login_attempts`
 - `access_management`
 
-Numeric role, status, and department IDs are embedded in Java code. The expected schema and reference values are documented in `../setup/DB_SETUP.md`.
+Numeric reference IDs are embedded in Java code. The application does not create or migrate the schema. See [DB_SETUP.md](../setup/DB_SETUP.md).
 
-## Tests and Quality Tooling
+## Test and Quality State
 
 Configured and verified:
 
+- Java 21 compilation target
 - Maven Wrapper 3.3.4 / Maven 3.9.16
-- Java 21 compiler source and target
-- JUnit Jupiter 5.13.4
-- Maven Surefire 3.5.3
-- 15 passing `PasswordServiceTest` methods
-- 40 passing `RegistrationServiceTest` methods
-- 55 tests total
+- JUnit Jupiter 5.13.4 and Surefire 3.5.3
+- 15 password tests and 40 registration tests
 - Explicit Logback configuration
 
-Not covered:
+Not configured or covered:
 
-- Complete console password creation and BCrypt verification
-- Complete registration and correction flows
-- Database repositories and schema compatibility
-- Login status routing and failed-attempt transitions
-- Recovery limits and target restrictions
-- Session creation, stale-session behavior, and clearing
-- Menu/service action routing
-- Logging configuration behavior
-
-Not configured:
-
-- CI
-- Formatter or linter
-- Static analysis
-- Code coverage reporting
-- Docker or deployment automation
+- Complete console and BCrypt flows
+- JDBC repositories and schema compatibility
+- Login outcomes, sessions, and failed-attempt policies
+- Recovery and target restrictions
+- Menu/service authorization and logout
+- Formatting, static analysis, coverage, CI, Docker, or deployment
 
 ## Commands
 
@@ -358,4 +195,4 @@ Not configured:
 .\mvnw.cmd exec:java
 ```
 
-If Maven is installed globally, the equivalent commands are `mvn test` and `mvn exec:java`. Complete `../setup/ENV_SETUP.md` and `../setup/DB_SETUP.md` before starting the application. Run the interactive application in a real terminal because hidden input depends on `System.console()`.
+Complete environment and database setup first, and run interactive flows in a terminal-backed console.
